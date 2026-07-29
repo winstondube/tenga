@@ -184,6 +184,10 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .brand .tld{color:var(--ochre)}
 .seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:2px;gap:2px}
 .seg button{border:0;background:transparent;padding:5px 12px;border-radius:2px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink-3);font-family:var(--mono);letter-spacing:.03em}
+.top-nav{display:flex;gap:18px;margin-left:auto;flex-wrap:wrap}
+.top-nav a{font-size:13.5px;color:var(--ink-2);text-decoration:none}
+.top-nav a:hover{color:var(--ink);text-decoration:underline}
+@media (max-width:760px){.top-nav{display:none}}
 .seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 
 .shell{max-width:1400px;margin:0 auto;padding:22px 20px 80px}
@@ -493,11 +497,14 @@ body{display:flex;flex-direction:column}
      <span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span>
      <span>tenga<span class="tld">.uk</span></span>
    </a>
-   <div class="seg" style="margin-left:auto">
-     <button data-act="role" data-v="customer" class="on">Customer</button>
-     <button data-act="role" data-v="admin" class="">Operations</button>
-   </div>
-   <button class="btn btn-s btn-ghost" data-act="reset" title="Clear all demo data and start again"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5A8 8 0 0 0 6.2 6.2L3.5 8.8M4 12.5a8 8 0 0 0 13.8 5.3l2.7-2.6M3.5 4v4.8h4.8M20.5 20v-4.8h-4.8"/></svg><span class="tiny">Reset demo</span></button>
+   <nav class="top-nav">
+        <a href="how-it-works/">How it works</a>
+        <a href="what-it-costs/">What it costs</a>
+        <a href="faqs/">Questions</a>
+        <a href="contact/">Contact</a>
+      </nav>
+      <a class="btn btn-s btn-ghost" href="#/lookup"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>Track an order</a>
+      <button class="btn btn-s" data-act="signin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z"/></svg>Sign in</button>
  </div></div>
  <section class="hero">
   <div class="hero-in">
@@ -622,7 +629,8 @@ body{display:flex;flex-direction:column}
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
    <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
- </div></div>
+ </div>
+ </div>
 
 
 <script>
@@ -778,6 +786,8 @@ function load(){
     // Fill the gaps from defaults rather than rendering NaN at them.
     S.settings=Object.assign({},DEFAULT_SETTINGS,S.settings||{});
     if(!Array.isArray(S.batches))S.batches=[];
+    if(S.session===undefined)S.session=null;
+    S.signinOpen=false;
     if(!Array.isArray(S.restricted)||!S.restricted.length)S.restricted=[...DEFAULT_RESTRICTED];
     return true;
    }
@@ -787,7 +797,7 @@ function load(){
 }
 function fresh(){
  S={v:1,settings:{...DEFAULT_SETTINGS},retailers:JSON.parse(JSON.stringify(DEFAULT_RETAILERS)),restricted:[...DEFAULT_RESTRICTED],
-    orders:[],audit:[],messages:[],batches:[],counter:1040,draft:null,role:'customer'};
+    orders:[],audit:[],messages:[],batches:[],counter:1040,draft:null,session:null,signinOpen:false};
  seed(); save();
 }
 function logAudit(ref,action,before,after,reason){
@@ -1396,7 +1406,7 @@ function render(){
   else if(parts[0]==='quote')body=viewQuote(parts[1],parts[2]);
   else if(parts[0]==='pay')body=viewPay(parts[1],parts[2],parts[3]);
   else if(parts[0]==='lookup')body=viewLookup();
-  else if(isAdmin)body=viewAdmin(parts.slice(1),q);
+  else if(isAdmin)body=(S.session==='admin')?viewAdmin(parts.slice(1),q):lockedPanel();
   else body=`<div class="narrow"><div class="empty">Page not found. <a class="link" href="#/">Go back</a></div></div>`;
  }catch(e){body=`<div class="narrow">${note('<b>Something went wrong rendering this page.</b><br>'+esc(e.message),'danger','alert')}</div>`;console.error(e)}
  $('#app').innerHTML=shell(body,isAdmin);
@@ -1415,18 +1425,56 @@ function shell(body,isAdmin){
      <span class="mark">${icon('plane',14)}</span>
      <span>tenga<span class="tld">.uk</span></span>
    </a>
-   <div class="seg" style="margin-left:auto">
-     <button data-act="role" data-v="customer" class="${isAdmin?'':'on'}">Customer</button>
-     <button data-act="role" data-v="admin" class="${isAdmin?'on':''}">Operations</button>
-   </div>
-   <button class="btn btn-s btn-ghost" data-act="reset" title="Clear all demo data and start again">${icon('refresh',15)}<span class="tiny">Reset demo</span></button>
+   ${S.session
+    ? `<div class="seg" style="margin-left:auto">
+        <button data-act="role" data-v="customer" class="${isAdmin?'':'on'}">Customer</button>
+        <button data-act="role" data-v="admin" class="${isAdmin?'on':''}">Operations</button>
+      </div>
+      <button class="btn btn-s btn-ghost" data-act="signout" title="Sign out">${icon('x',15)}<span class="tiny">Sign out</span></button>
+      <button class="btn btn-s btn-ghost" data-act="reset" title="Clear all demo data and start again">${icon('refresh',15)}<span class="tiny">Reset demo</span></button>`
+    : `<nav class="top-nav">
+        <a href="how-it-works/">How it works</a>
+        <a href="what-it-costs/">What it costs</a>
+        <a href="faqs/">Questions</a>
+        <a href="contact/">Contact</a>
+      </nav>
+      <a class="btn btn-s btn-ghost" href="#/lookup">${icon('search',15)}Track an order</a>
+      <button class="btn btn-s" data-act="signin">${icon('lock',15)}Sign in</button>`}
  </div></div>
  ${body}
  ${isAdmin?'':`<div class="foot">
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
    <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
- </div>`}`;
+ </div>`}
+ ${S.signinOpen?signinPanel():''}`;
+}
+
+/* Signed out, the top bar should look like the finished product: navigation
+   and one sign-in button. The role switch is a thing you get after signing
+   in, not a control bolted to the header. */
+function lockedPanel(){
+ return `<div class="narrow-s" style="padding-top:64px"><div class="card card-p stack" style="text-align:center">
+   <div style="color:var(--ink-3);display:flex;justify-content:center">${icon('lock',26)}</div>
+   <h2 style="font-size:21px">Operations is staff only</h2>
+   <p class="small muted">Sign in to open the dashboard, the purchase queue and the audit log.</p>
+   <button class="btn btn-primary" data-act="signin">${icon('lock',16)}Sign in</button>
+   <a class="link tiny" href="#/">Back to the customer site</a>
+ </div></div>`;
+}
+
+function signinPanel(){
+ return `<div class="modal-bg" data-act="closeSignin">
+  <div class="modal">
+   <div class="card-h"><b>Sign in</b><button class="btn btn-xs btn-ghost" data-act="closeSignin" aria-label="Close">${icon('x',14)}</button></div>
+   <div class="card-b stack">
+     ${note('<b>No accounts in this build yet.</b> Choose which side you want to look at. In the finished product customers sign in here and staff use a separate operations login.','info','shield')}
+     <button class="btn btn-primary btn-block btn-lg" data-act="signinAs" data-v="customer">${icon('user',17)}Continue as a customer</button>
+     <button class="btn btn-block btn-lg" data-act="signinAs" data-v="admin">${icon('lock',17)}Staff sign in, operations</button>
+     <div class="tiny muted center">Customers will not need an account to order or to track. Sign in is for saved recipients and repeat orders.</div>
+   </div>
+  </div>
+ </div>`;
 }
 window.addEventListener('hashchange',render);
 
@@ -3139,6 +3187,13 @@ document.addEventListener('click',e=>{
  const o=d.ref?getOrder(d.ref):curOrder();
  const A={
   role(){ location.hash = d.v==='admin' ? '#/admin' : '#/'; },
+  signin(){ S.signinOpen=true; save(); rerender(true) },
+  closeSignin(){ if(el.classList.contains('modal-bg') && e.target.closest('.modal') && !e.target.closest('[data-act="closeSignin"][class*=btn]')) return;
+    S.signinOpen=false; save(); rerender(true) },
+  signinAs(){ S.session=d.v; S.signinOpen=false; save();
+    logAudit('', d.v==='admin'?'Operations sign in':'Customer sign in','','demo session');
+    location.hash = d.v==='admin' ? '#/admin' : '#/'; rerender(); },
+  signout(){ S.session=null; save(); location.hash='#/'; rerender(); toast('Signed out') },
   reset(){ if(confirm('Clear all demo data and start again with the seeded example orders?')){localStorage.removeItem(KEY);fresh();location.hash='#/';render();toast('Demo reset')} },
   tab(){ VIEW.adminTab=d.v; rerender(true); },
   openOrder(){ VIEW.adminTab='review'; go('#/admin/order/'+d.ref); },

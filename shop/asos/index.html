@@ -295,9 +295,9 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 /* Shelves of UK stock drifting past, with one item lifted out, priced and
    flown off. Thirty photographs, half beauty and half fashion, ten to a row,
    because the service is no longer about one perfume from one shop. */
-.hero-art{position:relative;justify-self:center;width:100%;max-width:420px;
+.hero-art{--tw:106px;--gap:10px;position:relative;justify-self:center;width:100%;max-width:420px;
   aspect-ratio:1/1.12;border-radius:8px;overflow:hidden;background:#0F2A24}
-.shelf{--tw:106px;--gap:10px;position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:var(--gap)}
+.shelf{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:var(--gap)}
 .shelf-row{display:flex;gap:var(--gap);width:calc(var(--n) * (var(--tw) + var(--gap)));will-change:transform}
 .shelf-row.r1{animation:slideL 58s linear infinite}
 .shelf-row.r2{animation:slideR 70s linear infinite}
@@ -308,7 +308,7 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .shelf-tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:.5}
 .shelf-fade{position:absolute;inset:0;z-index:2;pointer-events:none;
   background:linear-gradient(90deg,var(--drench) 0%,transparent 15%,transparent 85%,var(--drench) 100%)}
-.shelf-pick{position:absolute;left:50%;top:50%;width:154px;height:154px;margin:-77px 0 0 -77px;border-radius:8px;
+.shelf-pick{position:absolute;left:50%;top:calc(50% + var(--picky,0px));width:154px;height:154px;margin:-77px 0 0 -77px;border-radius:8px;
   overflow:hidden;box-shadow:0 26px 54px -18px rgba(0,0,0,.95);opacity:0;z-index:3;
   outline:2px solid var(--gold);outline-offset:2px}
 .shelf-pick img{width:100%;height:100%;object-fit:cover;display:block}
@@ -319,7 +319,7 @@ details[open] > summary{border-bottom:1px solid var(--line)}
   58%{opacity:1;transform:scale(1) translate(0,0)}
   100%{opacity:0;transform:scale(.5) translate(155%,-42%)}
 }
-.shelf-ptag{position:absolute;left:50%;top:calc(50% + 88px);transform:translateX(-50%);background:var(--on-drench);
+.shelf-ptag{position:absolute;left:50%;top:calc(50% + 88px + var(--picky,0px));transform:translateX(-50%);background:var(--on-drench);
   color:#101614;border-radius:5px;padding:7px 13px;font-family:var(--mono);font-size:12.5px;font-weight:700;
   white-space:nowrap;opacity:0;z-index:4;box-shadow:0 12px 26px -14px rgba(0,0,0,.9)}
 .shelf-ptag.run{animation:ptagin 5s ease forwards}
@@ -483,9 +483,9 @@ body:has(.floatcta.on){padding-bottom:56px}
   /* edge to edge: the shelf earns more from width than from a neat margin */
   .hero-art{order:2;max-width:none;width:calc(100% + 36px);margin:2px -18px 0;
     border-radius:0;aspect-ratio:1/0.78}
-  .shelf{--tw:88px;--gap:8px}
+  .hero-art{--tw:88px;--gap:8px}
   .shelf-pick{width:132px;height:132px;margin:-66px 0 0 -66px}
-  .shelf-ptag{top:calc(50% + 76px);font-size:11.5px;padding:6px 10px}
+  .shelf-ptag{top:calc(50% + 76px + var(--picky,0px));font-size:11.5px;padding:6px 10px}
   .shelf-dest{right:10px;top:10px;font-size:9.5px;padding:3px 8px}
 
   .home-in{padding:26px 18px 70px}
@@ -510,7 +510,7 @@ body:has(.floatcta.on){padding-bottom:56px}
   .hero-art{width:calc(100% + 28px);margin:2px -14px 0}
   .home-in{padding:22px 14px 64px}
   .hero h1{font-size:1.85rem}
-  .shelf{--tw:78px}
+  .hero-art{--tw:78px}
 }
 
 @media (min-width:601px) and (max-width:880px){

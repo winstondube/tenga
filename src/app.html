@@ -142,6 +142,9 @@ table.t tbody tr.clickable:hover{background:var(--surface-2)}
 .thumb{position:relative;width:46px;height:46px;flex:none;border-radius:3px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;border:1px solid rgba(0,0,0,.08);overflow:hidden}
 .thumb.lg{width:72px;height:72px;font-size:18px}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+summary::-webkit-details-marker{display:none}
+summary::marker{content:""}
+details[open] > summary{border-bottom:1px solid var(--line)}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -538,6 +541,79 @@ function sizeFrom(text){
  const p=s.match(/(\d+)\s?(pack|pk|piece|pcs|pair)\b/i);
  return p?p[1]+' '+p[2].toLowerCase():'';
 }
+/* ---------------- bookmarklet import ----------------
+   Boots, Superdrug, ASOS and Next block servers and relays, but they cannot
+   block the customer's own browser: it is a real browser, already logged in,
+   already past the bot check, with the price rendered on screen.
+
+   So we read it from there. One click on the retailer page lifts the
+   retailer's own structured data out of the live DOM and hands it back.
+   No server, no scraping service, nothing to defeat.                       */
+/* How much a read price can be trusted, most reliable first. Schema and
+   meta are the retailer stating its own price. Page text is us guessing
+   from the markup, so it is flagged for a closer look at review. */
+const SRC_LABEL={schema:'Read from retailer data',meta:'Read from page tags',page:'Scraped from page text',live:'Read from page'};
+function srcLabel(v){return SRC_LABEL[v]||'Customer reported'}
+function tengaBase(){return location.origin+location.pathname}
+function bookmarkletSrc(){
+ const target=tengaBase();
+ return "javascript:(function(){"+
+  "var d={u:location.href},i,f=[];"+
+  "var fl=function(x){if(!x||typeof x!=='object')return;if(Array.isArray(x)){x.forEach(fl);return}f.push(x);if(x['@graph'])fl(x['@graph'])};"+
+  "var L=document.querySelectorAll('script[type=\"application/ld+json\"]');"+
+  "for(i=0;i<L.length;i++){try{fl(JSON.parse(L[i].textContent))}catch(e){}}"+
+  "var p=f.filter(function(x){var t=x['@type'];return t==='Product'||(Array.isArray(t)&&t.indexOf('Product')>=0)})[0];"+
+  "if(p){d.n=p.name;var im=p.image;d.i=Array.isArray(im)?(im[0]&&(im[0].url||im[0])):(im&&(im.url||im));"+
+  "var o=p.offers;if(Array.isArray(o))o=o[0];"+
+  "if(o){d.p=o.price||o.lowPrice;d.c=o.priceCurrency;d.s='schema';"+
+  "if(o.availability)d.a=/InStock/i.test(o.availability)?'In stock':/OutOfStock|SoldOut/i.test(o.availability)?'Out of stock':''}}"+
+  "var m=function(q){var e=document.querySelector(q);return e&&e.content};"+
+  "var H=document.querySelector('h1');"+
+  "d.n=d.n||(H&&H.innerText.trim())||m('meta[property=\"og:title\"]')||document.title;"+
+  "d.i=d.i||m('meta[property=\"og:image\"]');"+
+  // Never pick the image by size: on a Boots page the biggest images are
+  // "customers also bought". Match the alt text against the product name,
+  // and if nothing matches well, send no image at all.
+  "if(!d.i){var nm=function(s){return (s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()};"+
+  "var tw=nm(d.n).split(' ').filter(function(w){return w.length>2}),bs=0;"+
+  "[].slice.call(document.images).forEach(function(im){if(im.naturalWidth<150)return;"+
+  "var al=nm(im.alt);if(!al||!tw.length)return;"+
+  "var hit=tw.filter(function(w){return al.indexOf(w)>=0}).length,sc=hit/tw.length;"+
+  "if(sc>bs&&sc>=0.7){bs=sc;d.i=im.currentSrc||im.src}});}"+
+  "if(!d.p){d.p=m('meta[property=\"product:price:amount\"]')||m('meta[itemprop=\"price\"]');if(d.p)d.s='meta'}"+
+  // Last resort: only look inside elements that call themselves a price, so a
+  // delivery banner at the top of the page cannot be mistaken for the product.
+  "if(!d.p){var E=document.querySelectorAll('[class*=price i],[id*=price i],[data-test*=price i],[itemprop=price]');"+
+  "for(i=0;i<E.length;i++){var t=(E[i].getAttribute('content')||E[i].innerText||'').match(/\\u00a3\\s?([0-9]+(?:\\.[0-9]{2})?)/);"+
+  "if(t){d.p=t[1];d.s='page';break}}}"+
+  "var q="+JSON.stringify(target)+"+'#/add?d='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(d)))));"+
+  "var w=window.open(q,'_blank');"+
+  "if(!w){try{navigator.clipboard.writeText(q)}catch(e){}alert('Popup blocked. The Tenga link is on your clipboard, paste it into a new tab.')}"+
+  "})()";
+}
+function applyImport(code){
+ let raw;
+ try{raw=JSON.parse(decodeURIComponent(escape(atob(code))))}catch(e){return false}
+ if(!raw||!raw.u)return false;
+ const base=extract(raw.u);
+ if(!base.retailerId&&!['unapproved','disabled'].includes(base.reason))return false;
+ const price=raw.p!=null?toNum(raw.p):null;
+ const clean=s=>String(s||'').replace(/\s+/g,' ')
+   .replace(/\s*[|–-]\s*(Boots|Superdrug|ASOS|LookFantastic|Next|Cult Beauty|Beauty Bay|Space NK)\s*$/i,'').trim();
+ const dr=draft();
+ dr.pendingUrl=raw.u;
+ dr.pending=Object.assign({},base,{
+  name:(raw.n&&raw.n.length>3)?clean(raw.n):base.name,
+  price,wasPrice:null,image:raw.i||null,
+  availability:raw.a||base.availability,
+  live:price!=null?'ok':'partial',
+  via:raw.s||'page'
+ });
+ if(!dr.pending.size)dr.pending.size=sizeFrom(dr.pending.name);
+ save();
+ return true;
+}
+
 async function enrich(p){
  const html=await fetchHTML(p.url);
  if(!html)return {...p,live:'failed'};
@@ -764,6 +840,14 @@ function route(){
 }
 function render(){
  const {parts,q}=route();
+ // Landing point for the retailer bookmarklet: swallow the payload, then
+ // hand the customer straight to the request form with it filled in.
+ if(parts[0]==='add'){
+  const ok=q.d?applyImport(q.d):false;
+  location.hash='#/request';
+  setTimeout(()=>toast(ok?'Imported from the retailer page':'That import link was not readable'),60);
+  return;
+ }
  const isAdmin=parts[0]==='admin';
  let body='';
  try{
@@ -898,6 +982,7 @@ function viewRequest(){
        <button class="btn btn-primary" data-act="fetch" style="height:37px">${icon('link',16)}Read link</button>
      </div>
      ${d.pending?pendingCard(d.pending):`<div class="tiny muted">We open the page and read the name, price and image. Whatever we find is provisional: a person checks it against the retailer before you get a quote.</div>`}
+     ${importHelper()}
    </div>
   </div>
 
@@ -945,6 +1030,22 @@ function viewRequest(){
  </div></div>`;
 }
 
+function importHelper(){
+ return `<details class="card" style="border-color:var(--line);background:var(--surface-2)">
+  <summary style="padding:10px 13px;cursor:pointer;font-size:13.5px;font-weight:560;list-style:none">
+    <span class="row" style="gap:7px">${icon('link',15)}Shops that hide their prices from us, like Boots and Superdrug</span>
+  </summary>
+  <div style="padding:0 13px 13px" class="stack-s">
+    <div class="tiny muted">Boots, Superdrug, ASOS and Next block us from opening their pages, so we cannot read the price the way we can elsewhere. Your own browser is not blocked. Drag this button to your bookmarks bar once, then press it while you are on any product page and it will send the name, price and photo straight here.</div>
+    <div class="row wrap" style="gap:10px;align-items:center">
+      <a class="btn btn-s btn-primary" href="${esc(bookmarkletSrc())}" onclick="return false" draggable="true" title="Drag me to your bookmarks bar">${icon('down',15)}Send to Tenga</a>
+      <span class="tiny muted">Drag it up to the bookmarks bar. Clicking it here does nothing.</span>
+    </div>
+    <div class="tiny muted" style="padding-top:2px">On a phone: copy the price from the page and type it in below instead. Faster than fighting with bookmarks on mobile.</div>
+  </div>
+ </details>`;
+}
+
 function pendingCard(p){
  const d=draft();
  if(p.reason==='badurl')return note(esc(p.msg||'That does not look like a web address.'),'danger','alert');
@@ -963,12 +1064,12 @@ function pendingCard(p){
          ${pill(p.retailerName,'accent')}
          ${loading?`<span class="pill p-mute"><i class="spin" style="width:9px;height:9px;border-width:1.5px"></i>Reading the page</span>`
           :p.availability==='In stock'?pill('In stock','accent'):p.availability==='Out of stock'?pill('Out of stock','danger'):pill(p.availability||'To be confirmed','mute')}
-         ${p.live==='ok'&&p.price!=null?pill('Price read from page','accent'):p.live==='failed'?pill('Enter price manually','mute'):''}
+         ${p.via&&p.price!=null?pill('Imported from '+p.retailerName,'accent'):p.live==='ok'&&p.price!=null?pill('Price read from page','accent'):p.live==='failed'?pill('Enter price manually','mute'):''}
        </div>
        <input type="text" id="pName" placeholder="Product name" value="${esc(p.name)}" style="font-weight:600">
        ${loading?`<div class="tiny muted">Fetching the retailer page for the name, price and image.</div>`
         :p.live==='failed'?`<div class="tiny muted">${esc(p.retailerName)} does not let us open the page automatically. Check the name below and type the price you can see. We confirm it against the retailer either way.</div>`
-        :p.price!=null?`<div class="tiny muted">Page shows <b class="mono">${money(p.price)}</b>${p.wasPrice?` was <s class="mono">${money(p.wasPrice)}</s>`:''} · read just now, still confirmed by a person before you pay.</div>`
+        :p.price!=null?`<div class="tiny ${p.via==='page'?'':'muted'}" ${p.via==='page'?'style="color:var(--warn)"':''}>Page shows <b class="mono">${money(p.price)}</b>${p.wasPrice?` was <s class="mono">${money(p.wasPrice)}</s>`:''} · ${esc(srcLabel(p.via||'live').toLowerCase())}${p.via==='page'?', so please check it matches':''}. A person confirms it before you pay.</div>`
         :p.reason==='noname'?`<div class="tiny" style="color:var(--warn)">We could not read a product name from that link. Please type it in so we buy the right thing.</div>`
         :`<div class="tiny muted">Read from your link. Check it matches the page, and correct it if not.</div>`}
      </div>
@@ -2100,7 +2201,7 @@ document.addEventListener('click',e=>{
       size:val('pSize'),colour:val('pColour'),shade:val('pShade'),scent:val('pScent'),variant:val('pVariant'),
       qty:Math.max(1,Number(val('pQty'))||1),
       displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
-      priceSource:val('pPrice')===''?'':(p.live==='ok'&&p.price!=null&&round2(Number(val('pPrice')))===p.price?'Read from page':'Customer reported'),
+      priceSource:val('pPrice')===''?'':(p.price!=null&&round2(Number(val('pPrice')))===p.price?srcLabel(p.via||'live'):'Customer reported'),
       wasPrice:p.wasPrice||null,image:p.image||null,availability:p.availability,
       extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',subsNotes:val('pSubsNotes'),customerNotes:val('pNotes'),
       cancelIfUnavailable:val('pSubs')==='cancel'});

@@ -305,6 +305,26 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .tag-sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:#7E520F}
 .tag-foot{margin-top:7px;font-size:11.5px;color:#5C6A64}
 
+/* ---------- running total, pinned while you fill the form ---------- */
+.paybar{position:fixed;left:0;right:0;bottom:0;z-index:90;background:var(--surface);
+  border-top:1px solid var(--line-2);box-shadow:0 -10px 28px -18px rgba(0,0,0,.5)}
+.paybar-in{max-width:800px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px}
+.paybar .lbl{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-family:var(--mono)}
+.paybar .amt{font-family:var(--mono);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.paybar .sub{font-size:12px;color:var(--ink-3);line-height:1.35}
+.paybar .sub.warn{color:var(--warn)}
+body:has(.paybar){padding-bottom:96px}
+body:has(.paybar) #themeSwitch{bottom:80px}
+@media (max-width:520px){
+  .paybar-in{padding:9px 16px;gap:10px}
+  .paybar .amt{font-size:18px}
+  .paybar .btn{padding:9px 13px;font-size:13.5px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .paybar{animation:barin .32s cubic-bezier(.16,1,.3,1)}
+  @keyframes barin{from{transform:translateY(100%)}}
+}
+
 /* ---------- shipping cycle band ---------- */
 .ship-band{background:var(--ochre-soft);border-bottom:1px solid color-mix(in srgb,var(--ochre) 26%,transparent)}
 .ship-in{max-width:1180px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:clamp(18px,3vw,34px);flex-wrap:wrap}
@@ -1659,9 +1679,36 @@ function viewRequest(){
 
   <div class="card card-p stack">
     ${note(`We aim to come back with a confirmed quote within <b>${st.responseHours} hours</b>. Nothing is purchased and no payment is taken until you approve it.`,'accent','clock')}
-    <button class="btn btn-primary btn-lg btn-block" data-act="submitRequest" ${d.items.length?'':'disabled'}>${icon('arrow',17)}Send ${d.items.length===1?'this item':'these '+d.items.length+' items'} for a price</button>
+    ${d.items.length
+      ? `<div class="tiny muted center">Your total is pinned at the bottom of the screen. Press <b>Send for a price</b> there when you are ready.</div>`
+      : `<button class="btn btn-primary btn-lg btn-block" data-act="submitRequest" disabled>${icon('arrow',17)}Add an item first</button>`}
     <div class="tiny muted center">By submitting you accept our terms. Prices and availability are only guaranteed once we have received payment and successfully placed the retailer order.</div>
   </div>
+ </div>
+ ${d.items.length?payBar(d):''}
+ </div>`;
+}
+
+/* The total follows you down the form. Once someone is filling in address
+   fields the summary has scrolled away, which is exactly when they want to
+   check what they are committing to. */
+function payBar(d){
+ const q=quoteCalc({items:d.items,quote:null});
+ const priced=d.items.filter(i=>i.displayedPrice!=null).length;
+ const nMissing=d.items.length-priced;
+ let sub=d.items.length+' item'+(d.items.length===1?'':'s');
+ let warn=false;
+ if(nMissing){sub+=', '+nMissing+' still '+(nMissing===1?'needs':'need')+' a price';warn=true}
+ else if(!q.meetsMin){sub+=' · '+money(q.shortfall)+' under the '+money(S.settings.minSpend)+' minimum';warn=true}
+ else sub+=' · shipping included';
+ return `<div class="paybar"><div class="paybar-in">
+   <div>
+     <div class="lbl">Total, paid once</div>
+     <div class="amt">${priced?(q.deliveryUnknown?'from ':'')+money(q.total):'—'}</div>
+     <div class="sub ${warn?'warn':''}">${esc(sub)}</div>
+   </div>
+   <span class="grow"></span>
+   <button class="btn btn-primary" data-act="submitRequest">${icon('arrow',16)}Send for a price</button>
  </div></div>`;
 }
 
@@ -2960,10 +3007,20 @@ document.addEventListener('click',e=>{
   },
   submitRequest(){
     const dr=draft();
-    const miss=[];
-    if(!dr.customer.name)miss.push('your name');if(!dr.customer.email)miss.push('your email');if(!dr.customer.whatsapp)miss.push('your WhatsApp number');
-    if(!dr.recipient.name)miss.push('the recipient name');if(!dr.recipient.phone)miss.push('the recipient phone');if(!dr.recipient.town)miss.push('the town in Zimbabwe');
-    if(miss.length){toast('Please add '+miss.join(', '));return}
+    // The send button now floats, so it can be pressed from anywhere on the
+    // page. Telling someone what is missing is no use if they cannot see it:
+    // take them to the first empty field and put the cursor in it.
+    const need=[
+      ['customer.name','your name'],['customer.email','your email'],['customer.whatsapp','your WhatsApp number'],
+      ['recipient.name','the recipient name'],['recipient.phone','the recipient phone'],['recipient.town','the town in Zimbabwe']
+    ].filter(([k])=>{const [a,b]=k.split('.');return !dr[a][b]});
+    if(need.length){
+      toast('Please add '+need.map(x=>x[1]).join(', '));
+      const el=document.querySelector('[data-bind="'+need[0][0]+'"]');
+      if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.focus();
+        el.style.borderColor='var(--warn)';setTimeout(()=>{el.style.borderColor=''},2200);}
+      return;
+    }
     const o=newOrder({});
     Object.assign(o.customer,dr.customer);Object.assign(o.recipient,dr.recipient);
     o.items=dr.items;o.partOfLargerOrder=dr.partOfLargerOrder;o.customerNotes=dr.notes;

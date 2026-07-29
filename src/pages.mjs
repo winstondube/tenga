@@ -120,15 +120,30 @@ function workedExample(api, retailerId, productName, price) {
     </div></div>`;
 }
 
+
+function shipTable(api) {
+  const s = api.settings;
+  const flights = api.shipSchedule(3);
+  return `<div class="card">
+    <div class="card-h"><b>The next three flights</b><span class="tiny muted">Stock moves every ${s.shipEveryDays / 7} weeks</span></div>
+    <div class="card-b"><table class="t">
+      <thead><tr><th>Leaves the UK</th><th>Pay by</th><th>Lands in Zimbabwe</th></tr></thead>
+      <tbody>${flights.map(f => `<tr><td><b>${api.fmtDay(f.departs)}</b></td><td class="${f.cutoffPassed ? 'muted' : ''}">${f.cutoffPassed ? 'closed' : api.fmtDay(f.cutoff)}</td><td class="muted">around ${api.fmtDay(f.arrives)}</td></tr>`).join('')}</tbody>
+    </table>
+    <p class="tiny muted" style="margin-top:10px">Your order joins the first flight whose payment date has not passed. Sending everything in one order is faster than sending it piece by piece, because a parcel waits for its slowest item.</p>
+    </div></div>`;
+}
+
 /* ---------- page builders ---------- */
 
 export function buildPages(api) {
   const s = api.settings;
   const pages = [];
-  const approved = api.retailers.filter(r => r.status !== 'disabled');
+  // Not a whitelist. These are the shops whose delivery rules we have on file.
+  const known = api.retailers;
 
   /* ---- one page per retailer ---- */
-  approved.forEach(r => {
+  known.forEach(r => {
     const c = RETAILER_COPY[r.id] || { blurb: `${r.name} is on our approved list, so you can send us any product link from them.`, popular: [], gotcha: '' };
     const delivery = r.freeOver
       ? `${api.money(r.delivery)} standard, free once the basket passes ${api.money(r.freeOver)}`
@@ -138,7 +153,7 @@ export function buildPages(api) {
       title: `Buy from ${r.name} and ship to Zimbabwe`,
       description: `Send us a ${r.name} link and we buy it, check it and fly it to Zimbabwe. One price including shipping, confirmed before you pay. Minimum ${api.money(s.minSpend)}.`,
       h1: `Buy from ${r.name} and ship to Zimbabwe`,
-      lede: `${r.name} will not deliver to Zimbabwe and will not take a Zimbabwean card. Send us the link instead. We buy it in the UK, check it, and fly it out.`,
+      lede: `${r.name} will not deliver to Zimbabwe and will not take a Zimbabwean card. Send us the link instead. We buy it in the UK, check it, and fly it out. Same for any other UK shop.`,
       crumbs: [['Shops', 'shop/'], [r.name, `shop/${r.id}/`]],
       body: `
         <p>${c.blurb}</p>
@@ -171,19 +186,20 @@ export function buildPages(api) {
   pages.push({
     path: 'shop/',
     title: 'UK shops we buy from and ship to Zimbabwe',
-    description: 'Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and more. Send a link from any approved UK shop and we buy it and fly it to Zimbabwe.',
+    description: 'Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and anywhere else. Send a link from any UK shop and we buy it and fly it to Zimbabwe.',
     h1: 'UK shops we buy from',
-    lede: 'Send a product link from any of these and we can quote it. If your shop is not listed, send the link anyway and we will tell you whether we can buy there.',
+    lede: 'We buy from any UK shop. These are the ones we order from most, so their delivery rules and quirks are already written down.',
     crumbs: [['Shops', 'shop/']],
     body: `
       <div class="steps" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-        ${approved.map(r => `<div class="step"><b><a href="{{BASE}}shop/${r.id}/">${esc(r.name)}</a></b>
+        ${known.map(r => `<div class="step"><b><a href="{{BASE}}shop/${r.id}/">${esc(r.name)}</a></b>
           <span class="small muted">${r.freeOver ? `Free UK delivery over ${api.money(r.freeOver)}` : `${api.money(r.delivery)} UK delivery`}${r.status === 'manual' ? ' · manual review' : ''}</span></div>`).join('')}
       </div>
-      <h2>Not on the list?</h2>
-      <p>Send the link anyway. We add shops when enough people ask for them, and we will tell you honestly if a shop is one we cannot work with, usually because their dispatch times are too unpredictable to quote against.</p>
+      <h2>Your shop is not listed?</h2>
+      <p>It does not matter. The list above is shops we have bought from often enough to have their delivery rules on file, which saves us a step. Send a link from anywhere in the UK and we will price it exactly the same way. If a shop turns out to be one we cannot work with, usually because dispatch times are too unpredictable to quote against, we tell you before you pay rather than after.</p>
       ${steps(api, '{{BASE}}#/request')}`,
     faq: [
+      ['Can you buy from a shop that is not on this list?', 'Yes, any UK shop. The list is shops we already know well, not a restriction.'],
       ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
       ['Can I order from more than one shop in the same request?', 'Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order.']
     ]
@@ -213,7 +229,7 @@ export function buildPages(api) {
             <tr><td>Clearance and on to ${esc(d.name)}</td><td class="mono">2 to 4 days</td></tr>
           </tbody>
         </table>
-        <p class="small muted">Around two to three weeks door to door in normal conditions. Consolidating several items into one order is faster than sending them separately, because everything waits for the slowest shop.</p>
+        ${shipTable(api)}
 
         <h2>What it costs to ${esc(d.name)}</h2>
         <p>The flight is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} clearance and ${api.money(s.localDelivery)} for local delivery. All of it is inside the single price you agree up front, so there is nothing to settle when the parcel arrives. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>

@@ -169,6 +169,7 @@ table.t tbody tr.clickable:hover{background:var(--surface-2)}
 .thumb img.ok{opacity:1;background:#fff}
 summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
+.faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -302,6 +303,35 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .tag-sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:#7E520F}
 .tag-foot{margin-top:7px;font-size:11.5px;color:#5C6A64}
 
+/* ---------- shipping cycle band ---------- */
+.ship-band{background:var(--ochre-soft);border-bottom:1px solid color-mix(in srgb,var(--ochre) 26%,transparent)}
+.ship-in{max-width:1180px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:clamp(18px,3vw,34px);flex-wrap:wrap}
+.ship-count{display:flex;align-items:center;gap:11px;flex:none}
+.ship-num{font-family:var(--mono);font-size:clamp(38px,5vw,52px);font-weight:700;line-height:.9;letter-spacing:-.04em;color:var(--ochre-ink)}
+.ship-unit{font-size:11.5px;line-height:1.25;color:var(--ochre-ink);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.ship-detail{flex:1;min-width:240px;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.ship-detail b{color:var(--ink)}
+.ship-cut{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:13px;color:var(--ochre-ink)}
+.ship-cut.late{color:var(--danger);font-weight:600}
+@media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
+
+/* ---------- trust grid ---------- */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.trust-item{background:var(--surface);padding:17px;display:flex;gap:12px;align-items:flex-start}
+.trust-item svg{color:var(--accent);flex:none;margin-top:2px}
+.trust-item > div{display:flex;flex-direction:column;gap:4px}
+.trust-item b{font-size:14.5px}
+
+/* ---------- faq ---------- */
+.faq-list{border-top:1px solid var(--line)}
+.faq-list details{border-bottom:1px solid var(--line)}
+.faq-list summary{padding:15px 2px;cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:"+";font-family:var(--mono);color:var(--ink-3);font-weight:400;font-size:17px}
+.faq-list details[open] summary::after{content:"–"}
+.faq-list details[open] summary{border-bottom:0}
+.faq-a{padding:0 2px 17px;color:var(--ink-2);line-height:1.65;max-width:70ch;font-size:14.5px}
+
 @media (prefers-reduced-motion:no-preference){
   .rise{animation:rise .8s cubic-bezier(.16,1,.3,1) backwards}
   .fade{animation:fade .7s ease-out backwards}
@@ -388,7 +418,14 @@ body{display:flex;flex-direction:column}
             <tr><td>Clearance and on to Gweru</td><td class="mono">2 to 4 days</td></tr>
           </tbody>
         </table>
-        <p class="small muted">Around two to three weeks door to door in normal conditions. Consolidating several items into one order is faster than sending them separately, because everything waits for the slowest shop.</p>
+        <div class="card">
+    <div class="card-h"><b>The next three flights</b><span class="tiny muted">Stock moves every 6 weeks</span></div>
+    <div class="card-b"><table class="t">
+      <thead><tr><th>Leaves the UK</th><th>Pay by</th><th>Lands in Zimbabwe</th></tr></thead>
+      <tbody><tr><td><b>Friday 14 August</b></td><td class="">Sunday 9 August</td><td class="muted">around Monday 24 August</td></tr><tr><td><b>Friday 25 September</b></td><td class="">Sunday 20 September</td><td class="muted">around Monday 5 October</td></tr><tr><td><b>Friday 6 November</b></td><td class="">Sunday 1 November</td><td class="muted">around Monday 16 November</td></tr></tbody>
+    </table>
+    <p class="tiny muted" style="margin-top:10px">Your order joins the first flight whose payment date has not passed. Sending everything in one order is faster than sending it piece by piece, because a parcel waits for its slowest item.</p>
+    </div></div>
 
         <h2>What it costs to Gweru</h2>
         <p>The flight is £9.50 per kilo with a £15.00 minimum, plus £6.00 clearance and £5.00 for local delivery. All of it is inside the single price you agree up front, so there is nothing to settle when the parcel arrives. <a href="/tenga/what-it-costs/">Full breakdown</a>.</p>

@@ -4,21 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>UK shops we buy from and ship to Zimbabwe | Tenga UK</title>
-<meta name="description" content="Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and more. Send a link from any approved UK shop and we buy it and fly it to Zimbabwe.">
+<meta name="description" content="Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and anywhere else. Send a link from any UK shop and we buy it and fly it to Zimbabwe.">
 <link rel="canonical" href="https://winstondube.github.io/tenga/shop/">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#F0F3F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0C1211" media="(prefers-color-scheme: dark)">
 <meta property="og:site_name" content="Tenga UK">
 <meta property="og:title" content="UK shops we buy from and ship to Zimbabwe | Tenga UK">
-<meta property="og:description" content="Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and more. Send a link from any approved UK shop and we buy it and fly it to Zimbabwe.">
+<meta property="og:description" content="Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and anywhere else. Send a link from any UK shop and we buy it and fly it to Zimbabwe.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://winstondube.github.io/tenga/shop/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://winstondube.github.io/tenga/"},{"@type":"ListItem","position":2,"name":"Shops","item":"https://winstondube.github.io/tenga/shop/"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Why can I not just order from these shops myself?","acceptedAnswer":{"@type":"Answer","text":"Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve."}},{"@type":"Question","name":"Can I order from more than one shop in the same request?","acceptedAnswer":{"@type":"Answer","text":"Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can you buy from a shop that is not on this list?","acceptedAnswer":{"@type":"Answer","text":"Yes, any UK shop. The list is shops we already know well, not a restriction."}},{"@type":"Question","name":"Why can I not just order from these shops myself?","acceptedAnswer":{"@type":"Answer","text":"Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve."}},{"@type":"Question","name":"Can I order from more than one shop in the same request?","acceptedAnswer":{"@type":"Answer","text":"Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order."}}]}</script>
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh}img,svg,video{display:block;max-width:100%}
 button,input,select,textarea{font-family:inherit;font-size:100%}
@@ -169,6 +169,7 @@ table.t tbody tr.clickable:hover{background:var(--surface-2)}
 .thumb img.ok{opacity:1;background:#fff}
 summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
+.faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -302,6 +303,35 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .tag-sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:#7E520F}
 .tag-foot{margin-top:7px;font-size:11.5px;color:#5C6A64}
 
+/* ---------- shipping cycle band ---------- */
+.ship-band{background:var(--ochre-soft);border-bottom:1px solid color-mix(in srgb,var(--ochre) 26%,transparent)}
+.ship-in{max-width:1180px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:clamp(18px,3vw,34px);flex-wrap:wrap}
+.ship-count{display:flex;align-items:center;gap:11px;flex:none}
+.ship-num{font-family:var(--mono);font-size:clamp(38px,5vw,52px);font-weight:700;line-height:.9;letter-spacing:-.04em;color:var(--ochre-ink)}
+.ship-unit{font-size:11.5px;line-height:1.25;color:var(--ochre-ink);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.ship-detail{flex:1;min-width:240px;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.ship-detail b{color:var(--ink)}
+.ship-cut{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:13px;color:var(--ochre-ink)}
+.ship-cut.late{color:var(--danger);font-weight:600}
+@media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
+
+/* ---------- trust grid ---------- */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.trust-item{background:var(--surface);padding:17px;display:flex;gap:12px;align-items:flex-start}
+.trust-item svg{color:var(--accent);flex:none;margin-top:2px}
+.trust-item > div{display:flex;flex-direction:column;gap:4px}
+.trust-item b{font-size:14.5px}
+
+/* ---------- faq ---------- */
+.faq-list{border-top:1px solid var(--line)}
+.faq-list details{border-bottom:1px solid var(--line)}
+.faq-list summary{padding:15px 2px;cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:"+";font-family:var(--mono);color:var(--ink-3);font-weight:400;font-size:17px}
+.faq-list details[open] summary::after{content:"–"}
+.faq-list details[open] summary{border-bottom:0}
+.faq-a{padding:0 2px 17px;color:var(--ink-2);line-height:1.65;max-width:70ch;font-size:14.5px}
+
 @media (prefers-reduced-motion:no-preference){
   .rise{animation:rise .8s cubic-bezier(.16,1,.3,1) backwards}
   .fade{animation:fade .7s ease-out backwards}
@@ -372,7 +402,7 @@ body{display:flex;flex-direction:column}
 <main class="page">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/tenga/">Home</a> › <a href="/tenga/shop/">Shops</a></nav>
   <h1>UK shops we buy from</h1>
-  <p class="lede">Send a product link from any of these and we can quote it. If your shop is not listed, send the link anyway and we will tell you whether we can buy there.</p>
+  <p class="lede">We buy from any UK shop. These are the ones we order from most, so their delivery rules and quirks are already written down.</p>
   
       <div class="steps" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
         <div class="step"><b><a href="/tenga/shop/boots/">Boots</a></b>
@@ -385,10 +415,11 @@ body{display:flex;flex-direction:column}
           <span class="small muted">Free UK delivery over £35.00</span></div><div class="step"><b><a href="/tenga/shop/next/">Next</a></b>
           <span class="small muted">£3.99 UK delivery</span></div><div class="step"><b><a href="/tenga/shop/afrohair/">Afro Hair &amp; Beauty</a></b>
           <span class="small muted">Free UK delivery over £50.00</span></div><div class="step"><b><a href="/tenga/shop/sephora/">Sephora UK</a></b>
-          <span class="small muted">Free UK delivery over £40.00 · manual review</span></div>
+          <span class="small muted">Free UK delivery over £40.00 · manual review</span></div><div class="step"><b><a href="/tenga/shop/shein/">SHEIN</a></b>
+          <span class="small muted">Free UK delivery over £35.00</span></div>
       </div>
-      <h2>Not on the list?</h2>
-      <p>Send the link anyway. We add shops when enough people ask for them, and we will tell you honestly if a shop is one we cannot work with, usually because their dispatch times are too unpredictable to quote against.</p>
+      <h2>Your shop is not listed?</h2>
+      <p>It does not matter. The list above is shops we have bought from often enough to have their delivery rules on file, which saves us a step. Send a link from anywhere in the UK and we will price it exactly the same way. If a shop turns out to be one we cannot work with, usually because dispatch times are too unpredictable to quote against, we tell you before you pay rather than after.</p>
       <div class="steps">
     <div class="step"><span class="n">01</span><b>Send the link</b><span class="small muted">Paste the product page address, tell us the size and how many.</span></div>
     <div class="step"><span class="n">02</span><b>We check it by hand</b><span class="small muted">A person opens the link and confirms the price and stock with the shop.</span></div>
@@ -397,7 +428,7 @@ body{display:flex;flex-direction:column}
   </div>
   <p><a class="btn btn-primary btn-lg" href="/tenga/#/request">Start with a link</a></p>
   <section class="faq"><h2 style="margin-top:8px">Questions</h2>
-    <details><summary>Why can I not just order from these shops myself?</summary><div class="a">Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.</div></details><details><summary>Can I order from more than one shop in the same request?</summary><div class="a">Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order.</div></details>
+    <details><summary>Can you buy from a shop that is not on this list?</summary><div class="a">Yes, any UK shop. The list is shops we already know well, not a restriction.</div></details><details><summary>Why can I not just order from these shops myself?</summary><div class="a">Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.</div></details><details><summary>Can I order from more than one shop in the same request?</summary><div class="a">Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order.</div></details>
   </section>
 </main>
 <footer class="site-foot"><div class="site-foot-in">

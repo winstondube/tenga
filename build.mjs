@@ -50,7 +50,8 @@ globalThis.location = { hash: '#/', origin: ORIGIN, pathname: BASE };
 
 const api = eval(APP_JS + `
 ;({ S, settings: S.settings, retailers: S.retailers, restricted: S.restricted,
-    viewHome, shell, quoteCalc, money, retailerById, newItem, note, icon, esc })`);
+    viewHome, shell, quoteCalc, money, retailerById, newItem, note, icon, esc,
+    HOME_FAQ, shipSchedule, nextShipment, fmtDay })`);
 
 /* ---------- shared chrome for the static marketing pages ---------- */
 const NAV = [
@@ -155,7 +156,7 @@ function chrome(inner, { skipNav } = {}) {
 ${inner}
 <footer class="site-foot"><div class="site-foot-in">
   <div><h3>Service</h3>${NAV.map(([l, p]) => `<a href="${BASE}${p}">${l}</a>`).join('')}</div>
-  <div><h3>Shops</h3>${api.retailers.filter(r => r.status !== 'disabled').slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
+  <div><h3>Shops</h3>${api.retailers.slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
   <div><h3>Delivery</h3>${['harare', 'bulawayo', 'mutare', 'gweru', 'masvingo'].map(c => `<a href="${BASE}delivery/${c}/">${c[0].toUpperCase() + c.slice(1)}</a>`).join('')}</div>
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a><a href="mailto:${site.contactEmail}">${site.contactEmail}</a></div>
 </div>
@@ -174,10 +175,12 @@ function write(path, html) {
   written.push(path);
 }
 
+/* faqLd and crumbLd are function declarations, so they hoist. */
+
 /* 1. the app, with the landing page pre-rendered so it is crawlable */
 
 const homeInner = api.shell(api.viewHome(), false);
-const homeLd = [orgLd, {
+const homeLd = [orgLd, faqLd(api.HOME_FAQ()), {
   '@context': 'https://schema.org', '@type': 'Service',
   name: 'UK buy-for-me and Zimbabwe forwarding', provider: { '@type': 'Organization', name: site.name },
   areaServed: { '@type': 'Country', name: 'Zimbabwe' },
@@ -208,7 +211,7 @@ ${SRC.split('<div id="app"></div>')[0].replace(/<title>[\s\S]*?<\/title>/, '').r
 ${SRC.split('<div id="app"></div>')[1]}
 <footer class="site-foot"><div class="site-foot-in">
   <div><h3>Service</h3>${NAV.map(([l, p]) => `<a href="${BASE}${p}">${l}</a>`).join('')}</div>
-  <div><h3>Shops</h3>${api.retailers.filter(r => r.status !== 'disabled').slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
+  <div><h3>Shops</h3>${api.retailers.slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
   <div><h3>Delivery</h3>${['harare', 'bulawayo', 'mutare', 'gweru', 'masvingo'].map(c => `<a href="${BASE}delivery/${c}/">${c[0].toUpperCase() + c.slice(1)}</a>`).join('')}</div>
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a></div>
 </div></footer>

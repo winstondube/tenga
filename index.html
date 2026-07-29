@@ -18,6 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Tenga UK","url":"https://winstondube.github.io/tenga/","description":"Buy-for-me and Zimbabwe forwarding","email":"help@tenga.uk","areaServed":["ZW","GB"],"logo":"https://winstondube.github.io/tenga/"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Do I pay anything when it arrives in Zimbabwe?","acceptedAnswer":{"@type":"Answer","text":"No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than £5.00, and we tell you before it ships rather than after it lands."}},{"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"We quote within 24 hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every 6 weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece."}},{"@type":"Question","name":"Can I pay with a Zimbabwean card?","acceptedAnswer":{"@type":"Answer","text":"You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve."}},{"@type":"Question","name":"What if the item is out of stock when you go to buy it?","acceptedAnswer":{"@type":"Answer","text":"We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item."}},{"@type":"Question","name":"What cannot you send?","acceptedAnswer":{"@type":"Answer","text":"Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money."}},{"@type":"Question","name":"Do I need an account?","acceptedAnswer":{"@type":"Answer","text":"No. You get a private tracking link when you submit, and that is all you need."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"UK buy-for-me and Zimbabwe forwarding","provider":{"@type":"Organization","name":"Tenga UK"},"areaServed":{"@type":"Country","name":"Zimbabwe"},"description":"Send a link to a product in a UK shop. We buy it, check it and ship it to Zimbabwe for one agreed price including shipping.","offers":{"@type":"Offer","priceCurrency":"GBP","description":"20% procurement fee, minimum £10.00, on a minimum order of £40.00"}}</script>
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh}img,svg,video{display:block;max-width:100%}
@@ -169,6 +170,7 @@ table.t tbody tr.clickable:hover{background:var(--surface-2)}
 .thumb img.ok{opacity:1;background:#fff}
 summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
+.faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -302,6 +304,35 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .tag-sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:#7E520F}
 .tag-foot{margin-top:7px;font-size:11.5px;color:#5C6A64}
 
+/* ---------- shipping cycle band ---------- */
+.ship-band{background:var(--ochre-soft);border-bottom:1px solid color-mix(in srgb,var(--ochre) 26%,transparent)}
+.ship-in{max-width:1180px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:clamp(18px,3vw,34px);flex-wrap:wrap}
+.ship-count{display:flex;align-items:center;gap:11px;flex:none}
+.ship-num{font-family:var(--mono);font-size:clamp(38px,5vw,52px);font-weight:700;line-height:.9;letter-spacing:-.04em;color:var(--ochre-ink)}
+.ship-unit{font-size:11.5px;line-height:1.25;color:var(--ochre-ink);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.ship-detail{flex:1;min-width:240px;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.ship-detail b{color:var(--ink)}
+.ship-cut{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:13px;color:var(--ochre-ink)}
+.ship-cut.late{color:var(--danger);font-weight:600}
+@media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
+
+/* ---------- trust grid ---------- */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.trust-item{background:var(--surface);padding:17px;display:flex;gap:12px;align-items:flex-start}
+.trust-item svg{color:var(--accent);flex:none;margin-top:2px}
+.trust-item > div{display:flex;flex-direction:column;gap:4px}
+.trust-item b{font-size:14.5px}
+
+/* ---------- faq ---------- */
+.faq-list{border-top:1px solid var(--line)}
+.faq-list details{border-bottom:1px solid var(--line)}
+.faq-list summary{padding:15px 2px;cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:"+";font-family:var(--mono);color:var(--ink-3);font-weight:400;font-size:17px}
+.faq-list details[open] summary::after{content:"–"}
+.faq-list details[open] summary{border-bottom:0}
+.faq-a{padding:0 2px 17px;color:var(--ink-2);line-height:1.65;max-width:70ch;font-size:14.5px}
+
 @media (prefers-reduced-motion:no-preference){
   .rise{animation:rise .8s cubic-bezier(.16,1,.3,1) backwards}
   .fade{animation:fade .7s ease-out backwards}
@@ -431,16 +462,27 @@ body{display:flex;flex-direction:column}
     </div>
   </div>
  </section>
+ <section class="ship-band"><div class="ship-in">
+   <div class="ship-count">
+     <span class="ship-num">16</span>
+     <span class="ship-unit">days<br>until the<br>next flight</span>
+   </div>
+   <div class="ship-detail">
+     <b>Stock moves every 6 weeks.</b> The next shipment leaves the UK on <b>Friday 14 August</b> and lands in Zimbabwe around Monday 24 August.
+     <div class="ship-cut "><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Pay by <b>Sunday 9 August</b> to be on it.</span></div>
+   </div>
+   <a class="btn btn-primary" href="#/request">Get on this flight</a>
+ </div></section>
  <div class="home-in">
   <div class="stack-l">
 
    <section class="stack">
-    <h2 style="font-size:clamp(22px,3vw,28px);max-width:20ch">Four steps, and you only pay at the third.</h2>
+    <h2 style="font-size:clamp(22px,3vw,28px);max-width:22ch">Four steps, and you only pay at the third.</h2>
     <div class="steps">
-     <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">Product page, size, quantity, and who it is for in Zimbabwe.</span></div>
+     <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">From any UK shop. Product page, size, quantity, and who it is for in Zimbabwe.</span></div>
      <div class="step"><span class="n">02</span><b>A person checks every one</b><span class="small muted">We open each link and confirm the price and stock with the shop.</span></div>
      <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and shipping home. Valid 60 minutes.</span></div>
-     <div class="step zw"><span class="n">04</span><b>We buy it and send it</b><span class="small muted">Checked in the UK, then flown to Zimbabwe. Track it the whole way.</span></div>
+     <div class="step zw"><span class="n">04</span><b>We buy it and send it</b><span class="small muted">Checked in the UK, then flown out on the next shipment.</span></div>
     </div>
    </section>
 
@@ -457,10 +499,21 @@ body{display:flex;flex-direction:column}
     </div>
    </section>
 
+   <section class="stack">
+   <h2 style="font-size:clamp(22px,3vw,28px);max-width:24ch">Paying up front for something you cannot hold is the hard part. Here is what protects you.</h2>
+   <div class="trust-grid">
+     <div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v6c0 4.6 3.1 8.1 7.5 9 4.4-.9 7.5-4.4 7.5-9V6zM9 12l2.2 2.2L15 10.5"/></svg><div><b>You see the price before we buy</b><span class="small muted">Nothing is ordered until you have approved a quote with every line shown. Not a deposit, not an estimate you settle later.</span></div></div><div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20h10M7 12.5h6M9.5 20v-9a3.5 3.5 0 0 1 6.6-1.6M9.5 20c0-1.5-.7-2.4-2-3"/></svg><div><b>We make our fee and nothing else</b><span class="small muted">No mark up on the product, on UK delivery, or on the flight. If a discount lands between your quote and our purchase, the saving is yours.</span></div></div><div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><div><b>A person checks every link</b><span class="small muted">Retailer stock data is wrong often enough that trusting it would mean taking money for things we cannot buy. So we do not trust it.</span></div></div><div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg><div><b>Every change is written down</b><span class="small muted">Price changes, substitutions and refunds are recorded against your order with a reference and a reason. You can see the whole history.</span></div></div><div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11ZM14.5 10a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/></svg><div><b>Private tracking from day one</b><span class="small muted">A link of your own that shows exactly where the order is, from submitted to delivered, without messaging anyone.</span></div></div><div class="trust-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11.5A8 8 0 0 0 6.2 6.2L3.5 8.8M4 12.5a8 8 0 0 0 13.8 5.3l2.7-2.6M3.5 4v4.8h4.8M20.5 20v-4.8h-4.8"/></svg><div><b>Refunds have a defined path</b><span class="small muted">If we cannot buy it, you are refunded. If the shop&#39;s price rises more than £2.00, you decide before we spend your money.</span></div></div>
+   </div>
+ </section>
+
    <section class="card">
-    <div class="card-h"><b>Shops we buy from</b><a class="link tiny" href="#/request">Somewhere else? Send it for review</a></div>
-    <div class="card-b row wrap" style="gap:7px">
-      <span class="pill p-accent">Boots</span><span class="pill p-accent">Superdrug</span><span class="pill p-accent">LookFantastic</span><span class="pill p-accent">Cult Beauty</span><span class="pill p-accent">Beauty Bay</span><span class="pill p-accent">Space NK</span><span class="pill p-accent">ASOS</span><span class="pill p-accent">Next</span><span class="pill p-accent">Afro Hair &amp; Beauty</span><span class="pill p-warn">Sephora UK · on review</span>
+    <div class="card-h"><b>Shops we know well</b><span class="tiny muted">We buy from anywhere in the UK</span></div>
+    <div class="card-b stack">
+      <p class="small">These are the shops we order from most, so we already have their delivery rules and quirks written down. <b>You are not limited to them.</b> Send a link from any UK shop and we will price it.</p>
+      <div class="row wrap" style="gap:7px">
+        <span class="pill p-accent">Boots</span><span class="pill p-accent">Superdrug</span><span class="pill p-accent">LookFantastic</span><span class="pill p-accent">Cult Beauty</span><span class="pill p-accent">Beauty Bay</span><span class="pill p-accent">Space NK</span><span class="pill p-accent">ASOS</span><span class="pill p-accent">Next</span><span class="pill p-accent">Afro Hair &amp; Beauty</span><span class="pill p-accent">Sephora UK</span><span class="pill p-accent">SHEIN</span>
+        <span class="pill p-mute">and anywhere else</span>
+      </div>
     </div>
    </section>
 
@@ -470,6 +523,22 @@ body{display:flex;flex-direction:column}
       <div>Cargo rules rule out aerosols, bleach and strong developers, prescription and medicated products, and anything with a battery. If your link contains one we flag it and come back to you before asking for a penny.</div>
       <div class="muted">Fine to send: lotions, creams, non medicated skincare, shampoo, conditioner, soap, makeup, wigs and extensions, beauty accessories, non electrical tools, clothing, shoes and accessories.</div>
     </div>
+   </section>
+
+   <section class="stack-s">
+   <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
+   <div class="faq-list">
+     <details><summary>Which UK shops can you buy from?</summary><div class="faq-a">Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.</div></details><details><summary>How much does it cost in total?</summary><div class="faq-a">Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value.</div></details><details><summary>Do I pay anything when it arrives in Zimbabwe?</summary><div class="faq-a">No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than £5.00, and we tell you before it ships rather than after it lands.</div></details><details><summary>How long does it take?</summary><div class="faq-a">We quote within 24 hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every 6 weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.</div></details><details><summary>Can I pay with a Zimbabwean card?</summary><div class="faq-a">You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.</div></details><details><summary>What if the item is out of stock when you go to buy it?</summary><div class="faq-a">We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.</div></details><details><summary>What cannot you send?</summary><div class="faq-a">Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.</div></details><details><summary>Do I need an account?</summary><div class="faq-a">No. You get a private tracking link when you submit, and that is all you need.</div></details>
+   </div>
+ </section>
+
+   <section class="card card-p stack" style="text-align:center">
+     <h2 style="font-size:clamp(20px,2.6vw,26px)">Send your first link</h2>
+     <p class="small muted" style="max-width:46ch;margin:0 auto">No account, no commitment. You will see the full price before anything is bought.</p>
+     <div class="row wrap" style="justify-content:center;margin-top:6px">
+       <a class="btn btn-primary btn-lg" href="#/request"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6"/></svg>Start a request</a>
+       <a class="btn btn-lg" href="https://wa.me/447700900000" target="_blank" rel="noopener"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.3-5.4A7.5 7.5 0 1 1 20.5 12Z"/></svg>Ask on WhatsApp</a>
+     </div>
    </section>
 
   </div>
@@ -601,6 +670,7 @@ const DEFAULT_SETTINGS={
  feeBasis:'combined',
  cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:5, volDivisor:5000, packagingKg:0.3,
  cargoSafetyPct:10, cargoTolerance:5,
+ shipAnchor:'2026-08-14', shipEveryDays:42, shipCutoffDays:5,
  currency:'GBP'
 };
 const DEFAULT_RETAILERS=[
@@ -623,7 +693,20 @@ const KEY='tenga_uk_v1';
 let S=null;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function load(){
- try{const raw=localStorage.getItem(KEY);if(raw){S=JSON.parse(raw);if(S&&S.v===1)return true}}catch(e){}
+ try{
+  const raw=localStorage.getItem(KEY);
+  if(raw){
+   S=JSON.parse(raw);
+   if(S&&S.v===1){
+    // Anyone with a saved session predates whatever setting was added last.
+    // Fill the gaps from defaults rather than rendering NaN at them.
+    S.settings=Object.assign({},DEFAULT_SETTINGS,S.settings||{});
+    if(!Array.isArray(S.batches))S.batches=[];
+    if(!Array.isArray(S.restricted)||!S.restricted.length)S.restricted=[...DEFAULT_RESTRICTED];
+    return true;
+   }
+  }
+ }catch(e){}
  return false;
 }
 function fresh(){
@@ -659,13 +742,16 @@ function extract(url){
  const host=u.hostname.replace(/^www\./,'').toLowerCase();
  const r=S.retailers.find(x=>x.domains.some(d=>host===d||host.endsWith('.'+d)));
  out.host=host;
- if(!r){out.reason='unapproved';out.retailerName=titleCase(host.split('.')[0]);return out}
- out.retailerId=r.id;out.retailerName=r.name;
- if(r.status==='disabled'){out.reason='disabled';return out}
+ // Any UK shop. The retailer list is shops whose delivery rules we have
+ // recorded, not a gate: an unknown shop simply means we confirm the
+ // delivery cost by hand, which we do for every order anyway.
+ if(!r){out.retailerId=null;out.retailerName=host;out.newShop=true}
+ else {out.retailerId=r.id;out.retailerName=r.name;if(r.notes)out.retailerNotes=r.notes}
  const segs=u.pathname.split('/').filter(Boolean).map(s=>decodeURIComponent(s));
  let slug=segs.filter(s=>!STOP.has(s.toLowerCase())&&!/^\d+$/.test(s)).pop()||'';
  slug=slug.replace(/\.(html?|aspx|php)$/i,'').replace(/[-_+]/g,' ').replace(/\b\d{4,}\b/g,'').replace(/\s+/g,' ').trim();
- if(!slug||slug.length<3){out.reason='noname';out.ok=true;out.name='';}
+ const letters=(slug.match(/[a-z]/gi)||[]).length;
+ if(!slug||slug.length<3||letters<5){out.reason='noname';out.ok=true;out.name='';}
  else {out.ok=true;out.name=titleCase(slug)}
  // Size is genuinely readable from most retailer slugs, so we read it.
  // Price is NOT. A browser cannot fetch a retailer page (CORS), and a real
@@ -677,7 +763,7 @@ function extract(url){
  if(pk&&!out.size)out.size=pk[1]+' '+pk[2].toLowerCase();
  out.price=null;out.wasPrice=null;
  out.availability='To be confirmed';
- if(!r.autoExtract)out.reason='noauto';
+ if(r&&!r.autoExtract)out.reason='noauto';
  return out;
 }
 /* ---------------- live product read ----------------
@@ -830,7 +916,7 @@ function applyImport(code){
  try{raw=JSON.parse(decodeURIComponent(escape(atob(code))))}catch(e){return false}
  if(!raw||!raw.u)return false;
  const base=extract(raw.u);
- if(!base.retailerId&&!['unapproved','disabled'].includes(base.reason))return false;
+ if(!base.ok)return false;
  const price=raw.p!=null?toNum(raw.p):null;
  const clean=s=>String(s||'').replace(/\s+/g,' ')
    .replace(/\s*[|–-]\s*(Boots|Superdrug|ASOS|LookFantastic|Next|Cult Beauty|Beauty Bay|Space NK)\s*$/i,'').trim();
@@ -1014,6 +1100,40 @@ function estimateCargo(o){
  const amount=round2(raw*(1+(st.cargoSafetyPct||0)/100));
  return {kg,freight:round2(freight),amount};
 }
+/* ---------------- shipping cycle ----------------
+   Stock moves on a fixed six-week cycle, so the useful question is not
+   "how long does it take" but "which flight am I on, and by when do I have
+   to pay to be on it". Everything is derived from one anchor date. */
+const DAY=86400000;
+function shipSchedule(count){
+ const st=S.settings;
+ const every=(Number(st.shipEveryDays)||42)*DAY;
+ let anchor=new Date(String(st.shipAnchor||DEFAULT_SETTINGS.shipAnchor)+'T12:00:00').getTime();
+ if(!isFinite(anchor))anchor=new Date(DEFAULT_SETTINGS.shipAnchor+'T12:00:00').getTime();
+ const now=Date.now();
+ let next=anchor;
+ if(next<now)next=anchor+Math.ceil((now-anchor)/every)*every;
+ const out=[];
+ for(let i=0;i<(count||1);i++){
+  const departs=next+i*every;
+  const cutoff=departs-(Number(st.shipCutoffDays)||5)*DAY;
+  out.push({
+   departs,cutoff,
+   daysAway:Math.max(0,Math.ceil((departs-now)/DAY)),
+   cutoffDays:Math.ceil((cutoff-now)/DAY),
+   cutoffPassed:now>cutoff,
+   arrives:departs+10*DAY
+  });
+ }
+ return out;
+}
+function nextShipment(){
+ // If the cutoff for the next flight has passed, the honest answer is the one after.
+ const s=shipSchedule(3);
+ return s.find(x=>!x.cutoffPassed)||s[0];
+}
+function fmtDay(ts){return new Date(ts).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
+
 function payTotals(o){
  const paid=o.payments.filter(p=>['Payment completed','Payment available','Payment held'].includes(p.status));
  const initialPaid=paid.filter(p=>p.type!=='cargo').reduce((a,p)=>a+p.amount,0);
@@ -1236,17 +1356,20 @@ function viewHome(){
  const demo={items:[newItem({retailerId:'boots',retailerName:'Boots',name:'Dior J’adore Eau de Parfum 100ml',
    category:'fragrance',attrs:{size:'100ml'},qty:1,displayedPrice:63.99,confirmedPrice:63.99})],quote:null};
  const dq=quoteCalc(demo);
+ const ship=shipSchedule(3);
+ const next=nextShipment();
  return `${heroSection(dq)}
+ ${shipBand(next)}
  <div class="home-in">
   <div class="stack-l">
 
    <section class="stack">
-    <h2 style="font-size:clamp(22px,3vw,28px);max-width:20ch">Four steps, and you only pay at the third.</h2>
+    <h2 style="font-size:clamp(22px,3vw,28px);max-width:22ch">Four steps, and you only pay at the third.</h2>
     <div class="steps">
-     <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">Product page, size, quantity, and who it is for in Zimbabwe.</span></div>
+     <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">From any UK shop. Product page, size, quantity, and who it is for in Zimbabwe.</span></div>
      <div class="step"><span class="n">02</span><b>A person checks every one</b><span class="small muted">We open each link and confirm the price and stock with the shop.</span></div>
      <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and shipping home. Valid ${st.quoteExpiryMins} minutes.</span></div>
-     <div class="step zw"><span class="n">04</span><b>We buy it and send it</b><span class="small muted">Checked in the UK, then flown to Zimbabwe. Track it the whole way.</span></div>
+     <div class="step zw"><span class="n">04</span><b>We buy it and send it</b><span class="small muted">Checked in the UK, then flown out on the next shipment.</span></div>
     </div>
    </section>
 
@@ -1263,10 +1386,16 @@ function viewHome(){
     </div>
    </section>
 
+   ${trustSection()}
+
    <section class="card">
-    <div class="card-h"><b>Shops we buy from</b><a class="link tiny" href="#/request">Somewhere else? Send it for review</a></div>
-    <div class="card-b row wrap" style="gap:7px">
-      ${S.retailers.filter(r=>r.status!=='disabled').map(r=>`<span class="pill ${r.status==='approved'?'p-accent':'p-warn'}">${esc(r.name)}${r.status==='manual'?' · on review':''}</span>`).join('')}
+    <div class="card-h"><b>Shops we know well</b><span class="tiny muted">We buy from anywhere in the UK</span></div>
+    <div class="card-b stack">
+      <p class="small">These are the shops we order from most, so we already have their delivery rules and quirks written down. <b>You are not limited to them.</b> Send a link from any UK shop and we will price it.</p>
+      <div class="row wrap" style="gap:7px">
+        ${S.retailers.map(r=>`<span class="pill p-accent">${esc(r.name)}</span>`).join('')}
+        <span class="pill p-mute">and anywhere else</span>
+      </div>
     </div>
    </section>
 
@@ -1278,8 +1407,80 @@ function viewHome(){
     </div>
    </section>
 
+   ${faqSection(HOME_FAQ())}
+
+   <section class="card card-p stack" style="text-align:center">
+     <h2 style="font-size:clamp(20px,2.6vw,26px)">Send your first link</h2>
+     <p class="small muted" style="max-width:46ch;margin:0 auto">No account, no commitment. You will see the full price before anything is bought.</p>
+     <div class="row wrap" style="justify-content:center;margin-top:6px">
+       <a class="btn btn-primary btn-lg" href="#/request">${icon('link',17)}Start a request</a>
+       <a class="btn btn-lg" href="https://wa.me/447700900000" target="_blank" rel="noopener">${icon('chat',17)}Ask on WhatsApp</a>
+     </div>
+   </section>
+
   </div>
  </div>`;
+}
+
+/* The shipping cycle is the single most useful fact on the page: not "how
+   long does it take" but "which flight am I on and by when must I pay". */
+function shipBand(n){
+ const late=n.cutoffDays<=2;
+ return `<section class="ship-band"><div class="ship-in">
+   <div class="ship-count">
+     <span class="ship-num">${n.daysAway}</span>
+     <span class="ship-unit">day${n.daysAway===1?'':'s'}<br>until the<br>next flight</span>
+   </div>
+   <div class="ship-detail">
+     <b>Stock moves every ${S.settings.shipEveryDays/7} weeks.</b> The next shipment leaves the UK on <b>${fmtDay(n.departs)}</b> and lands in Zimbabwe around ${fmtDay(n.arrives)}.
+     <div class="ship-cut ${late?'late':''}">${icon('clock',14)}<span>${n.cutoffDays<=0?'Payment for this flight has closed. Order now and you are on the one after.':`Pay by <b>${fmtDay(n.cutoff)}</b> to be on it${late?', which is soon':''}.`}</span></div>
+   </div>
+   <a class="btn btn-primary" href="#/request">Get on this flight</a>
+ </div></section>`;
+}
+
+/* Verifiable mechanisms, not testimonials. Asking a stranger to pay in
+   advance is the hard part of this business, so say plainly what protects
+   them, and never claim anything that cannot be checked on the site. */
+function trustSection(){
+ const st=S.settings;
+ const items=[
+  ['shield','You see the price before we buy','Nothing is ordered until you have approved a quote with every line shown. Not a deposit, not an estimate you settle later.'],
+  ['pound','We make our fee and nothing else','No mark up on the product, on UK delivery, or on the flight. If a discount lands between your quote and our purchase, the saving is yours.'],
+  ['search','A person checks every link','Retailer stock data is wrong often enough that trusting it would mean taking money for things we cannot buy. So we do not trust it.'],
+  ['note','Every change is written down','Price changes, substitutions and refunds are recorded against your order with a reference and a reason. You can see the whole history.'],
+  ['pin','Private tracking from day one','A link of your own that shows exactly where the order is, from submitted to delivered, without messaging anyone.'],
+  ['refresh','Refunds have a defined path',`If we cannot buy it, you are refunded. If the shop's price rises more than ${money(st.absorbIncrease)}, you decide before we spend your money.`]
+ ];
+ return `<section class="stack">
+   <h2 style="font-size:clamp(22px,3vw,28px);max-width:24ch">Paying up front for something you cannot hold is the hard part. Here is what protects you.</h2>
+   <div class="trust-grid">
+     ${items.map(([ic,t,d])=>`<div class="trust-item">${icon(ic,17)}<div><b>${esc(t)}</b><span class="small muted">${esc(d)}</span></div></div>`).join('')}
+   </div>
+ </section>`;
+}
+
+function HOME_FAQ(){
+ const st=S.settings;
+ return [
+  ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
+  ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and the flight at ${money(st.cargoRate)} per kilo. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
+  ['Do I pay anything when it arrives in Zimbabwe?','No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than '+money(st.cargoTolerance)+', and we tell you before it ships rather than after it lands.'],
+  ['How long does it take?',`We quote within ${st.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${st.shipEveryDays/7} weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.`],
+  ['Can I pay with a Zimbabwean card?','You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.'],
+  ['What if the item is out of stock when you go to buy it?','We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.'],
+  ['What cannot you send?','Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.'],
+  ['Do I need an account?','No. You get a private tracking link when you submit, and that is all you need.']
+ ];
+}
+
+function faqSection(faq){
+ return `<section class="stack-s">
+   <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
+   <div class="faq-list">
+     ${faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><div class="faq-a">${esc(a)}</div></details>`).join('')}
+   </div>
+ </section>`;
 }
 
 /* Instant feedback under the hero input. No network: the retailer comes from
@@ -1290,11 +1491,7 @@ function heroDetect(url){
  const raw=String(url||'').trim();
  if(raw.length<8){box.innerHTML='';return}
  const r=extract(raw);
- if(r.reason==='unapproved')
-   box.innerHTML=`${icon('alert',14)}<span><b>${esc(r.retailerName)}</b> is not on our list yet. Send it anyway and we will tell you if we can buy there.</span>`;
- else if(r.reason==='disabled')
-   box.innerHTML=`${icon('x',14)}<span>We are not buying from <b>${esc(r.retailerName)}</b> at the moment.</span>`;
- else if(!r.retailerId)
+ if(!r.ok)
    box.innerHTML=`${icon('link',14)}<span>That does not look like a product page yet.</span>`;
  else
    box.innerHTML=`${icon('check',14)}<span class="ok">${esc(r.retailerName)} is approved.</span>`+
@@ -1505,11 +1702,6 @@ function catFields(p){
 function pendingCard(p){
  const d=draft();
  if(p.reason==='badurl')return note(esc(p.msg||'That does not look like a web address.'),'danger','alert');
- if(p.reason==='unapproved')return `<div class="stack-s">
-   ${note(`<b>${esc(p.retailerName)} is not currently approved.</b> You can still submit the link for manual review and we will tell you whether we can buy from them.`,'warn','alert')}
-   <div class="row wrap"><button class="btn btn-s" data-act="addManual">${icon('plus',15)}Submit for manual review</button><button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button></div>
- </div>`;
- if(p.reason==='disabled')return note(`<b>We are not buying from ${esc(p.retailerName)} at the moment.</b> Try a different retailer, or contact us if it is important.`,'danger','x');
  const loading=p.live==='loading';
  return `<div class="card" style="background:var(--surface-2);border-color:var(--line-2)">
   <div class="card-b stack">
@@ -1811,7 +2003,7 @@ const QUEUES=[
  ['New requests',[
    ['new','New requests',o=>/Request submitted|Product information captured|Awaiting price confirmation|Awaiting UK delivery confirmation/.test(o.status)],
    ['review','Needs manual review',o=>/Manual review required|Restricted-product review/.test(o.status)||o.items.some(i=>i.restricted.length&&!i.restrictedCleared)],
-   ['unapproved','Unapproved retailer',o=>o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved')],
+   ['newshop','New shop, set delivery',o=>!o.quote&&o.items.some(i=>!i.retailerId)],
    ['missing','Missing product detail',o=>o.items.some(i=>!i.name||i.confirmedPrice==null)&&!o.quote]
  ]],
  ['Quotes',[
@@ -2020,7 +2212,7 @@ function paneReview(o){
  const st=S.settings, q=quoteCalc(o);
  return `<div class="stack" style="padding-top:16px">
   ${o.items.some(i=>i.restricted.length&&!i.restrictedCleared)?note('<b>Restricted keywords found.</b> Clear or reject each flagged item before a quote can be sent. The customer must not be asked to pay first.','danger','alert'):''}
-  ${o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved')?note('<b>This order contains a retailer that is not approved.</b> Decide whether to buy from them before quoting.','warn','shield'):''}
+  ${o.items.some(i=>!i.retailerId)?note('<b>A shop we have no record of.</b> Open it, check it is a real UK retailer that will deliver to us, and set its delivery cost on the quote tab. Add it to the shop list if you expect it again.','info','shield'):''}
   ${o.customerNotes||o.notes?note('<b>Customer note:</b> '+esc(o.customerNotes||o.notes),'info','note'):''}
 
   ${o.items.map((it,ix)=>{
@@ -2031,9 +2223,9 @@ function paneReview(o){
      ${thumb(it,true)}
      <div class="grow stack-s">
        <div class="row wrap" style="gap:6px">
-         ${pill(it.retailerName||'Unknown retailer',r&&r.status==='approved'?'accent':'warn')}
-         ${r&&r.status==='manual'?pill('Manual review retailer','warn'):''}
-         ${!r?pill('Not approved','danger'):''}
+         ${pill(it.retailerName||'Unknown shop',r?'accent':'info')}
+         ${r?'':pill('New shop','info')}
+         
          ${flagged?pill('Restricted: '+it.restricted.join(', '),'danger'):it.restricted.length?pill('Restriction cleared','accent'):''}
          ${pill(it.itemStatus,statusTone(it.itemStatus))}
        </div>
@@ -2407,7 +2599,7 @@ function adminRetailers(){
      <td><b class="small">${esc(r.name)}</b></td>
      <td class="tiny mono muted">${r.domains.map(esc).join('<br>')}</td>
      <td><select data-ret="${r.id}" data-k="status" style="width:auto;font-size:12px;padding:3px 6px">
-       ${[['approved','Approved'],['manual','Manual review'],['disabled','Disabled']].map(([v,l])=>`<option value="${v}" ${r.status===v?'selected':''}>${l}</option>`).join('')}
+       ${[['approved','Known, rules recorded'],['manual','Known, watch this one'],['disabled','Avoid if possible']].map(([v,l])=>`<option value="${v}" ${r.status===v?'selected':''}>${l}</option>`).join('')}
      </select></td>
      <td><input type="number" step="0.01" data-ret="${r.id}" data-k="delivery" value="${r.delivery}" style="width:80px;padding:3px 6px;font-size:12px"></td>
      <td><input type="number" step="0.01" data-ret="${r.id}" data-k="freeOver" value="${r.freeOver}" style="width:80px;padding:3px 6px;font-size:12px"></td>
@@ -2464,6 +2656,11 @@ function adminSettings(){
     ${f('packagingKg','Packaging weight kg','Added to actual weight','0.05')}
     ${f('cargoSafetyPct','Safety margin on the estimate %','Padding on quoted shipping, since it is charged up front','1')}
     ${f('cargoTolerance','Difference we absorb £','Below this we do not chase or refund after weighing')}
+  </div></div>
+  <div class="card"><div class="card-h"><b>Shipping cycle</b></div><div class="card-b field-grid">
+    <label class="f">Next known departure <span class="hint">anchor date, ISO format</span><input type="date" data-set="shipAnchor" value="${s.shipAnchor}"></label>
+    ${f('shipEveryDays','Ships every, days','42 is six weeks','1')}
+    ${f('shipCutoffDays','Payment cutoff, days before','Pay by this many days before departure','1')}
   </div></div>
   <div class="row"><button class="btn btn-primary" data-act="saveSettings">${icon('check',16)}Save settings</button></div>
  </div>`;
@@ -2694,8 +2891,7 @@ document.addEventListener('click',e=>{
     const url=val('linkInput'); const dr=draft(); dr.pendingUrl=url;
     if(!url){toast('Paste a product link first');return}
     const r=extract(url);
-    if(!r.ok&&!['unapproved','disabled'].includes(r.reason)){dr.pending={reason:'badurl',msg:r.reason};save();rerender(true);return}
-    if(['unapproved','disabled'].includes(r.reason)){dr.pending=r;save();rerender(true);return}
+    if(!r.ok){dr.pending={reason:'badurl',msg:r.reason};save();rerender(true);return}
     // Show the card immediately, then fill in what the retailer page tells us.
     dr.pending={...r,live:'loading'};save();rerender(true);
     const filled=await enrich(dr.pending);
@@ -2757,9 +2953,9 @@ document.addEventListener('click',e=>{
     S.orders.push(o);
     setStatus(o,'Product information captured');
     const flagged=o.items.some(i=>i.restricted.length);
-    const unapproved=o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved');
+    
     if(flagged)setStatus(o,'Restricted-product review','Keywords: '+[...new Set(o.items.flatMap(i=>i.restricted))].join(', '));
-    else if(unapproved)setStatus(o,'Manual review required','Retailer not on the approved list');
+    
     else setStatus(o,'Awaiting price confirmation');
     logAudit(o.ref,'Request submitted','',o.items.length+' items','');
     logMsg(o.ref,'Request received','Email',o.customer.email,'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.');

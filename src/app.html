@@ -373,6 +373,7 @@ const DEFAULT_SETTINGS={
  absorbIncrease:2, priceDropPolicy:'credit', priceDropThreshold:2,
  feeBasis:'combined',
  cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:5, volDivisor:5000, packagingKg:0.3,
+ cargoSafetyPct:10, cargoTolerance:5,
  currency:'GBP'
 };
 const DEFAULT_RETAILERS=[
@@ -737,8 +738,14 @@ function quoteCalc(o){
  else {fee=round2(Math.max(productTotal*st.procurementPct/100,st.procurementMin))}
  const adjustments=(o.quote&&o.quote.adjustments)||[];
  const adjTotal=round2(adjustments.reduce((a,x)=>a+Number(x.delta||0),0));
- const total=round2(productTotal+deliveryTotal+fee+adjTotal);
- return {groups:list,productTotal,deliveryTotal,fee,adjTotal,adjustments,total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
+ // Zimbabwe shipping is quoted up front, estimated from the products, so
+ // the customer settles everything in one payment. If the scales disagree
+ // later we ask for the difference or refund it.
+ const cargoAuto=estimateCargo({items});
+ const cargoEst=(o.quote&&o.quote.cargoEstimate!=null&&o.quote.cargoEstimate!=='')?round2(Number(o.quote.cargoEstimate)):cargoAuto.amount;
+ const total=round2(productTotal+deliveryTotal+fee+adjTotal+cargoEst);
+ return {groups:list,productTotal,deliveryTotal,fee,adjTotal,adjustments,cargoEst,cargoKg:cargoAuto.kg,cargoAuto:cargoAuto.amount,
+  total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
 }
 function cargoCalc(o){
  const st=S.settings, c=o.cargo||{};
@@ -754,11 +761,31 @@ function cargoCalc(o){
  const total=round2(freight+clearance+local+other);
  return {actual,vol,pack,chargeable,rate,freight,clearance,local,other,total};
 }
+/* Shipping is quoted up front so the customer pays once, so the weight
+   guess has to be honest. Volume from the size where we have it, a
+   sensible default per product kind where we do not, plus packaging. */
+const CAT_KG={fragrance:0.35,makeup:0.12,hairpiece:0.30,footwear:1.10,clothing:0.35,haircare:0.30,skincare:0.30,other:0.40};
+function estimateItemKg(it){
+ if(it.estKg!=null&&it.estKgManual)return Number(it.estKg);
+ const size=(it.attrs&&it.attrs.size)||'';
+ const m=String(size).match(/(\d+(?:\.\d+)?)\s*(ml|kg|g|l)\b/i);
+ let kg=null;
+ if(m){
+  const n=parseFloat(m[1]), u=m[2].toLowerCase();
+  if(u==='ml')kg=n/1000; else if(u==='l')kg=n; else if(u==='g')kg=n/1000; else kg=n;
+  // contents plus the bottle or jar around them, glass being the heavy case
+  kg=kg*1.15+(it.category==='fragrance'?0.25:0.06);
+ } else kg=CAT_KG[it.category]!=null?CAT_KG[it.category]:0.4;
+ return round2(Math.max(0.05,kg));
+}
 function estimateCargo(o){
  const st=S.settings;
- const kg=activeItems(o).reduce((a,i)=>a+(Number(i.estKg)||0.45)*(Number(i.qty)||1),0)+ (st.packagingKg||0);
+ const items=activeItems(o);
+ const kg=round2(items.reduce((a,i)=>a+estimateItemKg(i)*(Number(i.qty)||1),0)+(st.packagingKg||0));
  const freight=Math.max(kg*st.cargoRate,st.cargoMin);
- return {kg:round2(kg),low:round2(freight+st.clearance),high:round2(freight*1.35+st.clearance+st.localDelivery)};
+ const raw=freight+(st.clearance||0)+(st.localDelivery||0);
+ const amount=round2(raw*(1+(st.cargoSafetyPct||0)/100));
+ return {kg,freight:round2(freight),amount};
 }
 function payTotals(o){
  const paid=o.payments.filter(p=>['Payment completed','Payment available','Payment held'].includes(p.status));
@@ -1077,9 +1104,10 @@ function viewRequest(){
   </div>
 
   ${d.items.length?`<div class="card">
-   <div class="card-h"><b>2. Your items</b><span class="pill p-mute">${d.items.length} item${d.items.length>1?'s':''}</span></div>
+   <div class="card-h"><b>2. Your order</b><span class="pill p-mute">${d.items.length} item${d.items.length>1?'s':''}</span></div>
    <div class="card-b stack">
      ${d.items.map((it,ix)=>draftItemCard(it,ix)).join('')}
+     <button class="btn btn-block" data-act="addMore">${icon('plus',16)}Add another item</button>
      ${runningTotal(d)}
    </div>
   </div>`:''}
@@ -1124,18 +1152,18 @@ function runningTotal(d){
  if(!priced.length)return `<div class="note n-mute" style="margin-top:4px">${icon('pound',15)}<div>Add the price shown on each page and we will total it up for you here, including our fee and UK delivery.</div></div>`;
  const q=quoteCalc({items:d.items,quote:null});
  const missing=d.items.length-priced.length;
- const est=estimateCargo({items:d.items});
  return `<div class="stack-s" style="border-top:1px solid var(--line);padding-top:12px">
   <div class="sum">
     <div class="l"><span>Product value${missing?` <span class="tiny muted">(${missing} item${missing>1?'s':''} still need a price)</span>`:''}</span><span class="v">${money(q.productTotal)}</span></div>
     <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
     <div class="l"><span>Our fee <span class="tiny muted">${st.procurementPct}% of product value, min ${money(st.procurementMin)}</span></span><span class="v">${money(q.fee)}</span></div>
-    <div class="l total"><span>You would pay now</span><span class="v">${money(q.total)}</span></div>
+    <div class="l"><span>Zimbabwe shipping <span class="tiny muted">about ${q.cargoKg} kg</span></span><span class="v">${money(q.cargoEst)}</span></div>
+    <div class="l total"><span>Total, paid once</span><span class="v">${money(q.total)}</span></div>
   </div>
   ${!q.meetsMin
     ? note(`<b>${money(q.shortfall)} under our ${money(st.minSpend)} minimum.</b> Add another item and this order is good to go. You can still submit as it is, and we will come back to you.`,'warn','alert')
     : `<div class="tiny" style="color:var(--accent)">${icon('check',12)} Meets the ${money(st.minSpend)} minimum.</div>`}
-  <div class="tiny muted">Zimbabwe shipping is separate and charged once we weigh the parcel, roughly ${money(est.low)} to ${money(est.high)} for this order. Everything above is an estimate from the prices you gave us. We confirm each one against the shop before you pay anything.</div>
+  <div class="tiny muted">One payment covers everything, including getting it to Zimbabwe. Shipping is worked out from the products, so it is close but not final until the parcel is weighed. If the scales disagree by more than ${money(st.cargoTolerance)} we tell you and either ask for the difference or refund it. We check every price against the shop before you pay anything.</div>
  </div>`;
 }
 
@@ -1232,7 +1260,7 @@ function pendingCard(p){
    </div>
    <label class="f">Notes for this item <span class="hint">optional</span><input type="text" id="pNotes" placeholder="Anything specific about this product"></label>
    <div class="row wrap">
-     <button class="btn btn-primary btn-s" data-act="addItem">${icon('plus',15)}Add to request</button>
+     <button class="btn btn-primary btn-s" data-act="addItem">${icon('plus',15)}Add to order</button>
      <button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button>
    </div>
   </div>
@@ -1287,7 +1315,7 @@ function customerStatusLine(o){
  if(quoteExpired(o))return {tone:'danger',ic:'clock',text:'Your quote has expired. Ask us for an updated one and we will recheck the prices.',cta:null};
  if(/Restricted|Manual review/i.test(o.status))return {tone:'warn',ic:'alert',text:'One of your items needs a closer look before we can quote. We will come back to you.',cta:null};
  if(o.status==='Quote sent'||o.status==='Awaiting initial payment')return {tone:'accent',ic:'card',text:'Your quote is ready. Review it and pay to start the purchase.',cta:{label:'View and pay quote',href:`#/quote/${o.ref}/${o.token}`}};
- if(o.status==='Zimbabwe shipping payment required'||o.status==='Cargo payment pending')return {tone:'ochre',ic:'scale',text:'Your parcel has been weighed. The Zimbabwe shipping charge is ready to pay.',cta:{label:'Pay Zimbabwe shipping',href:`#/pay/${o.ref}/${o.token}/cargo`}};
+ if(o.status==='Zimbabwe shipping payment required'||o.status==='Cargo payment pending')return {tone:'ochre',ic:'scale',text:'Your parcel came in heavier than we estimated, so there is a small shipping difference to settle before it ships.',cta:{label:'Pay the difference',href:`#/pay/${o.ref}/${o.token}/cargo`}};
  if(o.status==='Additional payment required')return {tone:'warn',ic:'pound',text:'The retailer price changed. We need your decision before we buy.',cta:{label:'See what changed',href:`#/pay/${o.ref}/${o.token}/additional`}};
  if(o.status==='Substitute approval required')return {tone:'warn',ic:'alert',text:'An item is unavailable. We have suggested an alternative and need your approval.',cta:null};
  if(o.status==='Delivered')return {tone:'accent',ic:'check',text:'Delivered. Thank you for using Tenga.',cta:null};
@@ -1300,7 +1328,6 @@ function viewTrack(ref,token){
  if(!o||o.token!==token)return `<div class="narrow-s">${note('That tracking link is not valid. Check the link we sent you, or <a class="link" href="#/lookup">look up your reference</a>.','danger','lock')}</div>`;
  const t=payTotals(o), q=o.quote?quoteCalc(o):null, cur=JOURNEY_RANK[o.status]!=null?JOURNEY_RANK[o.status]:0;
  const s=customerStatusLine(o);
- const est=estimateCargo(o);
  const cargoDue=o.payments.find(p=>p.type==='cargo'&&['Payment link created','Payment not started','Payment pending'].includes(p.status));
  return `<div class="narrow"><div class="stack-l">
   <div class="spread wrap">
@@ -1356,14 +1383,18 @@ function viewTrack(ref,token){
    <div class="card-h"><b>Payments</b></div>
    <div class="card-b stack">
     <div class="sum">
-      <div class="l"><span>First payment, UK purchase</span><span class="v">${q?money(q.total):'Not quoted yet'}</span></div>
-      <div class="l tiny muted"><span>Status</span><span class="v">${t.initialPaid?'Paid '+money(t.initialPaid):o.quote?'Awaiting payment':'Awaiting quote'}</span></div>
-      <div class="l" style="margin-top:8px"><span>Zimbabwe shipping</span><span class="v">${o.cargo&&o.cargo.actualWeight?money(cargoCalc(o).total):'Estimated '+money(est.low)+' to '+money(est.high)}</span></div>
-      <div class="l tiny muted"><span>Status</span><span class="v">${t.cargoPaid?'Paid '+money(t.cargoPaid):o.cargo&&o.cargo.actualWeight?'Confirmed by weight, awaiting payment':'Confirmed once weighed'}</span></div>
-      ${t.refunded?`<div class="l" style="color:var(--danger)"><span>Refunded</span><span class="v">-${money(t.refunded)}</span></div>`:''}
+      ${q?`<div class="l"><span>Products</span><span class="v">${money(q.productTotal)}</span></div>
+      <div class="l"><span>UK delivery</span><span class="v">${money(q.deliveryTotal)}</span></div>
+      <div class="l"><span>Our fee</span><span class="v">${money(q.fee)}</span></div>
+      <div class="l"><span>Zimbabwe shipping</span><span class="v">${money(q.cargoEst)}</span></div>
+      <div class="l total"><span>Total</span><span class="v">${money(q.total)}</span></div>`
+      :`<div class="l"><span>Total</span><span class="v">Not quoted yet</span></div>`}
+      <div class="l tiny muted"><span>Status</span><span class="v">${t.initialPaid?'Paid in full '+money(t.initialPaid):o.quote?'Awaiting payment':'Awaiting quote'}</span></div>
+      ${t.cargoPaid?`<div class="l"><span>Shipping difference paid</span><span class="v">${money(t.cargoPaid)}</span></div>`:''}
+      ${t.refunded?`<div class="l" style="color:var(--accent)"><span>Refunded to you</span><span class="v">-${money(t.refunded)}</span></div>`:''}
     </div>
-    ${!o.cargo||!o.cargo.actualWeight?`<div class="tiny muted">The Zimbabwe figure is an estimate based on what you ordered. It is confirmed once the parcel is on the scales, and we will tell you before anything ships.</div>`:''}
-    ${cargoDue?`<a class="btn btn-primary btn-block" href="#/pay/${o.ref}/${o.token}/cargo">${icon('card',16)}Pay Zimbabwe shipping ${money(cargoDue.amount)}</a>`:''}
+    ${!o.cargo||!o.cargo.actualWeight?`<div class="tiny muted">Your payment covers everything including shipping to Zimbabwe. The shipping part is worked out from what you ordered. Once the parcel is weighed, a difference of more than ${money(S.settings.cargoTolerance)} is charged or refunded, and anything smaller we absorb.</div>`:''}
+    ${cargoDue?`<a class="btn btn-primary btn-block" href="#/pay/${o.ref}/${o.token}/cargo">${icon('card',16)}Pay the shipping difference, ${money(cargoDue.amount)}</a>`:''}
    </div>
   </div>
 
@@ -1417,14 +1448,12 @@ function viewQuote(ref,token){
      <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
      <div class="l"><span>UK retailer delivery${q.groups.length>1?' ('+q.groups.length+' shops, charged separately)':''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
      <div class="l"><span>Procurement fee <span class="tiny muted">(${S.settings.procurementPct}% of product value, min ${money(S.settings.procurementMin)})</span></span><span class="v">${money(q.fee)}</span></div>
+     <div class="l"><span>Zimbabwe shipping <span class="tiny muted">about ${q.cargoKg} kg at ${money(S.settings.cargoRate)} per kg, plus clearance and local delivery</span></span><span class="v">${money(q.cargoEst)}</span></div>
      ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
-     <div class="l total"><span>Pay now</span><span class="v">${money(q.total)}</span></div>
+     <div class="l total"><span>Pay now, everything included</span><span class="v">${money(q.total)}</span></div>
    </div>
    <hr class="hr" style="margin:14px 0">
-   <div class="sum">
-     <div class="l"><span class="muted">Zimbabwe shipping, later</span><span class="v muted">est. ${money(est.low)} to ${money(est.high)}</span></div>
-     <div class="tiny muted">Based on roughly ${est.kg} kg for what you have ordered, at ${money(S.settings.cargoRate)} per kg plus clearance. This is an estimate from product descriptions. The real figure comes from the scales, and we will ask you before shipping if it is higher.</div>
-   </div>
+   ${note(`<b>One payment, nothing else to pay on arrival.</b> The shipping figure is worked out from what you have ordered, roughly ${q.cargoKg} kg. Once your parcel is weighed in the UK, if the real cost differs by more than ${money(S.settings.cargoTolerance)} we will tell you and either ask for the difference or refund it. Anything smaller than that, we absorb.`,'ochre','scale')}
   </div>
 
   <div class="card">
@@ -1439,7 +1468,7 @@ function viewQuote(ref,token){
    <div class="eyebrow">Before you pay, please confirm</div>
    <label class="check"><input type="checkbox" class="qc"><span>The products, sizes, shades and quantities above are correct.</span></label>
    <label class="check"><input type="checkbox" class="qc"><span>The recipient name, phone number and town are correct.</span></label>
-   <label class="check"><input type="checkbox" class="qc"><span>I understand Zimbabwe shipping is charged separately once the parcel is weighed.</span></label>
+   <label class="check"><input type="checkbox" class="qc"><span>I understand the shipping figure is estimated from the products, and that a difference of more than ${money(S.settings.cargoTolerance)} once weighed will be charged or refunded.</span></label>
    <label class="check"><input type="checkbox" class="qc"><span>I understand the order is subject to retailer availability, and that prices are only guaranteed once payment is received and the retailer order is placed.</span></label>
    <label class="check"><input type="checkbox" class="qc"><span>I accept the terms and cancellation policy.</span></label>
    <hr class="hr">
@@ -1508,8 +1537,14 @@ const QUEUES=[
  ]],
  ['Cargo',[
    ['weight','Awaiting weight',o=>activeItems(o).length>0&&activeItems(o).every(i=>i.received)&&!(o.cargo&&o.cargo.actualWeight)],
-   ['cargopay','Awaiting cargo payment',o=>!!(o.cargo&&o.cargo.actualWeight)&&!payTotals(o).cargoPaid],
-   ['tobatch','Ready for a batch',o=>payTotals(o).cargoPaid>0&&!o.batchId]
+   ['cargopay','Shipping difference to settle',o=>{
+     if(!(o.cargo&&o.cargo.actualWeight)||!o.quote)return false;
+     const diff=round2(cargoCalc(o).total-quoteCalc(o).cargoEst);
+     if(Math.abs(diff)<=S.settings.cargoTolerance)return false;
+     if(diff>0)return !payTotals(o).cargoPaid;
+     return !(o.refunds||[]).some(r=>r.type==='Cargo-payment refund');
+   }],
+   ['tobatch','Ready for a batch',o=>payTotals(o).initialPaid>0&&!!(o.cargo&&o.cargo.actualWeight)&&!o.batchId]
  ]],
  ['Everything',[
    ['all','All orders',()=>true],
@@ -1784,8 +1819,13 @@ function paneQuote(o,q){
       <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
       <div class="l"><span>UK retailer delivery</span><span class="v">${money(q.deliveryTotal)}</span></div>
       <div class="l"><span>Procurement fee <span class="tiny muted">${st.procurementPct}% min ${money(st.procurementMin)}, ${st.feeBasis==='combined'?'combined basis':'per retailer'}</span></span><span class="v">${money(q.fee)}</span></div>
+      <div class="l"><span>Zimbabwe shipping <span class="tiny muted">est. ${q.cargoKg} kg, auto ${money(q.cargoAuto)} incl. ${st.cargoSafetyPct}% margin</span></span><span class="v">${money(q.cargoEst)}</span></div>
       ${q.adjustments.map((a,i)=>`<div class="l"><span>${esc(a.reason)} <span class="tiny muted">${esc(a.by)} ${fmtTime(a.at)}</span></span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))} <button class="btn btn-xs btn-ghost" data-act="delAdj" data-ref="${o.ref}" data-i="${i}">${icon('x',12)}</button></span></div>`).join('')}
-      <div class="l total"><span>Initial payment</span><span class="v">${money(q.total)}</span></div>
+      <div class="l total"><span>Single payment</span><span class="v">${money(q.total)}</span></div>
+    </div>
+    <div class="row wrap" style="align-items:flex-end">
+      <label class="f" style="width:190px">Override shipping estimate £<input type="number" step="0.01" data-act="cargoEst" data-ref="${o.ref}" value="${o.quote.cargoEstimate!=null?o.quote.cargoEstimate:''}" placeholder="${q.cargoAuto}"></label>
+      <div class="tiny muted" style="padding-bottom:9px">Leave blank to use the automatic figure. Reconciled against the scales after check in.</div>
     </div>
     ${!q.meetsMin?note('Product value is below the '+money(st.minSpend)+' minimum.','warn','alert'):''}
     <hr class="hr">
@@ -1950,12 +1990,28 @@ function paneReceiving(o){
 
 /* ---- cargo ---- */
 function paneCargo(o){
- const c=o.cargo||{}, calc=cargoCalc(o), t=payTotals(o), est=estimateCargo(o);
+ const c=o.cargo||{}, calc=cargoCalc(o), t=payTotals(o), q=quoteCalc(o);
+ const st=S.settings;
+ const quoted=q.cargoEst;
+ const diff=c.actualWeight?round2(calc.total-quoted):0;
  const allIn=activeItems(o).length>0&&activeItems(o).every(i=>i.received);
  return `<div class="stack" style="padding-top:16px">
   ${!allIn?note('Not everything has been checked in yet. You can still record a weight, but consolidation is incomplete.','warn','box'):''}
+  ${c.actualWeight?`<div class="card"><div class="card-h"><b>Estimate against the scales</b>${Math.abs(diff)<=st.cargoTolerance?pill('Within tolerance','accent'):diff>0?pill('Customer owes '+money(diff),'danger'):pill('Refund '+money(-diff),'warn')}</div>
+   <div class="card-b stack">
+    <div class="sum">
+      <div class="l"><span>Quoted and already paid</span><span class="v">${money(quoted)}</span></div>
+      <div class="l"><span>Actual, from the scales</span><span class="v">${money(calc.total)}</span></div>
+      <div class="l total"><span>Difference</span><span class="v" style="color:${Math.abs(diff)<=st.cargoTolerance?'var(--accent)':diff>0?'var(--danger)':'var(--warn)'}">${diff>0?'+':''}${money(diff)}</span></div>
+    </div>
+    ${Math.abs(diff)<=st.cargoTolerance
+      ? note(`Inside the ${money(st.cargoTolerance)} tolerance, so we absorb it. Nothing to ask the customer.`,'accent','check')
+      : diff>0
+        ? `<div class="row wrap"><button class="btn btn-s" data-act="mkPayCustom" data-ref="${o.ref}">${icon('pound',15)}Request the ${money(diff)} difference</button><span class="tiny muted" style="padding-top:8px">Or absorb it and record why.</span></div>`
+        : `<div class="row wrap"><button class="btn btn-s" data-act="cargoRefund" data-ref="${o.ref}" data-amt="${-diff}">${icon('refresh',15)}Refund ${money(-diff)} to the customer</button></div>`}
+   </div></div>`:''}
   <div class="card">
-   <div class="card-h"><b>Weight and cargo charges</b><span class="eyebrow">Estimated at quote: ${money(est.low)} to ${money(est.high)}</span></div>
+   <div class="card-h"><b>Weight and cargo charges</b><span class="eyebrow">Quoted at ${money(quoted)} on ${q.cargoKg} kg</span></div>
    <div class="card-b stack">
     <div class="field-grid">
       <label class="f">Actual weight (kg)<input type="number" step="0.01" data-cargo="actualWeight" value="${c.actualWeight||''}"></label>
@@ -1976,11 +2032,9 @@ function paneCargo(o){
       ${calc.other?`<div class="l"><span>Other</span><span class="v">${money(calc.other)}</span></div>`:''}
       <div class="l total"><span>Zimbabwe shipping payable</span><span class="v">${money(calc.total)}</span></div>
     </div>
-    ${c.actualWeight&&calc.total>est.high?note(`Confirmed charge is <b>${money(round2(calc.total-est.high))}</b> above the top of the estimate the customer saw. Tell them before shipping.`,'warn','alert'):''}
     <div class="row wrap">
       <button class="btn btn-s btn-primary" data-act="saveCargo" data-ref="${o.ref}">${icon('scale',15)}Save weight and charges</button>
-      <button class="btn btn-s" data-act="mkPay" data-ref="${o.ref}" data-kind="cargo" ${c.actualWeight?'':'disabled'}>${icon('mail',15)}Request cargo payment</button>
-      ${t.cargoPaid?pill('Cargo paid '+money(t.cargoPaid),'accent'):''}
+      ${t.cargoPaid?pill('Top-up paid '+money(t.cargoPaid),'accent'):''}
     </div>
    </div>
   </div>
@@ -2001,9 +2055,10 @@ function paneCargo(o){
     </div>
     <div class="row wrap">
       <button class="btn btn-s btn-primary" data-act="saveCargo" data-ref="${o.ref}">${icon('check',15)}Save shipment details</button>
-      <button class="btn btn-s" data-act="handOver" data-ref="${o.ref}" ${t.cargoPaid?'':'disabled'}>${icon('truck',15)}Mark handed to cargo company</button>
+      <button class="btn btn-s" data-act="handOver" data-ref="${o.ref}" ${t.initialPaid?'':'disabled'}>${icon('truck',15)}Mark handed to cargo company</button>
     </div>
-    ${!t.cargoPaid?`<div class="tiny muted">Cargo payment must be received before hand over.</div>`:''}
+    ${!t.initialPaid?`<div class="tiny muted">The order must be paid before hand over.</div>`
+      :Math.abs(diff)>st.cargoTolerance&&!t.cargoPaid&&diff>0?`<div class="tiny" style="color:var(--warn)">Shipping is ${money(diff)} over the quote. Settle that before shipping, or absorb it deliberately.</div>`:''}
    </div>
   </div>
  </div>`;
@@ -2114,6 +2169,8 @@ function adminSettings(){
     ${f('localDelivery','Zimbabwe local delivery £')}
     ${f('volDivisor','Volumetric divisor','Length x width x height / divisor','100')}
     ${f('packagingKg','Packaging weight kg','Added to actual weight','0.05')}
+    ${f('cargoSafetyPct','Safety margin on the estimate %','Padding on quoted shipping, since it is charged up front','1')}
+    ${f('cargoTolerance','Difference we absorb £','Below this we do not chase or refund after weighing')}
   </div></div>
   <div class="row"><button class="btn btn-primary" data-act="saveSettings">${icon('check',16)}Save settings</button></div>
  </div>`;
@@ -2282,6 +2339,13 @@ document.addEventListener('change',e=>{
  const el=e.target,d=el.dataset||{};const act=d.act;if(!act)return;
  const o=d.ref?getOrder(d.ref):curOrder();
  if(act==='forceStatus'&&el.value){setStatus(o,el.value,'Set manually by administrator');save();rerender(true)}
+ else if(act==='cargoEst'){
+   o.quote=o.quote||{deliveryOverrides:{},adjustments:[]};
+   const before=quoteCalc(o).cargoEst;
+   o.quote.cargoEstimate=el.value===''?null:round2(Number(el.value));
+   logAudit(o.ref,'Shipping estimate overridden',money(before),money(quoteCalc(o).cargoEst));
+   save();rerender(true);
+ }
  else if(act==='delOverride'){o.quote=o.quote||{deliveryOverrides:{},adjustments:[]};o.quote.deliveryOverrides=o.quote.deliveryOverrides||{};
    o.quote.deliveryOverrides[d.key]=el.value===''?null:Number(el.value);logAudit(o.ref,'UK delivery set for '+d.key,'',money(Number(el.value)||0));save();rerender(true)}
  else if(act==='payStatus'&&el.value){
@@ -2373,6 +2437,11 @@ document.addEventListener('click',e=>{
     dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);toast('Submitted for manual review');
   },
   delDraft(){ const dr=draft();dr.items.splice(Number(d.ix),1);save();rerender(true) },
+  addMore(){
+    const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true);
+    const i=document.getElementById('linkInput');
+    if(i){i.scrollIntoView({block:'center',behavior:'smooth'});i.focus()}
+  },
   submitRequest(){
     const dr=draft();
     const miss=[];
@@ -2503,6 +2572,14 @@ document.addEventListener('click',e=>{
     logMsg(o.ref,'Refund issued','Email',o.customer.email,'We have refunded '+money(amt)+'. '+val('refReason'));
     const t=payTotals(o);setStatus(o,t.refunded>=t.initialPaid+t.cargoPaid?'Fully refunded':'Partially refunded');
     save();rerender(true);toast('Refund recorded')
+  },
+  cargoRefund(){
+    const amt=round2(Number(d.amt));
+    o.refunds=o.refunds||[];
+    o.refunds.push({amount:amt,type:'Cargo-payment refund',reason:'Parcel weighed lighter than quoted',ref:'RF-'+hash(o.ref+amt).toString(36).toUpperCase().slice(0,7),at:Date.now(),by:'Admin (demo)'});
+    logAudit(o.ref,'Shipping difference refunded','',money(amt),'Actual cargo cost below the quoted estimate');
+    logMsg(o.ref,'Refund issued','Email',o.customer.email,'Good news: your parcel weighed less than we estimated, so we are refunding '+money(amt)+' of the shipping you paid.');
+    save();rerender(true);toast('Refunded '+money(amt))
   },
   releaseHold(){ const p=o.payments.find(x=>x.id===d.id);p.status='Payment available';p.held=false;
     logAudit(o.ref,'Payment released','Payment held','Payment available');applyPaymentEffects(o,p);save();rerender(true);toast('Marked available') },

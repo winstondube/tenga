@@ -452,6 +452,9 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 .page .card,.page .steps,.page table.t{margin:16px 0}
 .page table.t{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 .page table.t th,.page table.t td{padding:10px 13px}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:820px){.cols-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.cols-3{grid-template-columns:1fr}}
 .crumbs{font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
 .crumbs a{color:var(--ink-3)}
 .faq{margin-top:44px;border-top:1px solid var(--line);padding-top:8px}
@@ -473,7 +476,7 @@ body{display:flex;flex-direction:column}
 <body>
 <header class="site-head"><div class="site-head-in">
   <a class="brand" href="/tenga/"><span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span><span>tenga<span class="tld">.uk</span></span></a>
-  <nav class="site-nav"><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a></nav>
+  <nav class="site-nav"><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></nav>
 </div></header>
 <main class="page">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/tenga/">Home</a> › <a href="/tenga/what-we-cannot-send/">What we cannot send</a></nav>
@@ -511,7 +514,7 @@ body{display:flex;flex-direction:column}
     <div class="step"><span class="n">01</span><b>Send the link</b><span class="small muted">Paste the product page address, tell us the size and how many.</span></div>
     <div class="step"><span class="n">02</span><b>We check it by hand</b><span class="small muted">A person opens the link and confirms the price and stock with the shop.</span></div>
     <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and the flight home, in a single payment.</span></div>
-    <div class="step zw"><span class="n">04</span><b>It lands in Zimbabwe</b><span class="small muted">Checked in the UK, flown out, then delivered or collected.</span></div>
+    <div class="step zw"><span class="n">04</span><b>You collect in Harare</b><span class="small muted">Checked in the UK, flown out, then ready to collect.</span></div>
   </div>
   <p><a class="btn btn-primary btn-lg" href="/tenga/#/request">Start with a link</a></p>
   <section class="faq"><h2 style="margin-top:8px">Questions</h2>
@@ -519,7 +522,7 @@ body{display:flex;flex-direction:column}
   </section>
 </main>
 <footer class="site-foot"><div class="site-foot-in">
-  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a></div>
+  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
   <div><h3>Shops</h3><a href="/tenga/shop/boots/">Boots</a><a href="/tenga/shop/superdrug/">Superdrug</a><a href="/tenga/shop/lookfantastic/">LookFantastic</a><a href="/tenga/shop/cultbeauty/">Cult Beauty</a><a href="/tenga/shop/beautybay/">Beauty Bay</a><a href="/tenga/shop/spacenk/">Space NK</a><a href="/tenga/shop/">All shops</a></div>
   <div><h3>Collection</h3><a href="/tenga/collection/">Collect in Harare</a></div>
   <div><h3>Start</h3><a href="/tenga/#/request">Send a link</a><a href="/tenga/#/lookup">Track an order</a><a href="mailto:help@tenga.uk">help@tenga.uk</a></div>

@@ -1218,6 +1218,7 @@ function shell(body,isAdmin){
  ${body}
  ${isAdmin?'':`<div class="foot">
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
+   <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
  </div>`}`;
 }
@@ -1339,18 +1340,15 @@ function trustSection(){
  </section>`;
 }
 
+/* The three a first-time visitor actually asks, in the order they ask them:
+   can you even get it, what does it cost, and where do I pick it up. The
+   rest live on the questions page rather than making this a wall. */
 function HOME_FAQ(){
  const st=S.settings;
  return [
-  ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
   ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and the flight at ${money(st.cargoRate)} per kilo. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
-  ['Do I pay anything when I collect it?','No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than '+money(st.cargoTolerance)+', and we tell you before it ships rather than at the counter.'],
-  ['How long does it take?',`We quote within ${st.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${st.shipEveryDays/7} weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.`],
-  ['Can I pay with a Zimbabwean card?','You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.'],
-  ['What if the item is out of stock when you go to buy it?','We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.'],
-  ['What cannot you send?','Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.'],
-  ['Where do I collect it?','Every order is collected from our Harare collection point. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
-  ['Do I need an account?','No. You get a private tracking link when you submit, and that is all you need.']
+  ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
+  ['Where do I collect it?','Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.']
  ];
 }
 
@@ -1359,6 +1357,10 @@ function faqSection(faq){
    <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
    <div class="faq-list">
      ${faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><div class="faq-a">${esc(a)}</div></details>`).join('')}
+   </div>
+   <div class="row wrap" style="padding-top:12px">
+     <a class="btn" href="faqs/">${icon('note',15)}More questions</a>
+     <a class="btn btn-ghost" href="contact/">${icon('chat',15)}Ask us something else</a>
    </div>
  </section>`;
 }

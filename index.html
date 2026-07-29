@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Tenga UK","url":"https://winstondube.github.io/tenga/","description":"Buy-for-me and Zimbabwe forwarding","email":"help@tenga.uk","areaServed":["ZW","GB"],"logo":"https://winstondube.github.io/tenga/"}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Do I pay anything when I collect it?","acceptedAnswer":{"@type":"Answer","text":"No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than £5.00, and we tell you before it ships rather than at the counter."}},{"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"We quote within 24 hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every 6 weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece."}},{"@type":"Question","name":"Can I pay with a Zimbabwean card?","acceptedAnswer":{"@type":"Answer","text":"You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve."}},{"@type":"Question","name":"What if the item is out of stock when you go to buy it?","acceptedAnswer":{"@type":"Answer","text":"We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item."}},{"@type":"Question","name":"What cannot you send?","acceptedAnswer":{"@type":"Answer","text":"Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money."}},{"@type":"Question","name":"Where do I collect it?","acceptedAnswer":{"@type":"Answer","text":"Every order is collected from our Harare collection point. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after."}},{"@type":"Question","name":"Do I need an account?","acceptedAnswer":{"@type":"Answer","text":"No. You get a private tracking link when you submit, and that is all you need."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"Where do I collect it?","acceptedAnswer":{"@type":"Answer","text":"Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"UK buy-for-me and Zimbabwe forwarding","provider":{"@type":"Organization","name":"Tenga UK"},"areaServed":{"@type":"Country","name":"Zimbabwe"},"description":"Send a link to a product in a UK shop. We buy it, check it and ship it to Zimbabwe for one agreed price including shipping.","offers":{"@type":"Offer","priceCurrency":"GBP","description":"20% procurement fee, minimum £10.00, on a minimum order of £40.00"}}</script>
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh}img,svg,video{display:block;max-width:100%}
@@ -453,6 +453,9 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 .page .card,.page .steps,.page table.t{margin:16px 0}
 .page table.t{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 .page table.t th,.page table.t td{padding:10px 13px}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:820px){.cols-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.cols-3{grid-template-columns:1fr}}
 .crumbs{font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
 .crumbs a{color:var(--ink-3)}
 .faq{margin-top:44px;border-top:1px solid var(--line);padding-top:8px}
@@ -596,7 +599,11 @@ body{display:flex;flex-direction:column}
    <section class="stack-s">
    <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
    <div class="faq-list">
-     <details><summary>Which UK shops can you buy from?</summary><div class="faq-a">Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.</div></details><details><summary>How much does it cost in total?</summary><div class="faq-a">Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value.</div></details><details><summary>Do I pay anything when I collect it?</summary><div class="faq-a">No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than £5.00, and we tell you before it ships rather than at the counter.</div></details><details><summary>How long does it take?</summary><div class="faq-a">We quote within 24 hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every 6 weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.</div></details><details><summary>Can I pay with a Zimbabwean card?</summary><div class="faq-a">You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.</div></details><details><summary>What if the item is out of stock when you go to buy it?</summary><div class="faq-a">We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.</div></details><details><summary>What cannot you send?</summary><div class="faq-a">Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.</div></details><details><summary>Where do I collect it?</summary><div class="faq-a">Every order is collected from our Harare collection point. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.</div></details><details><summary>Do I need an account?</summary><div class="faq-a">No. You get a private tracking link when you submit, and that is all you need.</div></details>
+     <details><summary>How much does it cost in total?</summary><div class="faq-a">Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and the flight at £9.50 per kilo. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value.</div></details><details><summary>Which UK shops can you buy from?</summary><div class="faq-a">Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.</div></details><details><summary>Where do I collect it?</summary><div class="faq-a">Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.</div></details>
+   </div>
+   <div class="row wrap" style="padding-top:12px">
+     <a class="btn" href="faqs/"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg>More questions</a>
+     <a class="btn btn-ghost" href="contact/"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.3-5.4A7.5 7.5 0 1 1 20.5 12Z"/></svg>Ask us something else</a>
    </div>
  </section>
 
@@ -613,6 +620,7 @@ body{display:flex;flex-direction:column}
  </div>
  <div class="foot">
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
+   <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
  </div></div>
 
@@ -1416,6 +1424,7 @@ function shell(body,isAdmin){
  ${body}
  ${isAdmin?'':`<div class="foot">
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
+   <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
  </div>`}`;
 }
@@ -1537,18 +1546,15 @@ function trustSection(){
  </section>`;
 }
 
+/* The three a first-time visitor actually asks, in the order they ask them:
+   can you even get it, what does it cost, and where do I pick it up. The
+   rest live on the questions page rather than making this a wall. */
 function HOME_FAQ(){
  const st=S.settings;
  return [
-  ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
   ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and the flight at ${money(st.cargoRate)} per kilo. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
-  ['Do I pay anything when I collect it?','No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than '+money(st.cargoTolerance)+', and we tell you before it ships rather than at the counter.'],
-  ['How long does it take?',`We quote within ${st.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${st.shipEveryDays/7} weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.`],
-  ['Can I pay with a Zimbabwean card?','You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.'],
-  ['What if the item is out of stock when you go to buy it?','We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.'],
-  ['What cannot you send?','Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.'],
-  ['Where do I collect it?','Every order is collected from our Harare collection point. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
-  ['Do I need an account?','No. You get a private tracking link when you submit, and that is all you need.']
+  ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
+  ['Where do I collect it?','Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.']
  ];
 }
 
@@ -1557,6 +1563,10 @@ function faqSection(faq){
    <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
    <div class="faq-list">
      ${faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><div class="faq-a">${esc(a)}</div></details>`).join('')}
+   </div>
+   <div class="row wrap" style="padding-top:12px">
+     <a class="btn" href="faqs/">${icon('note',15)}More questions</a>
+     <a class="btn btn-ghost" href="contact/">${icon('chat',15)}Ask us something else</a>
    </div>
  </section>`;
 }
@@ -3479,7 +3489,7 @@ render();
 </script>
 
 <footer class="site-foot"><div class="site-foot-in">
-  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a></div>
+  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
   <div><h3>Shops</h3><a href="/tenga/shop/boots/">Boots</a><a href="/tenga/shop/superdrug/">Superdrug</a><a href="/tenga/shop/lookfantastic/">LookFantastic</a><a href="/tenga/shop/cultbeauty/">Cult Beauty</a><a href="/tenga/shop/beautybay/">Beauty Bay</a><a href="/tenga/shop/spacenk/">Space NK</a><a href="/tenga/shop/">All shops</a></div>
   <div><h3>Collection</h3><a href="/tenga/collection/">Collect in Harare</a></div>
   <div><h3>Start</h3><a href="/tenga/#/request">Send a link</a><a href="/tenga/#/lookup">Track an order</a></div>

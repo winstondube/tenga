@@ -72,7 +72,7 @@ function steps(api, cta) {
     <div class="step"><span class="n">01</span><b>Send the link</b><span class="small muted">Paste the product page address, tell us the size and how many.</span></div>
     <div class="step"><span class="n">02</span><b>We check it by hand</b><span class="small muted">A person opens the link and confirms the price and stock with the shop.</span></div>
     <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and the flight home, in a single payment.</span></div>
-    <div class="step zw"><span class="n">04</span><b>It lands in Zimbabwe</b><span class="small muted">Checked in the UK, flown out, then delivered or collected.</span></div>
+    <div class="step zw"><span class="n">04</span><b>You collect in Harare</b><span class="small muted">Checked in the UK, flown out, then ready to collect.</span></div>
   </div>
   <p><a class="btn btn-primary btn-lg" href="${cta}">Start with a link</a></p>`;
 }
@@ -86,7 +86,7 @@ function costTable(api) {
         <tr><td>The product</td><td class="mono">at cost</td><td>Exactly what the shop charges on the day we buy.</td></tr>
         <tr><td>UK delivery</td><td class="mono">at cost</td><td>Per shop, no mark up. Often free once a basket passes the shop’s threshold.</td></tr>
         <tr><td>Our fee</td><td class="mono">${s.procurementPct}%, min ${api.money(s.procurementMin)}</td><td>Of the product value. This is the only money we make on the purchase.</td></tr>
-        <tr><td>Flight to Zimbabwe</td><td class="mono">${api.money(s.cargoRate)}/kg</td><td>Minimum ${api.money(s.cargoMin)}, plus ${api.money(s.clearance)} clearance and ${api.money(s.localDelivery)} local delivery.</td></tr>
+        <tr><td>Flight to Zimbabwe</td><td class="mono">${api.money(s.cargoRate)}/kg</td><td>Minimum ${api.money(s.cargoMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
         <tr><td>Minimum order</td><td class="mono">${api.money(s.minSpend)}</td><td>Product value, before fee and shipping.</td></tr>
       </tbody>
     </table>
@@ -184,7 +184,7 @@ export function buildPages(api) {
     lede: 'We buy from any UK shop. These are the ones we order from most, so their delivery rules and quirks are already written down.',
     crumbs: [['Shops', 'shop/']],
     body: `
-      <div class="steps" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div class="steps cols-3">
         ${known.map(r => `<div class="step"><b><a href="{{BASE}}shop/${r.id}/">${esc(r.name)}</a></b>
           <span class="small muted">${r.freeOver ? `Free UK delivery over ${api.money(r.freeOver)}` : `${api.money(r.delivery)} UK delivery`}${r.status === 'manual' ? ' · manual review' : ''}</span></div>`).join('')}
       </div>
@@ -339,6 +339,110 @@ export function buildPages(api) {
       ['Do I need an account?', 'No. You get a private tracking link when you submit, and that is all you need.'],
       ['How do I pay?', 'PayPal or card. You pay us, never the shop.'],
       ['Is my money safe if you cannot buy the item?', 'You are refunded. We record every refund against your order with a reference, and we do not place a retailer order at all until your payment has cleared.']
+    ]
+  });
+
+  /* ---- every question, grouped ---- */
+  const FAQ_GROUPS = [
+    ['Before you order', [
+      ['Which UK shops can you buy from?', 'Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so those already have their delivery rules on file and come back fastest. Everywhere else works the same way, we just confirm the postage with the shop before pricing it.'],
+      ['Can I buy from a shop that is not on your list?', 'Yes. The list is shops we know well, not a restriction. Send a link from anywhere in the UK.'],
+      ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
+      ['Do I need an account?', 'No. You get a private tracking link when you submit, and that is all you need.'],
+      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order the flight would cost more than the goods. The minimum keeps it proportionate.`]
+    ]],
+    ['What it costs', [
+      ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and the flight at ${api.money(s.cargoRate)} per kilo. All in one payment, every line shown before you pay.`],
+      ['Are there any hidden charges?', 'No. Nothing is due when you collect. One payment covers the product, UK delivery, our fee and the flight including clearance.'],
+      ['How is your fee worked out?', `${s.procurementPct}% of the product value with a ${api.money(s.procurementMin)} minimum, calculated across the whole order rather than per shop.`],
+      ['Do you mark up the product or the postage?', 'No. Our fee is the only money we make. If a discount code appears between your quote and our purchase, the saving is yours.'],
+      ['What if the shop puts the price up after I pay?', `Rises up to ${api.money(s.absorbIncrease)} we absorb. Anything larger and we come back to you before spending your money: pay the difference, change the item, reduce the quantity, or take a refund.`],
+      ['What if the shop drops the price?', 'The saving is yours. We refund the difference or hold it as credit, your choice.'],
+      ['How long is a quote valid?', `${s.quoteExpiryMins} minutes. Retailer prices genuinely move that fast and we will not hold a price we cannot buy at. If it lapses, ask and we will recheck and resend.`]
+    ]],
+    ['Paying', [
+      ['How do I pay?', 'PayPal or card. You pay us, never the shop.'],
+      ['Can I pay with a Zimbabwean card?', 'You pay us, so yes. It is the UK shops that reject Zimbabwean cards, not us.'],
+      ['When do you actually buy my order?', 'Only once your payment has cleared. Nothing is ordered from a retailer before that.'],
+      ['Is my money safe if you cannot buy the item?', 'You are refunded. Every refund is recorded against your order with a reference and a reason.']
+    ]],
+    ['Getting it to Zimbabwe', [
+      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${s.shipEveryDays / 7} weeks, and clears in about ten days.`],
+      ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
+      ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
+      ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
+      ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type, plus packaging and a small safety margin. Once the parcel is weighed in the UK, a difference of more than ${api.money(s.cargoTolerance)} is charged or refunded. Anything smaller we absorb.`],
+      ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready to collect.']
+    ]],
+    ['What we can and cannot send', [
+      ['What can you not send?', 'Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours.'],
+      ['Can you send perfume?', 'Fragrance contains alcohol and is classed as flammable, so it depends on the route and the packing. Send the link and we will tell you honestly before you pay rather than after.'],
+      ['Can you send hair dye?', 'Colour without a peroxide developer is usually fine. The developer itself is not.'],
+      ['What happens if I order something restricted by accident?', 'It is flagged automatically, a person reviews it, and we come back to you. You are never asked for money on an item we cannot actually send.']
+    ]],
+    ['When something goes wrong', [
+      ['What if the item is out of stock when you go to buy it?', 'We contact you before spending anything. Wait for restock, take a backup you nominated when ordering, choose something else, reduce the quantity, or take a refund on that item.'],
+      ['Can I give you a backup product in advance?', 'Yes, and it saves a lot of time. Choose "buy this instead" when you add an item and give us a second link, a size and a price ceiling.'],
+      ['What if the wrong item arrives at your UK address?', 'It goes on hold before it ships. We photograph it, take it up with the retailer, and tell you where it stands.'],
+      ['Can I cancel?', 'Before we have bought it, yes. After that it depends on the retailer’s own cancellation and return rights, and on whether the item is sealed or personalised. We will not promise a refund until the retailer outcome is confirmed.']
+    ]]
+  ];
+
+  pages.push({
+    path: 'faqs/',
+    title: 'Questions about buying from the UK and shipping to Zimbabwe',
+    description: 'Costs, payment, timings, collection in Harare, what cannot be flown, and what happens when something goes wrong. Straight answers.',
+    h1: 'Questions',
+    lede: 'Everything people ask before their first order, answered without hedging. If yours is not here, ask us.',
+    crumbs: [['Questions', 'faqs/']],
+    body: FAQ_GROUPS.map(([name, items]) => `
+      <h2>${esc(name)}</h2>
+      <section class="faq" style="margin-top:6px;border-top:1px solid var(--line)">
+        ${items.map(([q, a]) => `<details><summary>${esc(q)}</summary><div class="a">${esc(a)}</div></details>`).join('')}
+      </section>`).join('') + `
+      <h2>Still stuck?</h2>
+      <p>Message us and a person answers. We would rather talk you out of an order we cannot do well than take your money and disappoint you. <a href="{{BASE}}contact/">How to reach us</a>.</p>
+      ${steps(api, '{{BASE}}#/request')}`,
+    ownFaqLayout: true,
+    faq: FAQ_GROUPS.flatMap(g => g[1])
+  });
+
+  /* ---- contact ---- */
+  pages.push({
+    path: 'contact/',
+    title: 'Contact Tenga UK',
+    description: 'WhatsApp or email a person about an order, a quote, or whether we can buy something. Replies within a working day.',
+    h1: 'Talk to a person',
+    lede: 'No ticket system and no bot. One of us reads it and answers.',
+    crumbs: [['Contact', 'contact/']],
+    body: `
+      <div class="steps cols-3">
+        <div class="step"><b>WhatsApp</b><span class="small muted">${esc(api.site.contactWhatsapp)}<br>Fastest, and the one most people use.</span></div>
+        <div class="step"><b>Email</b><span class="small muted"><a href="mailto:${esc(api.site.contactEmail)}">${esc(api.site.contactEmail)}</a><br>Best if you are sending several links.</span></div>
+        <div class="step zw"><b>About an existing order</b><span class="small muted">Use your private tracking link first. It shows exactly where the order is without anyone having to reply.</span></div>
+      </div>
+
+      <h2>When you will hear back</h2>
+      <p>Quotes come back within ${s.responseHours} hours and usually much sooner. Questions about an order in progress are answered the same working day. If we are going to be slower than that, we say so rather than going quiet.</p>
+
+      <h2>What to include</h2>
+      <ul>
+        <li>The product link, or your order reference if you already have one.</li>
+        <li>Size, colour or shade if the page makes you choose one.</li>
+        <li>The name and phone number of whoever will collect in Harare.</li>
+      </ul>
+      <p>You do not need to write a long message. A link and a size is enough to get a price.</p>
+
+      <h2>Where you collect</h2>
+      <p>Orders are collected in Harare. We confirm the exact collection point and opening hours when your shipment lands, so you are not making a wasted trip on an estimate.</p>
+
+      <h2>Before you message</h2>
+      <p>Most first questions are answered on <a href="{{BASE}}faqs/">the questions page</a>, particularly cost, timings and what cannot be flown. If yours is not there, ask.</p>
+      ${steps(api, '{{BASE}}#/request')}`,
+    faq: [
+      ['How quickly do you reply?', `Quotes within ${s.responseHours} hours, questions about an order the same working day.`],
+      ['Is there a phone number I can call?', 'WhatsApp is the fastest way to reach us and leaves a written record of what was agreed, which protects both of us.'],
+      ['Can I visit you in the UK?', 'No, we are not a shop. We buy on your behalf and forward from a receiving address.']
     ]
   });
 

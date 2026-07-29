@@ -53,13 +53,17 @@ const api = eval(APP_JS + `
     viewHome, shell, quoteCalc, money, retailerById, newItem, note, icon, esc,
     HOME_FAQ, shipSchedule, nextShipment, fmtDay })`);
 
+api.site = site;   // pages.mjs needs the contact details
+
 /* ---------- shared chrome for the static marketing pages ---------- */
 const NAV = [
   ['How it works', 'how-it-works/'],
   ['What it costs', 'what-it-costs/'],
   ['Shops', 'shop/'],
   ['Collection', 'collection/'],
-  ['What we cannot send', 'what-we-cannot-send/']
+  ['What we cannot send', 'what-we-cannot-send/'],
+  ['Questions', 'faqs/'],
+  ['Contact', 'contact/']
 ];
 
 const FAVICON = 'data:image/svg+xml,' + encodeURIComponent(
@@ -87,6 +91,9 @@ const PAGE_CSS = `
 .page .card,.page .steps,.page table.t{margin:16px 0}
 .page table.t{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 .page table.t th,.page table.t td{padding:10px 13px}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:820px){.cols-3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.cols-3{grid-template-columns:1fr}}
 .crumbs{font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
 .crumbs a{color:var(--ink-3)}
 .faq{margin-top:44px;border-top:1px solid var(--line);padding-top:8px}
@@ -247,7 +254,7 @@ ${chrome(`<main class="page">
   <h1>${api.esc(p.h1)}</h1>
   <p class="lede">${api.esc(p.lede)}</p>
   ${p.body}
-  ${p.faq && p.faq.length ? `<section class="faq"><h2 style="margin-top:8px">Questions</h2>
+  ${p.faq && p.faq.length && !p.ownFaqLayout ? `<section class="faq"><h2 style="margin-top:8px">Questions</h2>
     ${p.faq.map(([q, a]) => `<details><summary>${api.esc(q)}</summary><div class="a">${api.esc(a)}</div></details>`).join('')}
   </section>` : ''}
 </main>`)}

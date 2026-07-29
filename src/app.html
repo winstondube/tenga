@@ -611,7 +611,9 @@ const JOURNEY=[
  {k:'Initial payment completed',label:'Payment received',desc:'Your payment has cleared with us.',leg:'uk'},
  {k:'Purchased from retailer',label:'Bought from the retailer',desc:'We have placed the order in the UK.',leg:'uk'},
  {k:'Received and checked',label:'Received and checked in the UK',desc:'Your item arrived at our UK address and passed inspection.',leg:'uk'},
- {k:'Cargo payment received',label:'Zimbabwe shipping paid',desc:'Weight confirmed and cargo charges settled.',leg:'zw'},
+ // "paid" here read like a second bill sitting next to a one-payment promise.
+ // Shipping was already paid on the quote; this step only confirms the weight.
+ {k:'Cargo payment received',label:'Shipping weight confirmed',desc:'Weighed in the UK and checked against what you paid.',leg:'zw'},
  {k:'Handed to cargo company',label:'Handed to the cargo company',desc:'Packed and booked onto a shipment.',leg:'zw'},
  {k:'In transit to Zimbabwe',label:'In transit to Zimbabwe',desc:'On its way.',leg:'zw'},
  {k:'Arrived in Zimbabwe',label:'Arrived in Zimbabwe',desc:'Through customs clearance and on its way to the collection point.',leg:'zw'},
@@ -998,6 +1000,15 @@ function restrictedHits(text){
 /* ---------------- pricing ---------------- */
 function itemPrice(it){const p=(it.confirmedPrice!=null&&it.confirmedPrice!=='')?Number(it.confirmedPrice):Number(it.displayedPrice||0);return round2(p)}
 function itemLine(it){return round2(itemPrice(it)*(Number(it.qty)||1))}
+/* If someone reported one price and the shop is charging another, say so on the
+   quote. Finding out by arithmetic is how a fair price starts an argument. */
+function priceMoved(it){
+ const said=it.displayedPrice, now=it.confirmedPrice;
+ if(said==null||said===''||now==null||now==='')return '';
+ const d=round2(Number(now)-Number(said));
+ if(Math.abs(d)<0.01)return '';
+ return `<div class="tiny" style="color:var(--ochre)">${icon('alert',11)} You told us ${money(said)}. The shop is charging ${money(now)} today, ${d>0?money(d)+' more':money(-d)+' less'}, so we have quoted the price we can actually buy it at.</div>`;
+}
 function activeItems(o){return o.items.filter(i=>i.itemStatus!=='Removed'&&i.itemStatus!=='Refunded')}
 function quoteCalc(o){
  const st=S.settings, items=activeItems(o);
@@ -2172,6 +2183,7 @@ function viewQuote(ref,token){
           <b class="small">${esc(it.name)}</b>
           ${v?`<div class="tiny muted">${esc(v)}</div>`:''}
           <div class="tiny muted">Qty ${it.qty} at ${money(itemPrice(it))} · <a class="link" href="${esc(it.url)}" target="_blank" rel="noopener">view on ${esc(g.name)} ${icon('ext',10)}</a></div>
+          ${priceMoved(it)}
           <div class="tiny muted">${subsText(it)}</div>
         </div>
         <b class="mono">${money(itemLine(it))}</b>

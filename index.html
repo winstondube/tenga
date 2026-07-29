@@ -2288,7 +2288,15 @@ function customerStatusLine(o){
  if(o.status==='Additional payment required')return {tone:'warn',ic:'pound',text:'The retailer price changed. We need your decision before we buy.',cta:{label:'See what changed',href:`#/pay/${o.ref}/${o.token}/additional`}};
  if(o.status==='Substitute approval required')return {tone:'warn',ic:'alert',text:'An item is unavailable. We have suggested an alternative and need your approval.',cta:null};
  if(o.status==='Delivered')return {tone:'accent',ic:'check',text:'Delivered. Thank you for using Tenga.',cta:null};
- if(t.initialPaid&&!/cargo|transit|Zimbabwe|collection|Delivered/i.test(o.status))return {tone:'accent',ic:'check',text:'Paid. We are working through the purchase and will keep this page updated.',cta:null};
+ // The whole Zimbabwe leg used to fall past this point to the "your quote is on
+ // its way" default, which is the wrong thing to tell someone whose parcel has
+ // already landed. Each stage says where the parcel actually is.
+ if(o.status==='Ready for collection')return {tone:'accent',ic:'pin',text:'Your order is in Harare and ready to collect. Whoever collects needs ID matching the recipient name.',cta:{label:'Where to collect',href:'collection/'}};
+ if(o.status==='Out for delivery')return {tone:'ochre',ic:'truck',text:'Out for delivery in Harare today.',cta:null};
+ if(/Arrived in Zimbabwe|Customs clearance/i.test(o.status))return {tone:'ochre',ic:'plane',text:'Landed in Zimbabwe and clearing customs. We message you the moment it is ready to collect.',cta:null};
+ if(/In transit to Zimbabwe|Handed to cargo company/i.test(o.status))return {tone:'ochre',ic:'plane',text:'On the flight to Zimbabwe. Nothing more to pay.',cta:null};
+ if(/consolidation|final weight|Ready for cargo|cargo batch|Cargo payment received/i.test(o.status))return {tone:'accent',ic:'box',text:'In the UK and being packed for the next flight to Zimbabwe.',cta:null};
+ if(t.initialPaid)return {tone:'accent',ic:'check',text:'Paid. We are working through the purchase and will keep this page updated.',cta:null};
  return {tone:'info',ic:'clock',text:'We are checking price, availability and UK delivery. Your quote is on its way.',cta:null};
 }
 

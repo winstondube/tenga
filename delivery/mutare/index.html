@@ -371,7 +371,9 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 @media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
 
 /* ---------- trust grid ---------- */
-.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+@media (max-width:900px){.trust-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.trust-grid{grid-template-columns:1fr}}
 .trust-item{background:var(--surface);padding:17px;display:flex;gap:12px;align-items:flex-start}
 .trust-item svg{color:var(--accent);flex:none;margin-top:2px}
 .trust-item > div{display:flex;flex-direction:column;gap:4px}

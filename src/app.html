@@ -620,6 +620,71 @@ function applyImport(code){
  return true;
 }
 
+/* ---------------- product categories ----------------
+   Colour and Shade on a bottle of perfume is noise, and noise is how the
+   wrong item gets bought. The options asked for follow the kind of product,
+   inferred from the name. Where the guess is not confident the customer
+   picks the category themselves rather than being handed the wrong form. */
+const CATEGORIES=[
+ {k:'fragrance',label:'Fragrance',
+  match:['eau de parfum','eau de toilette','eau de cologne','parfum','cologne','aftershave','fragrance','body mist',' edt',' edp'],
+  fields:[
+   {id:'size',label:'Size',ph:'100ml'},
+   {id:'strength',label:'Concentration',type:'select',opts:['Eau de Parfum','Eau de Toilette','Parfum or Extrait','Eau de Cologne','Body mist','Not sure']},
+   {id:'format',label:'Format',type:'select',opts:['Bottle','Gift set','Refill','Travel spray','Not sure']}
+  ]},
+ {k:'hairpiece',label:'Wig, weave or extensions',
+  match:['wig','bundle','closure','frontal','weave','extension','ponytail','braiding hair','crochet','lace front','drawstring','hair piece'],
+  fields:[
+   {id:'length',label:'Length',ph:'22 inch'},
+   {id:'colour',label:'Colour',ph:'1B natural black'},
+   {id:'texture',label:'Texture',type:'select',opts:['Straight','Body wave','Deep wave','Curly','Kinky straight','Water wave','Not sure']},
+   {id:'lace',label:'Lace or cap',type:'select',opts:['13x4 frontal','13x6 frontal','4x4 closure','5x5 closure','360 lace','Full lace','Machine made','Not sure']},
+   {id:'density',label:'Density',ph:'150%'}
+  ]},
+ {k:'makeup',label:'Makeup',
+  match:['lipstick','lip gloss','lip liner','foundation','concealer','mascara','eyeshadow','eye shadow','blush','bronzer','highlighter','eyeliner','setting powder','primer','palette','brow pencil'],
+  fields:[
+   {id:'shade',label:'Shade',ph:'Biscuit, 4.5N'},
+   {id:'finish',label:'Finish',type:'select',opts:['Matte','Satin','Dewy','Shimmer','Not sure']},
+   {id:'size',label:'Size',ph:'30ml'}
+  ]},
+ {k:'haircare',label:'Hair care',
+  match:['shampoo','conditioner','hair oil','hair mask','relaxer','edge control','leave-in','leave in','hair food','curl cream','detangler','hair spray','hair gel','co-wash',
+   'hair perfector','bond builder','hair treatment','hair repair','hair colour','hair dye','developer','bleach'],
+  fields:[{id:'size',label:'Size',ph:'400ml'},{id:'variant',label:'Variant',ph:'for dry hair'}]},
+ {k:'skincare',label:'Skin and body care',
+  match:['serum','moisturis','cleanser','toner','sunscreen','spf','body butter','cocoa butter','shea butter','balm','scrub','shower gel','deodorant','body wash','face wash','micellar','exfoliant','cream','lotion','soap','oil',
+   'niacinamide','hyaluronic','retinol','vitamin c','salicylic','glycolic','azelaic','squalane','peptide','ceramide','ampoule','essence'],
+  fields:[{id:'size',label:'Size',ph:'250ml'},{id:'variant',label:'Variant',ph:'fragrance free, for dry skin'}]},
+ {k:'footwear',label:'Shoes',
+  match:['trainer','sneaker','shoe','boot','sandal','heel','loafer','air force','air max','slider','flip flop'],
+  fields:[{id:'size',label:'UK size',ph:'UK 8'},{id:'colour',label:'Colour',ph:'White'},{id:'width',label:'Width fitting',ph:'Standard'}]},
+ {k:'clothing',label:'Clothing',
+  match:['dress','jeans','shirt','hoodie','jacket','t-shirt','tshirt','trouser','skirt','coat','jumper','blazer','legging','tracksuit'],
+  fields:[{id:'size',label:'Size',ph:'UK 12'},{id:'colour',label:'Colour',ph:'Black'},{id:'fit',label:'Fit or length',ph:'Regular'}]},
+ {k:'other',label:'Something else',match:[],
+  fields:[{id:'size',label:'Size',ph:''},{id:'colour',label:'Colour',ph:''},{id:'variant',label:'Any other option',ph:'2 pack'}]}
+];
+function catOf(k){return CATEGORIES.find(c=>c.k===k)||CATEGORIES[CATEGORIES.length-1]}
+/* Detect from the product name only, never the URL: boots.com contains
+   "boot", which would turn every unmatched Boots product into a shoe. The
+   retailer name is stripped for the same reason. */
+function detectCategory(name,retailerName){
+ let t=' '+String(name||'').toLowerCase().replace(/[^a-z0-9%+ ]+/g,' ').replace(/\s+/g,' ')+' ';
+ if(retailerName)t=t.split(String(retailerName).toLowerCase()).join(' ');
+ for(const c of CATEGORIES){
+  if(c.match.some(m=>t.includes(m)))return {k:c.k,confident:true};
+ }
+ return {k:'other',confident:false};
+}
+function attrText(it){
+ const cat=catOf(it.category);
+ const parts=cat.fields.map(f=>it.attrs&&it.attrs[f.id]).filter(v=>v&&v!=='Not sure');
+ if(it.attrs&&it.attrs.other)parts.push(it.attrs.other);
+ return parts.join(' · ');
+}
+
 async function enrich(p){
  const html=await fetchHTML(p.url);
  if(!html)return {...p,live:'failed'};
@@ -705,14 +770,21 @@ function margin(o){
 function quoteExpired(o){return !!(o.quote&&o.quote.sentAt&&o.quote.expiresAt&&Date.now()>o.quote.expiresAt&&!payTotals(o).initialPaid)}
 
 /* ---------------- order factory ---------------- */
+const ATTR_KEYS=['size','colour','shade','scent','variant','length','texture','lace','density','strength','finish','fit','width','format','other'];
 function newItem(p){
- return Object.assign({
-  id:uid('it'),url:'',retailerId:null,retailerName:'',name:'',size:'',colour:'',shade:'',scent:'',variant:'',other:'',
+ const it=Object.assign({
+  id:uid('it'),url:'',retailerId:null,retailerName:'',name:'',category:'',attrs:{},
   qty:1,displayedPrice:null,wasPrice:null,confirmedPrice:null,availability:'Unknown',
   extractOk:false,restricted:[],restrictedCleared:false,estKg:0.45,
   subsAllowed:'no',subsNotes:'',cancelIfUnavailable:true,customerNotes:'',adminNotes:'',
   itemStatus:'Awaiting review',purchase:null,received:null,issues:[]
  },p||{});
+ // Fold any flat option fields into attrs, so older records and the seed
+ // data keep working without a separate migration.
+ it.attrs=Object.assign({},it.attrs);
+ ATTR_KEYS.forEach(k=>{ if(it[k]){it.attrs[k]=it[k]; delete it[k]} });
+ if(!it.category)it.category=detectCategory(it.name,it.retailerName).k;
+ return it;
 }
 function newOrder(p){
  const ref=nextRef();
@@ -962,6 +1034,12 @@ function viewLookup(){
 /* ================================================================
    CUSTOMER: request builder
    ================================================================ */
+function collectAttrs(catKey){
+ const out={};
+ catOf(catKey).fields.forEach(f=>{const v=val('pa_'+f.id);if(v&&v!=='Not specified')out[f.id]=v});
+ const other=val('pa_other'); if(other)out.other=other;
+ return out;
+}
 function draft(){
  if(!S.draft)S.draft={items:[],pending:null,customer:{name:'',email:'',whatsapp:'',country:'Zimbabwe'},
    recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},partOfLargerOrder:false,notes:''};
@@ -1052,6 +1130,33 @@ function importHelper(){
  </details>`;
 }
 
+/* The options block on the customer form, shaped by product kind. */
+function catFields(p){
+ const det=p.cat||detectCategory(p.name,p.retailerName);
+ const cat=catOf(det.k);
+ const guessed=det.confident;
+ return `<div class="stack-s">
+  <div class="row wrap" style="align-items:flex-end;gap:10px">
+    <label class="f" style="min-width:230px">What kind of product is this
+      <span class="hint">${guessed?'We worked this out from the name. Change it if we got it wrong.':'We could not tell, please choose so we ask for the right options.'}</span>
+      <select id="pCat" data-act="pickCat" style="${guessed?'':'border-color:var(--warn)'}">
+        ${CATEGORIES.map(c=>`<option value="${c.k}" ${c.k===det.k?'selected':''}>${esc(c.label)}</option>`).join('')}
+      </select>
+    </label>
+    ${guessed?`<span class="pill p-accent" style="margin-bottom:9px">${esc(cat.label)} detected</span>`:`<span class="pill p-warn" style="margin-bottom:9px">Please choose</span>`}
+  </div>
+  <div class="field-grid">
+    ${cat.fields.map(f=>{
+      const val0=f.id==='size'?(p.size||''):'';
+      return f.type==='select'
+       ? `<label class="f">${esc(f.label)}<select id="pa_${f.id}"><option value="">Not specified</option>${f.opts.map(o=>`<option ${o===val0?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`
+       : `<label class="f">${esc(f.label)}<input type="text" id="pa_${f.id}" value="${esc(val0)}" placeholder="${esc(f.ph||'')}"></label>`;
+    }).join('')}
+    <label class="f">Anything else about the option<input type="text" id="pa_other" placeholder="${esc(cat.k==='fragrance'?'e.g. the intense version':'e.g. 2 pack')}"></label>
+  </div>
+ </div>`;
+}
+
 function pendingCard(p){
  const d=draft();
  if(p.reason==='badurl')return note(esc(p.msg||'That does not look like a web address.'),'danger','alert');
@@ -1083,12 +1188,8 @@ function pendingCard(p){
    <div class="field-grid">
      <label class="f">Quantity<input type="number" id="pQty" min="1" max="20" value="1"></label>
      <label class="f">Price on the page ${p.price!=null?'<span class="hint">read from the page, correct if wrong</span>':'<span class="hint">optional, helps us quote faster</span>'}<input type="number" step="0.01" id="pPrice" value="${p.price!=null?p.price:''}" placeholder="63.99"></label>
-     <label class="f">Size<input type="text" id="pSize" value="${esc(p.size||'')}" placeholder="e.g. 250ml"></label>
-     <label class="f">Colour<input type="text" id="pColour" placeholder="e.g. natural black"></label>
-     <label class="f">Shade<input type="text" id="pShade" placeholder="e.g. 4.5N"></label>
-     <label class="f">Scent<input type="text" id="pScent" placeholder="e.g. vanilla"></label>
-     <label class="f">Other option<input type="text" id="pVariant" placeholder="e.g. 22 inch, UK 8"></label>
    </div>
+   ${catFields(p)}
    <hr class="hr">
    <div class="field-grid two">
      <label class="f">If this exact item is unavailable
@@ -1110,7 +1211,7 @@ function pendingCard(p){
 }
 
 function draftItemCard(it,ix){
- const variantBits=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+ const variantBits=attrText(it);
  return `<div class="item-card"><div class="item-head">
    ${thumb(it)}
    <div class="grow stack-s">
@@ -1146,7 +1247,7 @@ function viewSubmitted(ref){
   </div>
   <div class="card">
     <div class="card-h"><b>What you asked for</b></div>
-    <div class="card-b stack-s">${o.items.map(it=>`<div class="row" style="align-items:flex-start">${thumb(it)}<div class="grow"><b class="small">${esc(it.name||'Unnamed item')}</b><div class="tiny muted">${esc(it.retailerName)} · qty ${it.qty}${it.size?' · '+esc(it.size):''}${it.shade?' · '+esc(it.shade):''}</div></div>${it.restricted.length?pill('Under review','warn'):''}</div>`).join('')}</div>
+    <div class="card-b stack-s">${o.items.map(it=>`<div class="row" style="align-items:flex-start">${thumb(it)}<div class="grow"><b class="small">${esc(it.name||'Unnamed item')}</b><div class="tiny muted">${esc(it.retailerName)} · qty ${it.qty}${attrText(it)?' · '+esc(attrText(it)):''}</div></div>${it.restricted.length?pill('Under review','warn'):''}</div>`).join('')}</div>
   </div>
   ${note('<b>Next:</b> a person opens every link, confirms stock and the real price, then sends you one quote. It stays valid for '+st.quoteExpiryMins+' minutes because retailer prices move.','info','clock')}
  </div></div>`;
@@ -1208,7 +1309,7 @@ function viewTrack(ref,token){
    <div class="card-h"><b>Your items</b><span class="tiny muted">${o.items.length} item${o.items.length>1?'s':''}</span></div>
    <div class="card-b stack-s">
     ${o.items.map(it=>{
-      const v=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+      const v=attrText(it);
       return `<div class="row" style="align-items:flex-start;padding:6px 0">${thumb(it)}
        <div class="grow stack-s" style="gap:3px">
          <b class="small">${esc(it.name||'Unnamed item')}</b>
@@ -1267,7 +1368,7 @@ function viewQuote(ref,token){
   ${q.groups.map(g=>`<div class="retailer-grp">
     <div class="rg-h"><b>${esc(g.name)}</b><span class="mono tiny">${g.freeApplied?'Free UK delivery':'UK delivery '+money(g.delivery)}</span></div>
     <div style="padding:4px 0">
-     ${g.items.map(it=>{const v=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+     ${g.items.map(it=>{const v=attrText(it);
       return `<div class="row" style="align-items:flex-start;padding:11px 13px;border-bottom:1px solid var(--line)">
         ${thumb(it)}
         <div class="grow stack-s" style="gap:3px">
@@ -1594,11 +1695,17 @@ function paneReview(o){
        <label class="f">Sold by<select data-item="${it.id}" data-k="soldBy">${['Retailer direct','Marketplace seller'].map(a=>`<option ${it.soldBy===a?'selected':''}>${a}</option>`).join('')}</select></label>
      </div>
      <div class="field-grid">
-       <label class="f">Size<input type="text" data-item="${it.id}" data-k="size" value="${esc(it.size)}"></label>
-       <label class="f">Colour<input type="text" data-item="${it.id}" data-k="colour" value="${esc(it.colour)}"></label>
-       <label class="f">Shade<input type="text" data-item="${it.id}" data-k="shade" value="${esc(it.shade)}"></label>
-       <label class="f">Scent<input type="text" data-item="${it.id}" data-k="scent" value="${esc(it.scent)}"></label>
-       <label class="f">Other option<input type="text" data-item="${it.id}" data-k="variant" value="${esc(it.variant)}"></label>
+       <label class="f">Product kind <span class="hint">changes the options asked for</span>
+         <select data-act="setCat" data-ref="${o.ref}" data-id="${it.id}">
+           ${CATEGORIES.map(c=>`<option value="${c.k}" ${c.k===it.category?'selected':''}>${esc(c.label)}</option>`).join('')}
+         </select></label>
+       ${catOf(it.category).fields.map(f=>{
+         const v=(it.attrs&&it.attrs[f.id])||'';
+         return f.type==='select'
+          ? `<label class="f">${esc(f.label)}<select data-attr="${it.id}" data-k="${f.id}"><option value="">Not specified</option>${f.opts.map(op=>`<option ${op===v?'selected':''}>${esc(op)}</option>`).join('')}</select></label>`
+          : `<label class="f">${esc(f.label)}<input type="text" data-attr="${it.id}" data-k="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"></label>`;
+       }).join('')}
+       <label class="f">Anything else<input type="text" data-attr="${it.id}" data-k="other" value="${esc((it.attrs&&it.attrs.other)||'')}"></label>
      </div>
      <div class="note n-mute" style="font-size:12.5px">${icon('user',14)}<div><b>Customer instruction:</b> ${it.subsAllowed==='yes'?'substitutes allowed'+(it.subsNotes?' ('+esc(it.subsNotes)+')':''):it.subsAllowed==='cancel'?'cancel and refund if unavailable':'do not substitute, ask first'}${it.customerNotes?' · '+esc(it.customerNotes):''}</div></div>
      <label class="f">Administrator notes<input type="text" data-item="${it.id}" data-k="adminNotes" value="${esc(it.adminNotes)}" placeholder="Basket check, seller, quantity limits"></label>
@@ -1744,7 +1851,7 @@ function panePurchase(o){
        <div class="row wrap" style="gap:6px">${pill(it.retailerName,'accent')}${pill(it.itemStatus,statusTone(it.itemStatus))}${it.soldBy==='Marketplace seller'?pill('Marketplace seller','warn'):''}</div>
        <b class="small">${esc(it.name)}</b>
        <div class="tiny muted">Qty ${it.qty} · approved at ${money(itemPrice(it))} each · total ${money(itemLine(it))}</div>
-       <div class="tiny muted">${[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).map(esc).join(' · ')||'no variant specified'}</div>
+       <div class="tiny muted">${esc(attrText(it))||'no options specified'}</div>
        <div class="tiny" style="color:var(--info)">${it.subsAllowed==='yes'?'Substitutes allowed'+(it.subsNotes?': '+esc(it.subsNotes):''):it.subsAllowed==='cancel'?'Cancel and refund if unavailable':'Do not substitute, ask the customer first'}</div>
        <a class="link tiny" href="${esc(it.url)}" target="_blank" rel="noopener">Open retailer page ${icon('ext',10)}</a>
      </div>
@@ -2129,6 +2236,7 @@ document.addEventListener('input',e=>{
  if(d.bind){const [a,b]=d.bind.split('.');const dr=draft();if(b)dr[a][b]=v;else dr[a]=v;save();return}
  const o=curOrder();
  if(d.item&&o){const it=o.items.find(i=>i.id===d.item);if(it){it[d.k]=(d.k==='qty'||d.k==='confirmedPrice'||d.k==='displayedPrice'||d.k==='estKg')?(v===''?(d.k==='confirmedPrice'?null:0):Number(v)):v;save()}return}
+ if(d.attr&&o){const it=o.items.find(i=>i.id===d.attr);if(it){it.attrs=Object.assign({},it.attrs);if(v)it.attrs[d.k]=v;else delete it.attrs[d.k];save()}return}
  if(d.pur&&o){const it=o.items.find(i=>i.id===d.pur);if(it){it.purchase=it.purchase||{};it.purchase[d.k]=v;save()}return}
  if(d.rec&&o){const it=o.items.find(i=>i.id===d.rec);if(it){it.recDraft=it.recDraft||{};it.recDraft[d.k]=v;save()}return}
  if(d.cargo&&o){o.cargo=o.cargo||{};o.cargo[d.cargo]=(v===''?'':(['company','shipRef','tracking','etaDate','dropoff'].includes(d.cargo)?v:Number(v)));save();return}
@@ -2162,6 +2270,14 @@ document.addEventListener('change',e=>{
    logAudit(o.ref,'Receiving issue logged','',el.value,it.name);
    logMsg(o.ref,'Goods issue identified','Email',o.customer.email,'We found an issue with one of your items ('+el.value+'). We are resolving it with the retailer and will update you.');
    save();rerender(true)}
+ else if(act==='pickCat'){
+   const dr=draft();
+   if(dr.pending){dr.pending.cat={k:el.value,confident:true};if(dr.pending.name)dr.pending.name=val('pName')||dr.pending.name;save();rerender(true)}
+ }
+ else if(act==='setCat'){
+   const it=o.items.find(i=>i.id===d.id);
+   if(it){const before=it.category;it.category=el.value;logAudit(o.ref,'Product category changed',before,el.value,it.name);save();rerender(true)}
+ }
  else if(act==='assignBatch'&&el.value){
    const b=S.batches.find(x=>x.id===d.batch);const ord=getOrder(el.value);
    if(b&&ord&&!b.orders.includes(ord.ref)){b.orders.push(ord.ref);ord.batchId=b.id;ord.cargo=ord.cargo||{};ord.cargo.company=b.company;ord.cargo.shipRef=b.ref;
@@ -2204,7 +2320,8 @@ document.addEventListener('click',e=>{
     const name=val('pName');
     if(!name){toast('Please give the product a name so we buy the right thing');return}
     const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
-      size:val('pSize'),colour:val('pColour'),shade:val('pShade'),scent:val('pScent'),variant:val('pVariant'),
+      category:val('pCat')||detectCategory(name,p.retailerName).k,
+      attrs:collectAttrs(val('pCat')||detectCategory(name,p.retailerName).k),
       qty:Math.max(1,Number(val('pQty'))||1),
       displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
       priceSource:val('pPrice')===''?'':(p.price!=null&&round2(Number(val('pPrice')))===p.price?srcLabel(p.via||'live'):'Customer reported'),

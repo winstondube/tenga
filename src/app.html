@@ -349,6 +349,23 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 .ship-cut.late{color:var(--danger);font-weight:600}
 @media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
 
+/* ---------- "any UK shop", demonstrated rather than asserted ---------- */
+.linkbar-wrap{display:flex;flex-direction:column;align-items:center;gap:15px;padding:clamp(20px,3vw,32px) 18px}
+.linkbar{width:100%;max-width:620px;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;
+  padding:11px 14px;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:14.5px}
+.linkbar .lk{color:var(--ink-3);flex:none}
+.linkbar-url{flex:1;min-width:0;white-space:nowrap;overflow:hidden;color:var(--ink)}
+.linkbar-url .host{font-weight:700}
+.linkbar-url .path{color:var(--ink-3)}
+.linkbar-caret{width:1.5px;height:17px;background:var(--accent);flex:none;animation:lkblink 1.05s step-end infinite}
+@keyframes lkblink{50%{opacity:0}}
+.linkbar-verdict{min-height:22px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;
+  color:var(--accent);opacity:0;transition:opacity .3s}
+.linkbar-verdict.on{opacity:1}
+.linkbar-verdict.fresh{color:var(--ochre-ink)}
+.linkbar-note{font-size:13.5px;color:var(--ink-3);text-align:center;max-width:56ch;line-height:1.6}
+@media (prefers-reduced-motion:reduce){.linkbar-caret{animation:none}}
+
 /* ---------- trust grid ---------- */
 .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 @media (max-width:900px){.trust-grid{grid-template-columns:repeat(2,1fr)}}
@@ -1179,8 +1196,9 @@ function render(){
  $('#app').innerHTML=shell(body,isAdmin);
  // The shelf only exists on the landing page, so it starts and stops with it
  // rather than ticking away behind every other route.
- stopShelf();
+ stopShelf();stopLinkbar();
  if(document.getElementById('heroPicked'))runShelf();
+ if(document.getElementById('linkUrl'))runLinkbar();
  window.scrollTo(0,VIEW.keepScroll?window.scrollY:0);VIEW.keepScroll=false;
 }
 function shell(body,isAdmin){
@@ -1248,13 +1266,15 @@ function viewHome(){
    ${trustSection()}
 
    <section class="card">
-    <div class="card-h"><b>Shops we know well</b><span class="tiny muted">We buy from anywhere in the UK</span></div>
-    <div class="card-b stack">
-      <p class="small">These are the shops we order from most, so we already have their delivery rules and quirks written down. <b>You are not limited to them.</b> Send a link from any UK shop and we will price it.</p>
-      <div class="row wrap" style="gap:7px">
-        ${S.retailers.map(r=>`<span class="pill p-accent">${esc(r.name)}</span>`).join('')}
-        <span class="pill p-mute">and anywhere else</span>
+    <div class="card-h"><b>Any UK shop</b><span class="tiny muted">Not a list to pick from</span></div>
+    <div class="card-b linkbar-wrap">
+      <div class="linkbar">
+        ${icon('lock',14)}
+        <span class="linkbar-url" id="linkUrl"></span>
+        <span class="linkbar-caret"></span>
       </div>
+      <div class="linkbar-verdict" id="linkVerdict" aria-live="polite"></div>
+      <p class="linkbar-note">The ${S.retailers.length} shops we use most already have their delivery rules on file, so those quotes come back fastest. Everywhere else works exactly the same way, we just confirm the postage first.</p>
     </div>
    </section>
 
@@ -1340,6 +1360,58 @@ function faqSection(faq){
      ${faq.map(([q,a])=>`<details><summary>${esc(q)}</summary><div class="faq-a">${esc(a)}</div></details>`).join('')}
    </div>
  </section>`;
+}
+
+/* ---------------- "any UK shop", demonstrated ----------------
+   An address bar types out a real product link, from a different shop each
+   time, and confirms it. Whether a shop counts as known is read from the
+   retailer list, so adding John Lewis there flips its verdict here. */
+const LINK_SAMPLES=[
+ {host:'boots.com',           path:'/no7-protect-and-perfect-serum-50ml'},
+ {host:'asos.com',            path:'/nike/air-force-1-white/prd/203991884'},
+ {host:'johnlewis.com',       path:'/charlotte-tilbury-pillow-talk-lipstick'},
+ {host:'cultbeauty.co.uk',    path:'/p/the-ordinary-niacinamide-10-zinc-1'},
+ {host:'marksandspencer.com', path:'/pure-cotton-shirt/p/clp60123456'},
+ {host:'superdrug.com',       path:'/palmers-cocoa-butter-formula-400ml'}
+];
+const TICK_SVG='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
+let linkTimers=[],linkIdx=0,linkRun=0;
+function stopLinkbar(){linkTimers.forEach(clearTimeout);linkTimers=[];linkRun++}
+function knownShop(host){return S.retailers.some(r=>r.domains.some(d=>host===d||host.endsWith('.'+d)))}
+function paintUrl(s,upto){
+ const el=document.getElementById('linkUrl'); if(!el)return;
+ const full='https://www.'+s.host+s.path, hostEnd=('https://www.'+s.host).length;
+ el.innerHTML = upto<=hostEnd
+  ? `<span class="host">${esc(full.slice(0,upto))}</span>`
+  : `<span class="host">${esc(full.slice(0,hostEnd))}</span><span class="path">${esc(full.slice(hostEnd,upto))}</span>`;
+}
+function runLinkbar(){
+ const url=document.getElementById('linkUrl'), verdict=document.getElementById('linkVerdict');
+ if(!url||!verdict){stopLinkbar();return}
+ const me=linkRun;                                  // an older cycle must never paint
+ const s=LINK_SAMPLES[linkIdx%LINK_SAMPLES.length];
+ const known=knownShop(s.host);
+ const full='https://www.'+s.host+s.path;
+ const say=()=>{verdict.className='linkbar-verdict on'+(known?'':' fresh');
+   verdict.innerHTML=TICK_SVG+(known?`<span>We buy from ${esc(s.host)} all the time</span>`
+                                    :`<span>New shop to us. Still yes, we confirm their postage</span>`)};
+ verdict.className='linkbar-verdict';verdict.innerHTML='';
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+  paintUrl(s,full.length);say();linkIdx++;
+  linkTimers.push(setTimeout(runLinkbar,3400));return;
+ }
+ let n=12+s.host.length;                            // the domain is already there
+ paintUrl(s,n);
+ const step=()=>{
+  if(me!==linkRun)return;
+  n+=2;paintUrl(s,Math.min(n,full.length));
+  if(n<full.length)linkTimers.push(setTimeout(step,22));
+  else{
+   linkTimers.push(setTimeout(()=>{if(me===linkRun)say()},260));
+   linkTimers.push(setTimeout(()=>{if(me!==linkRun)return;linkIdx++;runLinkbar()},3000));
+  }
+ };
+ linkTimers.push(setTimeout(step,420));
 }
 
 /* Thirty photographs, fifteen beauty and fifteen fashion, none repeated.

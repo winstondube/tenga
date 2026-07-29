@@ -370,6 +370,23 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 .ship-cut.late{color:var(--danger);font-weight:600}
 @media (max-width:640px){.ship-in{padding:16px 20px}.ship-detail{min-width:100%}}
 
+/* ---------- "any UK shop", demonstrated rather than asserted ---------- */
+.linkbar-wrap{display:flex;flex-direction:column;align-items:center;gap:15px;padding:clamp(20px,3vw,32px) 18px}
+.linkbar{width:100%;max-width:620px;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;
+  padding:11px 14px;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:14.5px}
+.linkbar .lk{color:var(--ink-3);flex:none}
+.linkbar-url{flex:1;min-width:0;white-space:nowrap;overflow:hidden;color:var(--ink)}
+.linkbar-url .host{font-weight:700}
+.linkbar-url .path{color:var(--ink-3)}
+.linkbar-caret{width:1.5px;height:17px;background:var(--accent);flex:none;animation:lkblink 1.05s step-end infinite}
+@keyframes lkblink{50%{opacity:0}}
+.linkbar-verdict{min-height:22px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;
+  color:var(--accent);opacity:0;transition:opacity .3s}
+.linkbar-verdict.on{opacity:1}
+.linkbar-verdict.fresh{color:var(--ochre-ink)}
+.linkbar-note{font-size:13.5px;color:var(--ink-3);text-align:center;max-width:56ch;line-height:1.6}
+@media (prefers-reduced-motion:reduce){.linkbar-caret{animation:none}}
+
 /* ---------- trust grid ---------- */
 .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 @media (max-width:900px){.trust-grid{grid-template-columns:repeat(2,1fr)}}

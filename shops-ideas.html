@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tenga · three ways to show the shops</title>
+<style>
+:root{
+  --bg:#F0F3F0; --surface:#FFFFFF; --surface-2:#EDECE6; --ink:#12181A; --ink-2:#3E4845; --ink-3:#6C7671;
+  --line:#DCDAD1; --line-2:#C8C6BC; --accent:#0B5D4E; --accent-soft:#E2EDE9; --accent-ink:#08463A;
+  --ochre:#B57A1F; --ochre-soft:#F5EAD6; --ochre-ink:#8A5B12; --drench:#0B2620; --gold:#E0AE5C;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --r:4px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0C1211;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
+        --line:#2B3234;--line-2:#3A4244;--accent:#4FBFA4;--accent-soft:#12302A;--accent-ink:#8FDCC7;
+        --ochre:#D9A64E;--ochre-soft:#33280F;--ochre-ink:#EFC988;--drench:#081D19}
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;letter-spacing:-.015em;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:34px 24px 90px}
+.head{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:34px}
+.head h1{font-family:var(--serif);font-weight:400;font-size:clamp(25px,4vw,36px);margin-bottom:8px}
+.head p{color:var(--ink-2);max-width:66ch;line-height:1.6;font-size:15px}
+.block{margin-bottom:52px}
+.bar{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:6px}
+.n{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre-ink);
+  border:1px solid var(--ochre);padding:3px 9px;border-radius:100px}
+.bar h2{font-size:clamp(18px,2.3vw,23px)}
+.why{color:var(--ink-2);font-size:14.5px;line-height:1.6;max-width:74ch;margin:8px 0 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;
+  align-items:center;gap:12px;font-weight:600;font-size:15px}
+.card-h .sub{font-size:12.5px;color:var(--ink-3);font-weight:400}
+.card-b{padding:18px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:600;padding:9px 14px;border-bottom:1px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.free{color:var(--accent);font-weight:600}
+.anywhere td{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+
+/* ---- A: the statement ---- */
+.stmt{padding:clamp(26px,4vw,44px)}
+.stmt h3{font-family:var(--serif);font-weight:400;font-size:clamp(30px,5vw,50px);line-height:1.06;letter-spacing:-.025em}
+.stmt h3 em{font-style:italic;color:var(--accent)}
+.stmt .under{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:clamp(18px,3vw,44px);
+  border-top:1px solid var(--line);padding-top:20px}
+.stmt .under p{font-size:14.5px;line-height:1.65;color:var(--ink-2)}
+.stmt .under b{color:var(--ink)}
+.stmt .names{font-family:var(--serif);font-size:16px;line-height:1.75;color:var(--ink)}
+
+/* ---- C: the address bar ---- */
+.addr-wrap{padding:clamp(24px,4vw,40px);display:flex;flex-direction:column;align-items:center;gap:16px}
+.addr{width:100%;max-width:620px;background:var(--bg);border:1px solid var(--line-2);border-radius:8px;
+  padding:11px 14px;display:flex;align-items:center;gap:11px;font-family:var(--mono);font-size:14.5px}
+.addr .lock{color:var(--ink-3);flex:none}
+.addr .url{flex:1;min-width:0;white-space:nowrap;overflow:hidden;color:var(--ink)}
+.addr .url .host{font-weight:700}
+.addr .url .rest{color:var(--ink-3)}
+.addr .caret{width:1.5px;height:17px;background:var(--accent);animation:blink 1.05s step-end infinite;flex:none}
+@keyframes blink{50%{opacity:0}}
+.verdict{min-height:22px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--accent);font-weight:600;
+  opacity:0;transition:opacity .3s}
+.verdict.show{opacity:1}
+.verdict.new{color:var(--ochre-ink)}
+.addr-note{font-size:13.5px;color:var(--ink-3);text-align:center;max-width:52ch}
+@media (prefers-reduced-motion:reduce){.addr .caret{animation:none}}
+.foot-note{margin-top:14px;font-size:13px;color:var(--ink-2);line-height:1.6;max-width:74ch}
+.foot-note b{color:var(--ink)}
+.current{opacity:.55}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="head">
+  <h1>Three ways to show the shops</h1>
+  <p>The job of this section is two things at once: you will recognise these names, and you are not restricted to them. The current version does the first with a row of tags and the second with a sentence, which puts the reassurance and the important part in the wrong order.</p>
+</header>
+
+<section class="block current">
+  <div class="bar"><span class="n">Current</span><h2>A row of tags</h2></div>
+  <p class="why">Eleven mono chips read as filters you might click, the eye scans them as a menu, and the one thing that matters, that any shop works, is buried in a paragraph above.</p>
+  <div class="card">
+    <div class="card-h">Shops we know well <span class="sub">We buy from anywhere in the UK</span></div>
+    <div class="card-b">
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin-bottom:14px">These are the shops we order from most, so we already have their delivery rules and quirks written down. <b style="color:var(--ink)">You are not limited to them.</b> Send a link from any UK shop and we will price it.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        <span style="font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink);padding:2px 8px;border-radius:100px">Boots</span>
+        <span style="font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink);padding:2px 8px;border-radius:100px">Superdrug</span>
+        <span style="font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink);padding:2px 8px;border-radius:100px">LookFantastic</span>
+        <span style="font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--accent-soft);color:var(--accent-ink);padding:2px 8px;border-radius:100px">Cult Beauty</span>
+        <span style="font-family:var(--mono);font-size:11.5px;font-weight:600;background:var(--surface-2);color:var(--ink-3);padding:2px 8px;border-radius:100px">and anywhere else</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A ============ -->
+<section class="block">
+  <div class="bar"><span class="n">Option A</span><h2>Say the important thing loudly, list the shops quietly</h2></div>
+  <p class="why">The headline carries the message and the shop names drop into prose underneath, where they belong. No chips, nothing that looks clickable, and the sentence people need to read is the biggest thing on screen. This is the smallest change and the least likely to date.</p>
+  <div class="card stmt">
+    <h3>Any UK shop.<br><em>Not a list to pick from.</em></h3>
+    <div class="under">
+      <p class="names">Boots, Superdrug, LookFantastic, Cult Beauty, Beauty Bay, Space NK, ASOS, Next, Afro Hair &amp; Beauty, Sephora UK.</p>
+      <p>Those are the ten we order from most, so their delivery rules and quirks are already written down and your quote comes back faster. <b>Everywhere else works exactly the same way</b>, we just confirm the postage with them before we price it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ B ============ -->
+<section class="block">
+  <div class="bar"><span class="n">Option B</span><h2>Show the delivery rules, since we claim to have them</h2></div>
+  <p class="why">The current copy says "we already have their delivery rules written down" and then shows none of them. This shows them. It turns decoration into something a customer can actually use to decide what to order and from where, and the last row makes the any-shop point without a paragraph. It is the only version that gets more useful as you add shops.</p>
+  <div class="card">
+    <div class="card-h">UK delivery, per shop <span class="sub">Passed on at cost, never marked up</span></div>
+    <table>
+      <thead><tr><th>Shop</th><th>UK delivery</th><th>Free over</th></tr></thead>
+      <tbody>
+        <tr><td>Boots</td><td class="num">£4.50</td><td class="num free">£25</td></tr>
+        <tr><td>Superdrug</td><td class="num">£3.49</td><td class="num free">£25</td></tr>
+        <tr><td>Beauty Bay</td><td class="num">£3.95</td><td class="num free">£20</td></tr>
+        <tr><td>Cult Beauty</td><td class="num">£3.95</td><td class="num free">£30</td></tr>
+        <tr><td>ASOS</td><td class="num">£4.50</td><td class="num free">£35</td></tr>
+        <tr><td>LookFantastic</td><td class="num">£3.99</td><td class="num free">£40</td></tr>
+        <tr><td>Sephora UK</td><td class="num">£4.99</td><td class="num free">£40</td></tr>
+        <tr><td>Afro Hair &amp; Beauty</td><td class="num">£4.25</td><td class="num free">£50</td></tr>
+        <tr><td>Space NK</td><td class="num">£4.95</td><td class="num free">£50</td></tr>
+        <tr><td>Next</td><td class="num">£3.99</td><td class="num" style="color:var(--ink-3)">no threshold</td></tr>
+        <tr class="anywhere"><td>Any other UK shop</td><td colspan="2">We confirm their postage and show it on your quote</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="foot-note"><b>Worth knowing:</b> this table is generated from the same retailer data the app quotes with, so it cannot go out of date. Change Boots' free-delivery threshold in Settings and this row changes with it.</p>
+</section>
+
+<!-- ============ C ============ -->
+<section class="block">
+  <div class="bar"><span class="n">Option C</span><h2>Show a link being accepted, over and over</h2></div>
+  <p class="why">An address bar types out a real product URL, from a different shop each time, and confirms it. It demonstrates the promise instead of asserting it, and every few seconds it quietly proves it again with a shop nobody expected. Riskier: it is motion in a section that does not strictly need it, and it repeats the hero's input.</p>
+  <div class="card addr-wrap">
+    <div class="addr">
+      <svg class="lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z"/></svg>
+      <span class="url" id="url"></span>
+      <span class="caret"></span>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <p class="addr-note">Any UK shop. The ten we use most have their delivery rules on file already; everywhere else we confirm the postage before we price it.</p>
+  </div>
+</section>
+
+</div>
+
+<script>
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SAMPLES = [
+  {host:'boots.com',        rest:'/no7-protect-and-perfect-serum-50ml', known:true},
+  {host:'asos.com',         rest:'/nike/air-force-1-white/prd/203991884', known:true},
+  {host:'johnlewis.com',    rest:'/charlotte-tilbury-pillow-talk-lipstick', known:false},
+  {host:'cultbeauty.co.uk', rest:'/p/the-ordinary-niacinamide-10-zinc-1', known:true},
+  {host:'marksandspencer.com', rest:'/pure-cotton-shirt/p/clp60123456', known:false},
+  {host:'superdrug.com',    rest:'/palmers-cocoa-butter-formula-400ml', known:true}
+];
+const urlEl = document.getElementById('url');
+const verdictEl = document.getElementById('verdict');
+const TICK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg>';
+
+let i = 0, timers = [], runId = 0;
+function clear(){ timers.forEach(clearTimeout); timers = []; runId++; }
+function show(s, upto){
+  const full = 'https://www.' + s.host + s.rest;
+  const shown = full.slice(0, upto);
+  const hostEnd = ('https://www.' + s.host).length;
+  urlEl.innerHTML = upto <= hostEnd
+    ? '<span class=\"host\">' + shown + '</span>'
+    : '<span class=\"host\">' + full.slice(0, hostEnd) + '</span><span class=\"rest\">' + full.slice(hostEnd, upto) + '</span>';
+}
+function verdictFor(s){
+  return TICK + (s.known
+    ? '<span>We buy from ' + s.host + ' all the time</span>'
+    : '<span>New shop to us. Still yes, we confirm their postage</span>');
+}
+function cycle(){
+  const me = runId;                       // any older cycle is stale and must not paint
+  const s = SAMPLES[i % SAMPLES.length];
+  const full = 'https://www.' + s.host + s.rest;
+  verdictEl.className = 'verdict';
+  verdictEl.innerHTML = '';               // never leave the last shop's verdict on screen
+  if (REDUCED){
+    show(s, full.length);
+    verdictEl.className = 'verdict show' + (s.known ? '' : ' new');
+    verdictEl.innerHTML = verdictFor(s);
+    i++; timers.push(setTimeout(cycle, 3200)); return;
+  }
+  let n = 12 + s.host.length;
+  show(s, n);
+  const step = () => {
+    if (me !== runId) return;
+    n += 2;
+    show(s, Math.min(n, full.length));
+    if (n < full.length) timers.push(setTimeout(step, 22));
+    else {
+      timers.push(setTimeout(() => {
+        if (me !== runId) return;
+        verdictEl.className = 'verdict show' + (s.known ? '' : ' new');
+        verdictEl.innerHTML = verdictFor(s);
+      }, 260));
+      timers.push(setTimeout(() => { if (me !== runId) return; i++; cycle(); }, 2900));
+    }
+  };
+  timers.push(setTimeout(step, 420));
+}
+let running = false;
+new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting && !running){ running = true; clear(); cycle(); }
+  else if (!e.isIntersecting && running){ running = false; clear(); }
+}), {threshold:0.3})
+  .observe(document.querySelector('.addr-wrap'));
+</script>
+</body>
+</html>

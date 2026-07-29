@@ -221,6 +221,10 @@ ${head({
   canonical: abs(''), jsonld: homeLd
 })}
 <style>
+/* The built page carries a real crawlable footer, so the app's own compact one
+   would be a second footer stacked under it. The app keeps rendering it for the
+   standalone build, where no site footer exists. */
+#app .foot{display:none}
 #themeSwitch{position:fixed;left:14px;bottom:14px;z-index:150;width:34px;height:34px;display:grid;place-items:center;
  border-radius:50%;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);box-shadow:0 2px 10px rgba(0,0,0,.10)}
 #themeSwitch:hover{background:var(--surface-2)}
@@ -236,6 +240,10 @@ ${SRC.split('<div id="app"></div>')[1]}
   <div><h3>Shops</h3>${api.retailers.slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
   <div><h3>Collection</h3>${`<a href="${BASE}collection/">Collect in Harare</a>`}</div>
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a></div>
+</div>
+<div class="site-legal">
+  ${site.name}, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.
+  Website designed &amp; built by <a href="https://welaunchsites.com/" style="display:inline;color:var(--ink-2)">LaunchSite</a>.
 </div></footer>
 <button id="themeSwitch" type="button" aria-label="Switch between light and dark">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg>

@@ -285,7 +285,8 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .hero-field:focus-within{box-shadow:0 0 0 2px var(--gold),0 12px 32px -18px rgba(0,0,0,.85)}
 .hero-go{border:0;border-radius:4px;background:var(--drench);color:var(--on-drench);padding:0 18px;font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
 .hero-go:hover{background:#164036}
-.hero-detect{min-height:22px;margin-top:11px;font-size:13px;color:var(--on-drench-2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hero-detect{min-height:20px;margin-top:10px;font-size:13px;color:var(--on-drench-2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hero-detect:empty{min-height:0;margin-top:0}
 .hero-detect b{color:var(--on-drench)}
 .hero-detect .ok{color:var(--gold)}
 .hero-trust{margin-top:30px;display:flex;flex-direction:column;gap:11px;font-size:13.5px;color:var(--on-drench-2)}
@@ -471,14 +472,14 @@ body:has(.floatcta.on){padding-bottom:56px}
   .seg button{padding:5px 10px;font-size:12px}
   .brand{font-size:13px}
 
-  .hero-in{padding:24px 18px 28px;gap:22px}
+  .hero-in{padding:20px 18px 24px;gap:18px}
   .hero h1{font-size:clamp(1.95rem,8.6vw,2.8rem);letter-spacing:-.02em}
-  .hero-sub{margin-top:12px;font-size:15px}
+  .hero-sub{margin-top:10px;font-size:14.5px}
   .hero-form{margin-top:18px}
   .hero-field input{padding:7px 10px;font-size:14px}
   .hero-field{flex-direction:column;padding:4px;gap:4px}
   .hero-go{padding:8px 16px;width:100%;font-size:14px}
-  .hero-trust{margin-top:22px;gap:9px;font-size:13px}
+  .hero-trust{margin-top:16px;gap:8px;font-size:13px}
 
   /* edge to edge: the shelf earns more from width than from a neat margin */
   .hero-art{order:2;max-width:none;width:calc(100% + 36px);margin:2px -18px 0;

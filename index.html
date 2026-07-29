@@ -31,7 +31,7 @@ button,input,select,textarea{font-family:inherit;font-size:100%}
 
 <style>
 :root{
-  --paper:#F4F3EE;
+  --bg:#F0F3F0;
   --surface:#FFFFFF;
   --surface-2:#EDECE6;
   --ink:#12181A;
@@ -56,37 +56,37 @@ button,input,select,textarea{font-family:inherit;font-size:100%}
   --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
   --r:4px;
-  --on-accent:#FFFFFF;
+  --on-accent:#FFFFFF;--drench:#0B2620;--gold:#E0AE5C;--on-drench:#F0F3F0;--on-drench-2:#A9BDB6;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --paper:#0E1213;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
+    --bg:#0C1211;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
     --line:#2B3234;--line-2:#3A4244;--accent:#4FBFA4;--accent-soft:#12302A;--accent-ink:#8FDCC7;
     --ochre:#D9A64E;--ochre-soft:#33280F;--ochre-ink:#EFC988;
     --danger:#E8897B;--danger-soft:#37201C;--warn:#D9B45F;--warn-soft:#33290F;--info:#8FB6D4;--info-soft:#17252F;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
-    --on-accent:#08201B;
+    --on-accent:#08201B;--drench:#081D19;--gold:#E0AE5C;--on-drench:#EAEFEC;--on-drench-2:#9AB0A9;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#0E1213;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
+  --bg:#0C1211;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
   --line:#2B3234;--line-2:#3A4244;--accent:#4FBFA4;--accent-soft:#12302A;--accent-ink:#8FDCC7;
   --ochre:#D9A64E;--ochre-soft:#33280F;--ochre-ink:#EFC988;
   --danger:#E8897B;--danger-soft:#37201C;--warn:#D9B45F;--warn-soft:#33290F;--info:#8FB6D4;--info-soft:#17252F;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
-    --on-accent:#08201B;
+    --on-accent:#08201B;--drench:#081D19;--gold:#E0AE5C;--on-drench:#EAEFEC;--on-drench-2:#9AB0A9;
 }
 :root[data-theme="light"]{
-  --paper:#F4F3EE;--surface:#FFFFFF;--surface-2:#EDECE6;--ink:#12181A;--ink-2:#3E4845;--ink-3:#6C7671;
+  --bg:#F0F3F0;--surface:#FFFFFF;--surface-2:#EDECE6;--ink:#12181A;--ink-2:#3E4845;--ink-3:#6C7671;
   --line:#DCDAD1;--line-2:#C8C6BC;--accent:#0B5D4E;--accent-soft:#E2EDE9;--accent-ink:#08463A;
   --ochre:#B57A1F;--ochre-soft:#F5EAD6;--ochre-ink:#8A5B12;
   --danger:#A33327;--danger-soft:#F7E4E1;--warn:#8A6100;--warn-soft:#F7EDD6;--info:#3A5C77;--info-soft:#E3EBF1;
   --shadow:0 1px 2px rgba(18,24,26,.05), 0 8px 24px -12px rgba(18,24,26,.18);
-  --on-accent:#FFFFFF;
+  --on-accent:#FFFFFF;--drench:#0B2620;--gold:#E0AE5C;--on-drench:#F0F3F0;--on-drench-2:#A9BDB6;
 }
 
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:620;letter-spacing:-.01em}
 p{margin:0}
@@ -182,7 +182,7 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* ---------- shell ---------- */
-.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .topbar-in{max-width:1400px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:16px}
 .brand{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:-.02em;text-decoration:none}
 .brand .mark{width:22px;height:22px;border-radius:3px;background:var(--accent);display:grid;place-items:center;color:var(--on-accent)}
@@ -193,6 +193,8 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 
 .wrap{max-width:1400px;margin:0 auto;padding:22px 20px 80px}
 .narrow{max-width:800px;margin:0 auto;padding:28px 20px 80px}
+.home-in{max-width:1180px;margin:0 auto;padding:clamp(34px,5vw,56px) 24px 80px}
+.home-in .prose{max-width:68ch}
 .narrow-s{max-width:620px;margin:0 auto;padding:28px 20px 80px}
 
 /* ---------- admin shell ---------- */
@@ -251,7 +253,7 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .modal-bg{position:fixed;inset:0;background:rgba(10,14,15,.45);z-index:100;display:grid;place-items:center;padding:20px;overflow:auto}
 .modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);max-width:520px;width:100%;box-shadow:var(--shadow);margin:auto}
 
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:100px;font-size:13.5px;z-index:200;box-shadow:var(--shadow);animation:tin .2s ease}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:100px;font-size:13.5px;z-index:200;box-shadow:var(--shadow);animation:tin .2s ease}
 @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(6px)}}
 
 .hero-lede{font-family:var(--serif);font-size:clamp(30px,5.4vw,46px);line-height:1.1;letter-spacing:-.02em;font-weight:400}
@@ -266,8 +268,66 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .foot{border-top:1px solid var(--line);margin-top:50px;padding:20px;text-align:center;font-size:12.5px;color:var(--ink-3)}
 .foot a{color:var(--ink-2)}
 
-.banner{background:var(--ink);color:var(--paper);font-size:12.5px;padding:6px 20px;text-align:center;font-family:var(--mono);letter-spacing:.02em}
+.banner{background:var(--ink);color:var(--bg);font-size:12.5px;padding:6px 20px;text-align:center;font-family:var(--mono);letter-spacing:.02em}
 .banner b{color:var(--ochre)}
+
+/* ---------- hero: committed viridian, the product wearing its own price ---------- */
+.hero{position:relative;background:var(--drench);color:var(--on-drench);overflow:clip;isolation:isolate}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,#2E7F6C 0%,#2E7F6C 42%,var(--gold) 58%,var(--gold) 100%);opacity:.55}
+.hero-in{max-width:1180px;margin:0 auto;padding:clamp(38px,7vw,84px) 24px clamp(44px,7vw,80px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,64px);align-items:center}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.5rem,6.4vw,4.6rem);line-height:1.03;letter-spacing:-.025em;color:var(--on-drench)}
+.hero h1 .zw{color:var(--gold);font-style:italic}
+.hero-sub{margin-top:18px;font-size:clamp(15.5px,1.5vw,18px);line-height:1.6;color:var(--on-drench-2);max-width:44ch}
+.hero-form{margin-top:26px;max-width:520px}
+.hero-field{display:flex;gap:8px;background:var(--on-drench);border-radius:6px;padding:6px;box-shadow:0 12px 32px -18px rgba(0,0,0,.85)}
+.hero-field input{flex:1;min-width:0;border:0;background:transparent;padding:11px 12px;font-size:15px;color:#101614}
+.hero-field input::placeholder{color:#5C6A64}
+.hero-field input:focus{outline:none}
+.hero-field:focus-within{box-shadow:0 0 0 2px var(--gold),0 12px 32px -18px rgba(0,0,0,.85)}
+.hero-go{border:0;border-radius:4px;background:var(--drench);color:var(--on-drench);padding:0 18px;font-size:14.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.hero-go:hover{background:#164036}
+.hero-detect{min-height:22px;margin-top:11px;font-size:13px;color:var(--on-drench-2);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hero-detect b{color:var(--on-drench)}
+.hero-detect .ok{color:var(--gold)}
+.hero-trust{margin-top:30px;display:flex;flex-direction:column;gap:11px;font-size:13.5px;color:var(--on-drench-2)}
+.hero-trust span{display:flex;align-items:center;gap:10px}
+.hero-trust svg{color:var(--gold);flex:none}
+
+.hero-art{position:relative;justify-self:center;width:100%;max-width:420px}
+.hero-shot{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/5;background:#1a3a33}
+.hero-shot img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-shelf{position:absolute;left:-38px;top:-26px;width:56%;aspect-ratio:16/10;border-radius:6px;overflow:hidden;
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.9);border:3px solid var(--drench)}
+.hero-shelf img{width:100%;height:100%;object-fit:cover;display:block}
+.tag{position:absolute;right:-14px;bottom:-20px;width:min(268px,84%);background:var(--on-drench);color:#101614;
+  border-radius:6px;padding:15px 17px;box-shadow:0 22px 44px -20px rgba(0,0,0,.9)}
+.tag-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5C6A64;margin-bottom:9px}
+.tag-l{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;padding:3px 0;color:#2C3A35}
+.tag-l .n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tag-sum{display:flex;justify-content:space-between;gap:14px;margin-top:9px;padding-top:10px;border-top:1px solid #D8DED9;
+  font-weight:700;font-size:16.5px;color:#101614}
+.tag-sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:#7E520F}
+.tag-foot{margin-top:7px;font-size:11.5px;color:#5C6A64}
+
+@media (prefers-reduced-motion:no-preference){
+  .rise{animation:rise .8s cubic-bezier(.16,1,.3,1) backwards}
+  .fade{animation:fade .7s ease-out backwards}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}}
+  @keyframes fade{from{opacity:0}}
+}
+@media (max-width:900px){
+  .hero-in{grid-template-columns:1fr;gap:36px}
+  .hero-art{order:2;max-width:340px;margin-top:8px}
+  .hero-shelf{left:-18px;top:-16px}
+  .tag{right:-8px}
+}
+@media (max-width:420px){
+  .hero-field{flex-direction:column;padding:8px}
+  .hero-go{padding:11px 18px}
+  .hero-shelf{display:none}
+  .tag{position:static;width:100%;margin-top:16px;box-shadow:none;border:1px solid rgba(255,255,255,.14)}
+}
 
 @media (max-width:880px){
   .admin{grid-template-columns:1fr}
@@ -1033,54 +1093,120 @@ window.addEventListener('hashchange',render);
    ================================================================ */
 function viewHome(){
  const st=S.settings;
- return `<div class="narrow">
+ // The tag on the hero photograph is real arithmetic, run through the same
+ // functions that produce a live quote. If the rules change, it changes.
+ const demo={items:[newItem({retailerId:'boots',retailerName:'Boots',name:'Dior J’adore Eau de Parfum 100ml',
+   category:'fragrance',attrs:{size:'100ml'},qty:1,displayedPrice:63.99,confirmedPrice:63.99})],quote:null};
+ const dq=quoteCalc(demo);
+ return `${heroSection(dq)}
+ <div class="home-in">
   <div class="stack-l">
-   <div class="stack">
-     <div class="eyebrow">United Kingdom to Zimbabwe</div>
-     <h1 class="hero-lede">Paste a UK product link.<br>We buy it, check it, and <em>send it home</em>.</h1>
-     <p style="max-width:56ch;color:var(--ink-2);font-size:16px">Beauty, personal care and fashion from retailers we already work with. You never pay the shop. You pay us one confirmed price, and we do the buying.</p>
-     <div class="row wrap" style="margin-top:4px">
-       <a class="btn btn-primary btn-lg" href="#/request">${icon('link',17)}Start a request</a>
-       <a class="btn btn-lg" href="#/lookup">${icon('search',17)}Track an order</a>
-     </div>
-   </div>
 
-   <div class="steps">
-    <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">Product page, size, shade, quantity, and who it is for.</span></div>
-    <div class="step"><span class="n">02</span><b>We confirm the real price</b><span class="small muted">A person opens every link and checks stock and UK delivery.</span></div>
-    <div class="step"><span class="n">03</span><b>You pay one quote</b><span class="small muted">Product, UK delivery and our fee. Valid for ${st.quoteExpiryMins} minutes.</span></div>
-    <div class="step zw"><span class="n">04</span><b>Zimbabwe shipping</b><span class="small muted">Charged after weighing, so you are not guessing.</span></div>
-   </div>
+   <section class="stack">
+    <h2 style="font-size:clamp(22px,3vw,28px);max-width:20ch">Four steps, and you only pay at the third.</h2>
+    <div class="steps">
+     <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">Product page, size, quantity, and who it is for in Zimbabwe.</span></div>
+     <div class="step"><span class="n">02</span><b>A person checks every one</b><span class="small muted">We open each link and confirm the price and stock with the shop.</span></div>
+     <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and shipping home. Valid ${st.quoteExpiryMins} minutes.</span></div>
+     <div class="step zw"><span class="n">04</span><b>We buy it and send it</b><span class="small muted">Checked in the UK, then flown to Zimbabwe. Track it the whole way.</span></div>
+    </div>
+   </section>
 
-   <div class="card">
-    <div class="card-h"><b>What it costs</b><span class="eyebrow">Before Zimbabwe shipping</span></div>
+   <section class="card">
+    <div class="card-h"><b>What it costs</b><span class="tiny muted">No hidden lines</span></div>
     <div class="card-b stack">
       <div class="field-grid">
-        <div class="stack-s"><div class="eyebrow">Minimum spend</div><div class="mono" style="font-size:20px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per request</div></div>
-        <div class="stack-s"><div class="eyebrow">Our fee</div><div class="mono" style="font-size:20px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
-        <div class="stack-s"><div class="eyebrow">UK delivery</div><div class="mono" style="font-size:20px;font-weight:700">At cost</div><div class="tiny muted">Per retailer, no mark up</div></div>
-        <div class="stack-s"><div class="eyebrow">Zimbabwe cargo</div><div class="mono" style="font-size:20px;font-weight:700">Separate</div><div class="tiny muted">From ${money(st.cargoRate)} per kg, billed on weight</div></div>
+        <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
+        <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
+        <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.cargoRate)}<span style="font-size:13px;font-weight:400">/kg</span></div><div class="tiny muted">Included in your total</div></div>
       </div>
-      ${note('<b>Two payments, not one.</b> The first payment covers buying the item in the UK. Zimbabwe shipping is quoted as an estimate up front, then confirmed once your parcel is weighed. If the confirmed amount is higher, we ask before shipping.','info','alert')}
+      ${note(`<b>You pay once.</b> Shipping to Zimbabwe is worked out from what you ordered and included in the total. Once your parcel is weighed, a difference of more than ${money(st.cargoTolerance)} is charged or refunded. Anything smaller, we absorb.`,'accent','check')}
     </div>
-   </div>
+   </section>
 
-   <div class="card">
-    <div class="card-h"><b>Retailers we buy from</b><a class="link tiny" href="#/request">Submit a different shop for review</a></div>
+   <section class="card">
+    <div class="card-h"><b>Shops we buy from</b><a class="link tiny" href="#/request">Somewhere else? Send it for review</a></div>
     <div class="card-b row wrap" style="gap:7px">
-      ${S.retailers.filter(r=>r.status!=='disabled').map(r=>`<span class="pill ${r.status==='approved'?'p-accent':'p-warn'}">${esc(r.name)}${r.status==='manual'?' · manual':''}</span>`).join('')}
+      ${S.retailers.filter(r=>r.status!=='disabled').map(r=>`<span class="pill ${r.status==='approved'?'p-accent':'p-warn'}">${esc(r.name)}${r.status==='manual'?' · on review':''}</span>`).join('')}
     </div>
-   </div>
+   </section>
 
-   <div class="card">
-    <div class="card-h"><b>What we cannot send</b></div>
+   <section class="card">
+    <div class="card-h"><b>What we cannot fly</b></div>
     <div class="card-b stack-s small">
-      <div>Cargo rules rule out aerosols, bleach and strong developers, prescription or medicated products, and anything with a battery. If your link contains one of these we will flag it and come back to you before asking for any money.</div>
-      <div class="muted">Accepted: lotions, creams, non medicated skincare, shampoo, conditioner, soap, makeup, wigs and extensions, beauty accessories, non electrical tools, clothing, shoes and accessories.</div>
+      <div>Cargo rules rule out aerosols, bleach and strong developers, prescription and medicated products, and anything with a battery. If your link contains one we flag it and come back to you before asking for a penny.</div>
+      <div class="muted">Fine to send: lotions, creams, non medicated skincare, shampoo, conditioner, soap, makeup, wigs and extensions, beauty accessories, non electrical tools, clothing, shoes and accessories.</div>
     </div>
-   </div>
+   </section>
+
   </div>
  </div>`;
+}
+
+/* Instant feedback under the hero input. No network: the retailer comes from
+   the domain and the name from the URL, both of which we already have. */
+function heroDetect(url){
+ const box=document.getElementById('heroDetect');
+ if(!box)return;
+ const raw=String(url||'').trim();
+ if(raw.length<8){box.innerHTML='';return}
+ const r=extract(raw);
+ if(r.reason==='unapproved')
+   box.innerHTML=`${icon('alert',14)}<span><b>${esc(r.retailerName)}</b> is not on our list yet. Send it anyway and we will tell you if we can buy there.</span>`;
+ else if(r.reason==='disabled')
+   box.innerHTML=`${icon('x',14)}<span>We are not buying from <b>${esc(r.retailerName)}</b> at the moment.</span>`;
+ else if(!r.retailerId)
+   box.innerHTML=`${icon('link',14)}<span>That does not look like a product page yet.</span>`;
+ else
+   box.innerHTML=`${icon('check',14)}<span class="ok">${esc(r.retailerName)} is approved.</span>`+
+     (r.name?`<span>Reading <b>${esc(r.name.slice(0,42))}${r.name.length>42?'…':''}</b>${r.size?' · '+esc(r.size):''}</span>`:'');
+}
+
+function heroSection(dq){
+ const st=S.settings;
+ return `<section class="hero">
+  <div class="hero-in">
+    <div>
+      <h1 class="rise" style="animation-delay:.05s">UK shelves.<br><span class="zw">Harare doorstep.</span></h1>
+      <p class="hero-sub rise" style="animation-delay:.15s">Paste a link from a UK shop. We buy it, check it by hand, and fly it to Zimbabwe. One price, shipping included, agreed before you pay a penny.</p>
+
+      <div class="hero-form rise" style="animation-delay:.25s">
+        <div class="hero-field">
+          <input type="url" id="heroLink" placeholder="Paste a Boots, Superdrug or ASOS link" autocomplete="off" spellcheck="false" aria-label="Product page address">
+          <button class="hero-go" data-act="heroGo">Get my price</button>
+        </div>
+        <div class="hero-detect" id="heroDetect" aria-live="polite"></div>
+      </div>
+
+      <div class="hero-trust fade" style="animation-delay:.5s">
+        <span>${icon('shield',15)}Nothing bought until you approve</span>
+        <span>${icon('scale',15)}Shipping in the price, not after</span>
+        <span>${icon('pin',15)}Delivered or collected in Zimbabwe</span>
+      </div>
+    </div>
+
+    <div class="hero-art fade" style="animation-delay:.35s">
+      <div class="hero-shot">
+        <img src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&q=80"
+             alt="Two glass perfume bottles catching warm light" loading="eager" decoding="async" width="900" height="1350">
+      </div>
+      <div class="hero-shelf">
+        <img src="https://images.unsplash.com/photo-1772987714654-2df39af2c658?auto=format&fit=crop&w=700&q=80"
+             alt="Skincare bottles and jars lined up on a shop shelf" loading="eager" decoding="async" width="700" height="394">
+      </div>
+      <div class="tag">
+        <div class="tag-h">Boots · landed in Harare</div>
+        <div class="tag-l"><span>Perfume, 100ml</span><span class="n">${money(dq.productTotal)}</span></div>
+        <div class="tag-l"><span>UK delivery</span><span class="n">${dq.deliveryTotal?money(dq.deliveryTotal):'free'}</span></div>
+        <div class="tag-l"><span>Our fee, ${st.procurementPct}%</span><span class="n">${money(dq.fee)}</span></div>
+        <div class="tag-l"><span>Flight and clearance</span><span class="n">${money(dq.cargoEst)}</span></div>
+        <div class="tag-sum"><span>You pay</span><span class="n">${money(dq.total)}</span></div>
+        <div class="tag-foot">One payment. Nothing to settle on arrival.</div>
+      </div>
+    </div>
+  </div>
+ </section>`;
 }
 
 function viewLookup(){
@@ -2346,6 +2472,9 @@ document.addEventListener('input',e=>{
  const el=e.target; if(!el.dataset)return;
  const v=el.type==='checkbox'?el.checked:el.value;
  const d=el.dataset;
+ // The hero reads the link as you type. extract() is offline and instant, so
+ // this is a direct DOM write: a re-render here would steal the caret.
+ if(el.id==='heroLink'){heroDetect(String(v));return}
  if(d.bind){const [a,b]=d.bind.split('.');const dr=draft();if(b)dr[a][b]=v;else dr[a]=v;save();return}
  const o=curOrder();
  if(d.item&&o){const it=o.items.find(i=>i.id===d.item);if(it){it[d.k]=(d.k==='qty'||d.k==='confirmedPrice'||d.k==='displayedPrice'||d.k==='estKg')?(v===''?(d.k==='confirmedPrice'?null:0):Number(v)):v;save()}return}
@@ -2466,6 +2595,13 @@ document.addEventListener('click',e=>{
     dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);toast('Submitted for manual review');
   },
   delDraft(){ const dr=draft();dr.items.splice(Number(d.ix),1);save();rerender(true) },
+  heroGo(){
+    const url=val('heroLink');
+    const dr=draft();
+    dr.pending=null;dr.pendingUrl=url;save();
+    go('#/request');
+    if(url)setTimeout(()=>{const i=document.getElementById('linkInput');if(i){i.value=url;A.fetch()}},30);
+  },
   addMore(){
     const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true);
     const i=document.getElementById('linkInput');

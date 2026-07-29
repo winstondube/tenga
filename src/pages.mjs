@@ -61,13 +61,6 @@ const RETAILER_COPY = {
   }
 };
 
-const DESTINATIONS = [
-  { slug: 'harare', name: 'Harare', blurb: 'Our largest destination by a distance. Collection from Belgravia, or delivery across the northern and eastern suburbs.', areas: 'Mount Pleasant, Borrowdale, Avondale, Highlands, Belgravia, Msasa, Waterfalls, Chitungwiza' },
-  { slug: 'bulawayo', name: 'Bulawayo', blurb: 'Weekly consolidation to Bulawayo, with collection from a depot on Fife Street.', areas: 'Hillside, Suburbs, Famona, Northend, Bradfield, Nkulumane' },
-  { slug: 'mutare', name: 'Mutare', blurb: 'Delivered through our cargo partner’s Mutare branch, usually a day or two behind Harare.', areas: 'Murambi, Fairbridge Park, Dangamvura, Chikanga' },
-  { slug: 'gweru', name: 'Gweru', blurb: 'Consolidated with the Harare shipment and forwarded on, so timings run a little longer.', areas: 'Mkoba, Windsor Park, Senga, Ascot' },
-  { slug: 'masvingo', name: 'Masvingo', blurb: 'Forwarded from Harare after clearance. Collection is usually the quickest option here.', areas: 'Rujeko, Mucheke, Target Kopje' }
-];
 
 const esc = s => String(s == null ? '' : s)
   .replace(/&(?!#?\w+;)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -205,57 +198,43 @@ export function buildPages(api) {
     ]
   });
 
-  /* ---- destinations ---- */
-  DESTINATIONS.forEach(d => {
-    pages.push({
-      path: `delivery/${d.slug}/`,
-      title: `UK to ${d.name} delivery, shopping and forwarding`,
-      description: `Order from UK shops and have it delivered or collected in ${d.name}. One price including the flight, confirmed before you pay.`,
-      h1: `UK shopping delivered to ${d.name}`,
-      lede: `Send a link from a UK shop and we buy it, check it in the UK and send it to ${d.name}. Collection or delivery, your choice.`,
-      crumbs: [['Delivery', 'delivery/'], [d.name, `delivery/${d.slug}/`]],
-      body: `
-        <p>${d.blurb}</p>
-        <h2>Areas we reach</h2>
-        <p>${esc(d.areas)}. If your area is not listed, collection is always available, and we will tell you before you pay whether delivery to your address is possible.</p>
-
-        <h2>How long it takes to ${esc(d.name)}</h2>
-        <table class="t">
-          <tbody>
-            <tr><td>You send the link</td><td class="mono">day 0</td></tr>
-            <tr><td>We confirm the price and you pay</td><td class="mono">within ${s.responseHours} hours</td></tr>
-            <tr><td>Shop delivers to our UK address</td><td class="mono">2 to 5 days</td></tr>
-            <tr><td>Checked, packed and flown out</td><td class="mono">next shipment</td></tr>
-            <tr><td>Clearance and on to ${esc(d.name)}</td><td class="mono">2 to 4 days</td></tr>
-          </tbody>
-        </table>
-        ${shipTable(api)}
-
-        <h2>What it costs to ${esc(d.name)}</h2>
-        <p>The flight is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} clearance and ${api.money(s.localDelivery)} for local delivery. All of it is inside the single price you agree up front, so there is nothing to settle when the parcel arrives. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
-
-        <h2>How it works</h2>
-        ${steps(api, '{{BASE}}#/request')}`,
-      faq: [
-        [`Do I pay anything when the parcel reaches ${d.name}?`, `No. Shipping and clearance are inside the price you agreed before we bought anything. The only exception is if the parcel weighs more than we estimated by more than ${api.money(s.cargoTolerance)}, in which case we tell you before it ships.`],
-        [`Can someone else collect for me in ${d.name}?`, 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
-        [`What if I am not in ${d.name}?`, 'We reach the main centres and can forward on from Harare to most towns. Tell us where you are when you send the link and we will price it honestly.']
-      ]
-    });
-  });
-
+  /* ---- collection, Harare only ---- */
   pages.push({
-    path: 'delivery/',
-    title: 'Where we deliver in Zimbabwe',
-    description: 'Harare, Bulawayo, Mutare, Gweru and Masvingo. UK shopping delivered or collected, with shipping inside the price.',
-    h1: 'Where we deliver in Zimbabwe',
-    lede: 'Collection points in the main centres, delivery to most suburbs, and forwarding on from Harare for everywhere else.',
-    crumbs: [['Delivery', 'delivery/']],
-    body: `<div class="steps" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-        ${DESTINATIONS.map(d => `<div class="step zw"><b><a href="{{BASE}}delivery/${d.slug}/">${esc(d.name)}</a></b><span class="small muted">${esc(d.blurb)}</span></div>`).join('')}
-      </div>
+    path: 'collection/',
+    title: 'Collect your UK order in Harare',
+    description: 'Order from any UK shop and collect it in Harare. One price including the flight and clearance, agreed before you pay.',
+    h1: 'Collect it in Harare',
+    lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
+    crumbs: [['Collection', 'collection/']],
+    body: `
+      <p>We fly a consolidated shipment every ${s.shipEveryDays / 7} weeks. When it clears, we message you and your order is ready to collect in Harare. Bring the phone number on the order and some ID.</p>
+
+      ${api.note('<b>Collection only, for now.</b> We do not run a delivery leg inside Zimbabwe yet, so every order is collected in Harare. If you are outside Harare you are welcome to order and arrange your own onward transport, and we will say so plainly rather than promise a delivery we cannot make.', 'warn', 'pin')}
+
+      <h2>How long it takes</h2>
+      <table class=t>
+        <tbody>
+          <tr><td>You send the link</td><td class=mono>day 0</td></tr>
+          <tr><td>We confirm the price and you pay</td><td class=mono>within ${s.responseHours} hours</td></tr>
+          <tr><td>Shop delivers to our UK address</td><td class=mono>2 to 5 days</td></tr>
+          <tr><td>Checked, packed and flown out</td><td class=mono>next shipment</td></tr>
+          <tr><td>Clearance, then ready to collect</td><td class=mono>2 to 4 days</td></tr>
+        </tbody>
+      </table>
+      ${shipTable(api)}
+
+      <h2>What it costs to get here</h2>
+      <p>The flight is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
+
+      <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
-    faq: [['Do you deliver outside the main centres?', 'We forward on from Harare to most towns. Tell us where you are when you send the link and we will quote it before you commit.']]
+    faq: [
+      ['Do you deliver to my address in Harare?', 'Not yet. Every order is collected from our Harare collection point. We would rather say that plainly than take your money and improvise.'],
+      ['Do you deliver to Bulawayo, Mutare or anywhere else?', 'Not yet. You can still order from anywhere in Zimbabwe, but the parcel is collected in Harare and onward transport is yours to arrange. We will tell you that before you pay, not after.'],
+      ['Do I pay anything at collection?', `No. Shipping and clearance are inside the price you agreed before we bought anything. The only exception is if the parcel weighs more than we estimated by more than ${api.money(s.cargoTolerance)}, and we tell you before it ships rather than at the counter.`],
+      ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
+      ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready. You do not need to chase us.']
+    ]
   });
 
   /* ---- what it costs ---- */
@@ -366,4 +345,4 @@ export function buildPages(api) {
   return pages;
 }
 
-export { DESTINATIONS };
+

@@ -518,8 +518,8 @@ const JOURNEY=[
  {k:'Cargo payment received',label:'Zimbabwe shipping paid',desc:'Weight confirmed and cargo charges settled.',leg:'zw'},
  {k:'Handed to cargo company',label:'Handed to the cargo company',desc:'Packed and booked onto a shipment.',leg:'zw'},
  {k:'In transit to Zimbabwe',label:'In transit to Zimbabwe',desc:'On its way.',leg:'zw'},
- {k:'Arrived in Zimbabwe',label:'Arrived in Zimbabwe',desc:'Through customs clearance.',leg:'zw'},
- {k:'Delivered',label:'Delivered',desc:'Collected or delivered to the recipient.',leg:'zw'}
+ {k:'Arrived in Zimbabwe',label:'Arrived in Zimbabwe',desc:'Through customs clearance and on its way to the collection point.',leg:'zw'},
+ {k:'Delivered',label:'Collected',desc:'Picked up from our Harare collection point.',leg:'zw'}
 ];
 const JOURNEY_RANK={};
 (function(){
@@ -538,7 +538,7 @@ const DEFAULT_SETTINGS={
  quoteExpiryMins:60, responseHours:24,
  absorbIncrease:2, priceDropPolicy:'credit', priceDropThreshold:2,
  feeBasis:'combined',
- cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:5, volDivisor:5000, packagingKg:0.3,
+ cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
  cargoSafetyPct:10, cargoTolerance:5,
  shipAnchor:'2026-08-14', shipEveryDays:42, shipCutoffDays:5,
  currency:'GBP'
@@ -1066,7 +1066,7 @@ function seed(){
  };
  // 1. brand new request awaiting review
  const o1=mk({ageH:2,customer:{name:'Rutendo Chikafu',email:'rutendo.c@example.com',whatsapp:'+263 77 412 8890',country:'Zimbabwe'},
-  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'12 Arundel Rd, Mount Pleasant',collection:'',instructions:'Call before delivery'},
+  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'',collection:'Harare collection point',instructions:'Call when ready'},
   items:[
    {url:'https://www.boots.com/cerave-moisturising-lotion-473ml-10263847',retailerId:'boots',retailerName:'Boots',name:'CeraVe Moisturising Lotion 473ml',size:'473ml',qty:2,displayedPrice:16.5,availability:'In stock',extractOk:true,estKg:0.55,subsAllowed:'yes',subsNotes:'CeraVe cream tub is fine if the lotion is out',cancelIfUnavailable:false},
    {url:'https://www.superdrug.com/palmers-cocoa-butter-formula-400ml-p-9928311',retailerId:'superdrug',retailerName:'Superdrug',name:'Palmers Cocoa Butter Formula 400ml',size:'400ml',qty:3,displayedPrice:7.99,wasPrice:9.99,availability:'In stock',extractOk:true,estKg:0.45}
@@ -1076,7 +1076,7 @@ function seed(){
 
  // 2. restricted flag, needs review
  const o2=mk({ageH:6,customer:{name:'Tapiwa Moyo',email:'t.moyo@example.co.uk',whatsapp:'+44 7700 900412',country:'United Kingdom'},
-  recipient:{name:'Grace Moyo',phone:'+263 71 220 5514',town:'Bulawayo',address:'',collection:'Swift Bulawayo depot, Fife St',instructions:'Recipient collects with ID'},
+  recipient:{name:'Grace Moyo',phone:'+263 71 220 5514',town:'Harare',address:'',collection:'Harare collection point',instructions:'Recipient collects with ID'},
   items:[
    {url:'https://www.lookfantastic.com/olaplex-no3-hair-perfector-100ml/11902334.html',retailerId:'lookfantastic',retailerName:'LookFantastic',name:'Olaplex No 3 Hair Perfector 100ml',size:'100ml',qty:1,displayedPrice:28.0,availability:'In stock',extractOk:true,estKg:0.25},
    {url:'https://www.superdrug.com/jerome-russell-bblonde-peroxide-developer-30-vol-p-1188420',retailerId:'superdrug',retailerName:'Superdrug',name:'Jerome Russell Bblonde Peroxide Developer 30 Vol',size:'150ml',qty:2,displayedPrice:4.29,availability:'In stock',extractOk:true,estKg:0.3,restricted:['peroxide','developer']}
@@ -1085,7 +1085,7 @@ function seed(){
 
  // 3. quote sent, awaiting payment
  const o3=mk({ageH:1,customer:{name:'Nyasha Dube',email:'nyasha.dube@example.com',whatsapp:'+263 78 991 2200',country:'Zimbabwe'},
-  recipient:{name:'Memory Dube',phone:'+263 78 991 2200',town:'Gweru',address:'44 Mkoba 6',collection:'',instructions:''},
+  recipient:{name:'Memory Dube',phone:'+263 78 991 2200',town:'Harare',address:'',collection:'Harare collection point',instructions:''},
   items:[
    {url:'https://www.beautybay.com/p/nars-radiant-creamy-concealer/',retailerId:'beautybay',retailerName:'Beauty Bay',name:'NARS Radiant Creamy Concealer',shade:'Biscuit',qty:1,displayedPrice:26.0,confirmedPrice:26.0,availability:'In stock',extractOk:true,estKg:0.12,itemStatus:'Approved'},
    {url:'https://www.beautybay.com/p/the-ordinary-niacinamide-10-zinc-1/',retailerId:'beautybay',retailerName:'Beauty Bay',name:'The Ordinary Niacinamide 10% + Zinc 1%',size:'60ml',qty:4,displayedPrice:11.0,confirmedPrice:11.0,availability:'In stock',extractOk:true,estKg:0.14,itemStatus:'Approved'}
@@ -1098,7 +1098,7 @@ function seed(){
 
  // 4. paid, waiting to be bought
  const o4=mk({ageH:20,customer:{name:'Chiedza Ncube',email:'chiedza.n@example.com',whatsapp:'+263 71 445 9087',country:'Zimbabwe'},
-  recipient:{name:'Sibongile Ncube',phone:'+263 71 445 9087',town:'Harare',address:'8 Fife Ave',collection:'',instructions:''},
+  recipient:{name:'Sibongile Ncube',phone:'+263 71 445 9087',town:'Harare',address:'',collection:'Harare collection point',instructions:''},
   items:[
    {url:'https://www.afrohairandbeauty.co.uk/products/brazilian-body-wave-bundle-22-inch',retailerId:'afrohair',retailerName:'Afro Hair & Beauty',name:'Brazilian Body Wave Bundle 22 Inch',colour:'Natural black 1B',qty:3,displayedPrice:42.0,confirmedPrice:42.0,availability:'In stock',extractOk:false,estKg:0.35,itemStatus:'Approved',subsAllowed:'yes',subsNotes:'20 inch acceptable if 22 is unavailable'}
   ]});
@@ -1110,7 +1110,7 @@ function seed(){
 
  // 5. received in UK, awaiting weight and cargo payment
  const o5=mk({ageH:200,customer:{name:'Farai Zimuto',email:'farai.z@example.com',whatsapp:'+44 7700 900771',country:'United Kingdom'},
-  recipient:{name:'Loveness Zimuto',phone:'+263 77 300 1122',town:'Mutare',address:'',collection:'Chimanimani Cargo, Mutare branch',instructions:''},
+  recipient:{name:'Loveness Zimuto',phone:'+263 77 300 1122',town:'Harare',address:'',collection:'Harare collection point',instructions:''},
   items:[
    {url:'https://www.boots.com/no7-protect-and-perfect-serum-50ml-10281142',retailerId:'boots',retailerName:'Boots',name:'No7 Protect And Perfect Serum 50ml',size:'50ml',qty:2,displayedPrice:24.95,confirmedPrice:24.95,availability:'In stock',extractOk:true,estKg:0.2,itemStatus:'Received',
     purchase:{orderNumber:'BOO-77341902',date:Date.now()-160*3600e3,actualCost:49.9,actualDelivery:0,tracking:'JD0002284471GB',courier:'Yodel',eta:Date.now()-120*3600e3,by:'Admin (demo)',notes:'Free delivery applied over £25'},
@@ -1123,11 +1123,11 @@ function seed(){
  const q5=quoteCalc(o5);
  o5.payments.push({id:uid('p'),type:'initial',provider:'Card',amount:q5.total,currency:'GBP',status:'Payment completed',ref:'ch_3PkQ22Lm',createdAt:Date.now()-199*3600e3,paidAt:Date.now()-198.8*3600e3,held:false});
  ['Quote sent','Initial payment completed','Purchased from retailer','Retailer dispatched','Received in the UK','Received and checked','Awaiting final weight'].forEach(s=>setStatus(o5,s));
- o5.cargo={actualWeight:1.4,packaging:0.3,l:32,w:24,h:16,rate:9.5,clearance:6,localDelivery:5,other:0};
+ o5.cargo={actualWeight:1.4,packaging:0.3,l:32,w:24,h:16,rate:9.5,clearance:6,localDelivery:0,other:0};
 
  // 6. in transit to Zimbabwe, cargo paid
  const o6=mk({ageH:600,customer:{name:'Blessing Marufu',email:'b.marufu@example.com',whatsapp:'+263 77 880 4412',country:'Zimbabwe'},
-  recipient:{name:'Blessing Marufu',phone:'+263 77 880 4412',town:'Harare',address:'',collection:'Tenga collection point, Belgravia',instructions:''},
+  recipient:{name:'Blessing Marufu',phone:'+263 77 880 4412',town:'Harare',address:'',collection:'Harare collection point',instructions:''},
   items:[
    {url:'https://www.asos.com/nike/nike-air-force-1-white/prd/203991884',retailerId:'asos',retailerName:'ASOS',name:'Nike Air Force 1 White',size:'UK 8',colour:'White',qty:1,displayedPrice:99.95,confirmedPrice:99.95,availability:'In stock',extractOk:true,estKg:1.2,itemStatus:'Received',
     purchase:{orderNumber:'ASOS-901233114',date:Date.now()-560*3600e3,actualCost:99.95,actualDelivery:0,tracking:'HRM7712004GB',courier:'Evri',eta:Date.now()-520*3600e3,by:'Admin (demo)',notes:''},
@@ -1136,7 +1136,7 @@ function seed(){
  o6.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-599*3600e3,expiresAt:Date.now()-598*3600e3,expiryMins:60,status:'Accepted'};
  const q6=quoteCalc(o6);
  o6.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712C04',createdAt:Date.now()-599*3600e3,paidAt:Date.now()-598*3600e3,held:false});
- o6.cargo={actualWeight:2.2,packaging:0.3,l:34,w:22,h:14,rate:9.5,clearance:6,localDelivery:5,other:0,company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,shipRef:'SCZ-2026-0714',eta:Date.now()+96*3600e3,tracking:'SCZ714-0092'};
+ o6.cargo={actualWeight:2.2,packaging:0.3,l:34,w:22,h:14,rate:9.5,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,shipRef:'SCZ-2026-0714',eta:Date.now()+96*3600e3,tracking:'SCZ714-0092'};
  const c6=cargoCalc(o6);
  o6.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:c6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712D88',createdAt:Date.now()-120*3600e3,paidAt:Date.now()-118*3600e3,held:false});
  S.batches.push({id:'BATCH-0714',company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,eta:Date.now()+96*3600e3,ref:'SCZ-2026-0714',manifest:'manifest-0714.pdf',status:'In transit to Zimbabwe',orders:[o6.ref]});
@@ -1145,14 +1145,14 @@ function seed(){
 
  // 7. delivered (history)
  const o7=mk({ageH:1400,customer:{name:'Rutendo Chikafu',email:'rutendo.c@example.com',whatsapp:'+263 77 412 8890',country:'Zimbabwe'},
-  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'12 Arundel Rd, Mount Pleasant',collection:'',instructions:''},
+  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'',collection:'Harare collection point',instructions:''},
   items:[{url:'https://www.cultbeauty.co.uk/p/the-inkey-list-hyaluronic-acid-serum',retailerId:'cultbeauty',retailerName:'Cult Beauty',name:'The Inkey List Hyaluronic Acid Serum',size:'30ml',qty:5,displayedPrice:8.99,confirmedPrice:8.99,availability:'In stock',extractOk:true,estKg:0.1,itemStatus:'Received',
    purchase:{orderNumber:'CB-5590231',date:Date.now()-1380*3600e3,actualCost:44.95,actualDelivery:0,tracking:'RM99123GB',courier:'Royal Mail',eta:Date.now()-1340*3600e3,by:'Admin (demo)',notes:''},
    received:{at:Date.now()-1300*3600e3,qtyOk:true,variantOk:true,condition:'Good',photos:[],notes:''}}]});
  o7.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-1399*3600e3,expiresAt:Date.now()-1398*3600e3,expiryMins:60,status:'Accepted'};
  const q7=quoteCalc(o7);
  o7.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q7.total,currency:'GBP',status:'Payment completed',ref:'PP-5590A2',createdAt:Date.now()-1399*3600e3,paidAt:Date.now()-1398*3600e3,held:false});
- o7.cargo={actualWeight:0.7,packaging:0.3,rate:9.5,clearance:6,localDelivery:5,other:0,company:'Swift Cargo Zimbabwe',shipRef:'SCZ-2026-0620'};
+ o7.cargo={actualWeight:0.7,packaging:0.3,rate:9.5,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipRef:'SCZ-2026-0620'};
  o7.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:cargoCalc(o7).total,currency:'GBP',status:'Payment completed',ref:'PP-5590B7',createdAt:Date.now()-1290*3600e3,paidAt:Date.now()-1288*3600e3,held:false});
  ['Quote sent','Initial payment completed','Purchased from retailer','Received and checked','Cargo payment received','Handed to cargo company','In transit to Zimbabwe','Arrived in Zimbabwe','Ready for collection','Delivered'].forEach(s=>setStatus(o7,s));
 
@@ -1344,11 +1344,12 @@ function HOME_FAQ(){
  return [
   ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
   ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and the flight at ${money(st.cargoRate)} per kilo. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
-  ['Do I pay anything when it arrives in Zimbabwe?','No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than '+money(st.cargoTolerance)+', and we tell you before it ships rather than after it lands.'],
+  ['Do I pay anything when I collect it?','No. Shipping and clearance are inside the price you agreed. The only exception is if the parcel weighs more than we estimated by more than '+money(st.cargoTolerance)+', and we tell you before it ships rather than at the counter.'],
   ['How long does it take?',`We quote within ${st.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${st.shipEveryDays/7} weeks, and clears in about ten days. Sending everything in one order is faster than sending it piece by piece.`],
   ['Can I pay with a Zimbabwean card?','You pay us by PayPal or card. Most UK shops reject Zimbabwean cards at their own checkout, which is the problem this service exists to solve.'],
   ['What if the item is out of stock when you go to buy it?','We contact you before spending anything. You can wait for restock, take a backup you nominated when you ordered, choose something else, reduce the quantity, or take a refund on that item.'],
   ['What cannot you send?','Aerosols and anything pressurised, bleach and strong peroxide developers, prescription and medicated products, and anything containing a battery. Air cargo rules rather than ours. We check your link against that list before you are asked for money.'],
+  ['Where do I collect it?','Every order is collected from our Harare collection point. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
   ['Do I need an account?','No. You get a private tracking link when you submit, and that is all you need.']
  ];
 }
@@ -1457,11 +1458,11 @@ function shelfSrc(id){return 'https://images.unsplash.com/photo-'+id+'?auto=form
    so it reads as a service moving many parcels rather than one. */
 const PICKS=[
  {i:0,  price:105.39, city:'Harare'},
- {i:1,  price:186.04, city:'Bulawayo'},
- {i:26, price:78.40,  city:'Mutare'},
- {i:15, price:96.20,  city:'Gweru'},
+ {i:1,  price:186.04, city:'Harare'},
+ {i:26, price:78.40,  city:'Harare'},
+ {i:15, price:96.20,  city:'Harare'},
  {i:6,  price:61.20,  city:'Harare'},
- {i:11, price:142.75, city:'Masvingo'}
+ {i:11, price:142.75, city:'Harare'}
 ];
 let pickTimer=null,pickIdx=0;
 function stopShelf(){clearTimeout(pickTimer);pickTimer=null}
@@ -1514,7 +1515,7 @@ function heroSection(dq){
       <div class="hero-trust fade" style="animation-delay:.5s">
         <span>${icon('shield',15)}Nothing bought until you approve</span>
         <span>${icon('scale',15)}Shipping in the price, not after</span>
-        <span>${icon('pin',15)}Delivered or collected in Zimbabwe</span>
+        <span>${icon('pin',15)}Collected in Harare, nothing to pay there</span>
       </div>
     </div>
 
@@ -1588,7 +1589,7 @@ function goToStep(id,focus){
 
 function draft(){
  if(!S.draft)S.draft={items:[],pending:null,customer:{name:'',email:'',whatsapp:'',country:'Zimbabwe'},
-   recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},partOfLargerOrder:false,notes:''};
+   recipient:{name:'',phone:'',town:'Harare',address:'',collection:'Harare collection point',instructions:''},partOfLargerOrder:false,notes:''};
  return S.draft;
 }
 function viewRequest(){
@@ -1638,10 +1639,8 @@ function viewRequest(){
      <div class="field-grid two">
        <label class="f">Recipient name<input type="text" data-bind="recipient.name" value="${esc(d.recipient.name)}"></label>
        <label class="f">Recipient phone<input type="tel" data-bind="recipient.phone" placeholder="+263" value="${esc(d.recipient.phone)}"></label>
-       <label class="f">Town or city<input type="text" data-bind="recipient.town" placeholder="Harare" value="${esc(d.recipient.town)}"></label>
-       <label class="f">Collection point <span class="hint">If they will collect rather than have it delivered</span><input type="text" data-bind="recipient.collection" value="${esc(d.recipient.collection)}"></label>
      </div>
-     <label class="f">Delivery address <span class="hint">Optional if collecting</span><input type="text" data-bind="recipient.address" value="${esc(d.recipient.address)}"></label>
+     ${note('<b>Collected in Harare.</b> Every order is picked up from our Harare collection point, so there is no delivery address to give. We message you the moment it is ready. Whoever collects needs ID matching the name above.','ochre','pin')}
      <label class="f">Anything we should know<textarea data-bind="notes" placeholder="Delivery notes, timing, who to call">${esc(d.notes)}</textarea></label>
      <label class="check"><input type="checkbox" data-bind="partOfLargerOrder" ${d.partOfLargerOrder?'checked':''}><span>This is part of a larger order I am putting together, please hold it for consolidation.</span></label>
    </div>
@@ -1938,7 +1937,7 @@ function viewTrack(ref,token){
     <div class="spread"><span class="muted">Cargo company</span><b>${esc(b.company)}</b></div>
     <div class="spread"><span class="muted">Shipment reference</span><b class="mono">${esc(b.ref)}</b></div>
     <div class="spread"><span class="muted">Expected in Zimbabwe</span><b>${fmtDate(b.eta)}</b></div>
-    <div class="spread"><span class="muted">${o.recipient.collection?'Collection point':'Delivery to'}</span><b>${esc(o.recipient.collection||o.recipient.address||o.recipient.town)}</b></div>
+    <div class="spread"><span class="muted">Collect from</span><b>${esc(o.recipient.collection||'Harare collection point')}</b></div>
   </div></div>`:''})():''}
 
   <div class="card card-p stack-s">
@@ -1996,7 +1995,7 @@ function viewQuote(ref,token){
    <div class="card-h"><b>Delivering to</b></div>
    <div class="card-b field-grid small">
      <div class="stack-s" style="gap:2px"><span class="eyebrow">Recipient</span><b>${esc(o.recipient.name)}</b><span class="muted">${esc(o.recipient.phone)}</span></div>
-     <div class="stack-s" style="gap:2px"><span class="eyebrow">In Zimbabwe</span><b>${esc(o.recipient.town)}</b><span class="muted">${esc(o.recipient.collection||o.recipient.address||'Address to confirm')}</span></div>
+     <div class="stack-s" style="gap:2px"><span class="eyebrow">In Zimbabwe</span><b>${esc(o.recipient.town)}</b><span class="muted">${esc(o.recipient.collection||'Harare collection point')}</span></div>
    </div>
   </div>
 
@@ -2702,7 +2701,7 @@ function adminSettings(){
     ${f('cargoRate','Rate £ per kg')}
     ${f('cargoMin','Minimum cargo charge £')}
     ${f('clearance','Customs and clearance £')}
-    ${f('localDelivery','Zimbabwe local delivery £')}
+    ${f('localDelivery','Zimbabwe local delivery £','Zero while collection only')}
     ${f('volDivisor','Volumetric divisor','Length x width x height / divisor','100')}
     ${f('packagingKg','Packaging weight kg','Added to actual weight','0.05')}
     ${f('cargoSafetyPct','Safety margin on the estimate %','Padding on quoted shipping, since it is charged up front','1')}
@@ -2982,7 +2981,7 @@ document.addEventListener('click',e=>{
     // take them to the first empty field and put the cursor in it.
     const need=[
       ['customer.name','your name'],['customer.email','your email'],['customer.whatsapp','your WhatsApp number'],
-      ['recipient.name','the recipient name'],['recipient.phone','the recipient phone'],['recipient.town','the town in Zimbabwe']
+      ['recipient.name','the recipient name'],['recipient.phone','the recipient phone']
     ].filter(([k])=>{const [a,b]=k.split('.');return !dr[a][b]});
     if(need.length){
       toast('Please add '+need.map(x=>x[1]).join(', '));

@@ -8,7 +8,7 @@
  *   index.html                the app, with the landing page PRE-RENDERED into
  *                             it so view-source shows real content
  *   shop/<retailer>/          one page per approved retailer
- *   delivery/<city>/          one page per destination
+ *   collection/               collect in Harare
  *   what-it-costs/            pricing, with live worked examples
  *   what-we-cannot-send/      restricted goods
  *   how-it-works/
@@ -58,7 +58,7 @@ const NAV = [
   ['How it works', 'how-it-works/'],
   ['What it costs', 'what-it-costs/'],
   ['Shops', 'shop/'],
-  ['Delivery', 'delivery/'],
+  ['Collection', 'collection/'],
   ['What we cannot send', 'what-we-cannot-send/']
 ];
 
@@ -157,7 +157,7 @@ ${inner}
 <footer class="site-foot"><div class="site-foot-in">
   <div><h3>Service</h3>${NAV.map(([l, p]) => `<a href="${BASE}${p}">${l}</a>`).join('')}</div>
   <div><h3>Shops</h3>${api.retailers.slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
-  <div><h3>Delivery</h3>${['harare', 'bulawayo', 'mutare', 'gweru', 'masvingo'].map(c => `<a href="${BASE}delivery/${c}/">${c[0].toUpperCase() + c.slice(1)}</a>`).join('')}</div>
+  <div><h3>Collection</h3>${`<a href="${BASE}collection/">Collect in Harare</a>`}</div>
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a><a href="mailto:${site.contactEmail}">${site.contactEmail}</a></div>
 </div>
 <div class="site-legal">
@@ -212,7 +212,7 @@ ${SRC.split('<div id="app"></div>')[1]}
 <footer class="site-foot"><div class="site-foot-in">
   <div><h3>Service</h3>${NAV.map(([l, p]) => `<a href="${BASE}${p}">${l}</a>`).join('')}</div>
   <div><h3>Shops</h3>${api.retailers.slice(0, 6).map(r => `<a href="${BASE}shop/${r.id}/">${api.esc(r.name)}</a>`).join('')}<a href="${BASE}shop/">All shops</a></div>
-  <div><h3>Delivery</h3>${['harare', 'bulawayo', 'mutare', 'gweru', 'masvingo'].map(c => `<a href="${BASE}delivery/${c}/">${c[0].toUpperCase() + c.slice(1)}</a>`).join('')}</div>
+  <div><h3>Collection</h3>${`<a href="${BASE}collection/">Collect in Harare</a>`}</div>
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a></div>
 </div></footer>
 <button id="themeSwitch" type="button" aria-label="Switch between light and dark">

@@ -625,47 +625,42 @@ function applyImport(code){
    wrong item gets bought. The options asked for follow the kind of product,
    inferred from the name. Where the guess is not confident the customer
    picks the category themselves rather than being handed the wrong form. */
+/* The link already identifies the product. Size is the one thing that
+   commonly varies behind a single URL, and for clothing, shoes, wigs and
+   makeup there is usually one more choice made on the page. So we ask for
+   at most two, and never for options the product cannot have. */
 const CATEGORIES=[
  {k:'fragrance',label:'Fragrance',
   match:['eau de parfum','eau de toilette','eau de cologne','parfum','cologne','aftershave','fragrance','body mist',' edt',' edp'],
-  fields:[
-   {id:'size',label:'Size',ph:'100ml'},
-   {id:'strength',label:'Concentration',type:'select',opts:['Eau de Parfum','Eau de Toilette','Parfum or Extrait','Eau de Cologne','Body mist','Not sure']},
-   {id:'format',label:'Format',type:'select',opts:['Bottle','Gift set','Refill','Travel spray','Not sure']}
-  ]},
+  size:{label:'Size',ph:'100ml'},second:null},
  {k:'hairpiece',label:'Wig, weave or extensions',
   match:['wig','bundle','closure','frontal','weave','extension','ponytail','braiding hair','crochet','lace front','drawstring','hair piece'],
-  fields:[
-   {id:'length',label:'Length',ph:'22 inch'},
-   {id:'colour',label:'Colour',ph:'1B natural black'},
-   {id:'texture',label:'Texture',type:'select',opts:['Straight','Body wave','Deep wave','Curly','Kinky straight','Water wave','Not sure']},
-   {id:'lace',label:'Lace or cap',type:'select',opts:['13x4 frontal','13x6 frontal','4x4 closure','5x5 closure','360 lace','Full lace','Machine made','Not sure']},
-   {id:'density',label:'Density',ph:'150%'}
-  ]},
+  size:{label:'Length',ph:'22 inch'},second:{id:'colour',label:'Colour',ph:'1B natural black'}},
  {k:'makeup',label:'Makeup',
   match:['lipstick','lip gloss','lip liner','foundation','concealer','mascara','eyeshadow','eye shadow','blush','bronzer','highlighter','eyeliner','setting powder','primer','palette','brow pencil'],
-  fields:[
-   {id:'shade',label:'Shade',ph:'Biscuit, 4.5N'},
-   {id:'finish',label:'Finish',type:'select',opts:['Matte','Satin','Dewy','Shimmer','Not sure']},
-   {id:'size',label:'Size',ph:'30ml'}
-  ]},
+  size:{label:'Size',ph:'30ml'},second:{id:'shade',label:'Shade',ph:'Biscuit, 4.5N'}},
  {k:'haircare',label:'Hair care',
   match:['shampoo','conditioner','hair oil','hair mask','relaxer','edge control','leave-in','leave in','hair food','curl cream','detangler','hair spray','hair gel','co-wash',
    'hair perfector','bond builder','hair treatment','hair repair','hair colour','hair dye','developer','bleach'],
-  fields:[{id:'size',label:'Size',ph:'400ml'},{id:'variant',label:'Variant',ph:'for dry hair'}]},
+  size:{label:'Size',ph:'400ml'},second:null},
  {k:'skincare',label:'Skin and body care',
   match:['serum','moisturis','cleanser','toner','sunscreen','spf','body butter','cocoa butter','shea butter','balm','scrub','shower gel','deodorant','body wash','face wash','micellar','exfoliant','cream','lotion','soap','oil',
    'niacinamide','hyaluronic','retinol','vitamin c','salicylic','glycolic','azelaic','squalane','peptide','ceramide','ampoule','essence'],
-  fields:[{id:'size',label:'Size',ph:'250ml'},{id:'variant',label:'Variant',ph:'fragrance free, for dry skin'}]},
+  size:{label:'Size',ph:'250ml'},second:null},
  {k:'footwear',label:'Shoes',
   match:['trainer','sneaker','shoe','boot','sandal','heel','loafer','air force','air max','slider','flip flop'],
-  fields:[{id:'size',label:'UK size',ph:'UK 8'},{id:'colour',label:'Colour',ph:'White'},{id:'width',label:'Width fitting',ph:'Standard'}]},
+  size:{label:'UK size',ph:'UK 8'},second:{id:'colour',label:'Colour',ph:'White'}},
  {k:'clothing',label:'Clothing',
   match:['dress','jeans','shirt','hoodie','jacket','t-shirt','tshirt','trouser','skirt','coat','jumper','blazer','legging','tracksuit'],
-  fields:[{id:'size',label:'Size',ph:'UK 12'},{id:'colour',label:'Colour',ph:'Black'},{id:'fit',label:'Fit or length',ph:'Regular'}]},
+  size:{label:'Size',ph:'UK 12'},second:{id:'colour',label:'Colour',ph:'Black'}},
  {k:'other',label:'Something else',match:[],
-  fields:[{id:'size',label:'Size',ph:''},{id:'colour',label:'Colour',ph:''},{id:'variant',label:'Any other option',ph:'2 pack'}]}
+  size:{label:'Size',ph:''},second:{id:'colour',label:'Colour or option',ph:''}}
 ];
+function catFieldList(k){
+ const c=catOf(k), out=[Object.assign({id:'size'},c.size)];
+ if(c.second)out.push(c.second);
+ return out;
+}
 function catOf(k){return CATEGORIES.find(c=>c.k===k)||CATEGORIES[CATEGORIES.length-1]}
 /* Detect from the product name only, never the URL: boots.com contains
    "boot", which would turn every unmatched Boots product into a shoe. The
@@ -678,9 +673,22 @@ function detectCategory(name,retailerName){
  }
  return {k:'other',confident:false};
 }
+/* One phrasing for the substitution instruction, used everywhere it shows. */
+function subsText(it,forAdmin){
+ if(it.subsAllowed==='cancel')return 'Cancel and refund if unavailable';
+ if(it.subsAllowed==='link'||it.subsAllowed==='yes'){
+  const bits=[];
+  if(it.subsSize)bits.push(it.subsSize);
+  if(it.subsPrice!=null)bits.push('up to '+money(it.subsPrice));
+  if(it.subsNotes)bits.push(it.subsNotes);
+  const tail=bits.length?' ('+bits.join(', ')+')':'';
+  if(it.subsUrl)return (forAdmin?'Backup approved: ':'Backup product given')+(forAdmin?`<a class="link" href="${esc(it.subsUrl)}" target="_blank" rel="noopener">open link</a>`:'')+tail;
+  return 'Substitute acceptable'+tail;
+ }
+ return forAdmin?'Do not substitute, ask the customer first':'Ask me first';
+}
 function attrText(it){
- const cat=catOf(it.category);
- const parts=cat.fields.map(f=>it.attrs&&it.attrs[f.id]).filter(v=>v&&v!=='Not sure');
+ const parts=catFieldList(it.category).map(f=>it.attrs&&it.attrs[f.id]).filter(Boolean);
  if(it.attrs&&it.attrs.other)parts.push(it.attrs.other);
  return parts.join(' · ');
 }
@@ -1036,7 +1044,7 @@ function viewLookup(){
    ================================================================ */
 function collectAttrs(catKey){
  const out={};
- catOf(catKey).fields.forEach(f=>{const v=val('pa_'+f.id);if(v&&v!=='Not specified')out[f.id]=v});
+ catFieldList(catKey).forEach(f=>{const v=val('pa_'+f.id);if(v)out[f.id]=v});
  const other=val('pa_other'); if(other)out.other=other;
  return out;
 }
@@ -1047,8 +1055,6 @@ function draft(){
 }
 function viewRequest(){
  const d=draft(), st=S.settings;
- const total=round2(d.items.reduce((a,i)=>a+(Number(i.displayedPrice)||0)*(Number(i.qty)||1),0));
- const known=d.items.filter(i=>i.displayedPrice!=null).length;
  return `<div class="narrow"><div class="stack-l">
   <div class="stack-s">
    <div class="eyebrow">New request</div>
@@ -1074,11 +1080,7 @@ function viewRequest(){
    <div class="card-h"><b>2. Your items</b><span class="pill p-mute">${d.items.length} item${d.items.length>1?'s':''}</span></div>
    <div class="card-b stack">
      ${d.items.map((it,ix)=>draftItemCard(it,ix)).join('')}
-     <div class="sum" style="border-top:1px solid var(--line);padding-top:12px">
-       <div class="l"><span>Estimated product value${known<d.items.length?' (from the items we could read)':''}</span><span class="v">${money(total)}</span></div>
-       ${total<st.minSpend?`<div class="tiny" style="color:var(--warn)">Our minimum is ${money(st.minSpend)} of product value per request. You can still submit, and we will tell you what is needed to reach it.</div>`:`<div class="tiny" style="color:var(--accent)">Meets the ${money(st.minSpend)} minimum.</div>`}
-       <div class="tiny muted">Our fee and UK delivery are added on the quote. Zimbabwe shipping is charged separately.</div>
-     </div>
+     ${runningTotal(d)}
    </div>
   </div>`:''}
 
@@ -1114,6 +1116,29 @@ function viewRequest(){
  </div></div>`;
 }
 
+/* What they will actually pay now, shown while they build the request
+   rather than sprung on them at the quote. Product + 20% + UK delivery. */
+function runningTotal(d){
+ const st=S.settings;
+ const priced=d.items.filter(i=>i.displayedPrice!=null);
+ if(!priced.length)return `<div class="note n-mute" style="margin-top:4px">${icon('pound',15)}<div>Add the price shown on each page and we will total it up for you here, including our fee and UK delivery.</div></div>`;
+ const q=quoteCalc({items:d.items,quote:null});
+ const missing=d.items.length-priced.length;
+ const est=estimateCargo({items:d.items});
+ return `<div class="stack-s" style="border-top:1px solid var(--line);padding-top:12px">
+  <div class="sum">
+    <div class="l"><span>Product value${missing?` <span class="tiny muted">(${missing} item${missing>1?'s':''} still need a price)</span>`:''}</span><span class="v">${money(q.productTotal)}</span></div>
+    <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
+    <div class="l"><span>Our fee <span class="tiny muted">${st.procurementPct}% of product value, min ${money(st.procurementMin)}</span></span><span class="v">${money(q.fee)}</span></div>
+    <div class="l total"><span>You would pay now</span><span class="v">${money(q.total)}</span></div>
+  </div>
+  ${!q.meetsMin
+    ? note(`<b>${money(q.shortfall)} under our ${money(st.minSpend)} minimum.</b> Add another item and this order is good to go. You can still submit as it is, and we will come back to you.`,'warn','alert')
+    : `<div class="tiny" style="color:var(--accent)">${icon('check',12)} Meets the ${money(st.minSpend)} minimum.</div>`}
+  <div class="tiny muted">Zimbabwe shipping is separate and charged once we weigh the parcel, roughly ${money(est.low)} to ${money(est.high)} for this order. Everything above is an estimate from the prices you gave us. We confirm each one against the shop before you pay anything.</div>
+ </div>`;
+}
+
 function importHelper(){
  return `<details class="card" style="border-color:var(--line);background:var(--surface-2)">
   <summary style="padding:10px 13px;cursor:pointer;font-size:13.5px;font-weight:560;list-style:none">
@@ -1146,13 +1171,12 @@ function catFields(p){
     ${guessed?`<span class="pill p-accent" style="margin-bottom:9px">${esc(cat.label)} detected</span>`:`<span class="pill p-warn" style="margin-bottom:9px">Please choose</span>`}
   </div>
   <div class="field-grid">
-    ${cat.fields.map(f=>{
-      const val0=f.id==='size'?(p.size||''):'';
-      return f.type==='select'
-       ? `<label class="f">${esc(f.label)}<select id="pa_${f.id}"><option value="">Not specified</option>${f.opts.map(o=>`<option ${o===val0?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`
-       : `<label class="f">${esc(f.label)}<input type="text" id="pa_${f.id}" value="${esc(val0)}" placeholder="${esc(f.ph||'')}"></label>`;
+    ${catFieldList(det.k).map(f=>{
+      const v0=f.id==='size'?(p.size||''):'';
+      const read=f.id==='size'&&p.size;
+      return `<label class="f">${esc(f.label)}${read?'<span class="hint">read from the link</span>':''}<input type="text" id="pa_${f.id}" value="${esc(v0)}" placeholder="${esc(f.ph||'')}"></label>`;
     }).join('')}
-    <label class="f">Anything else about the option<input type="text" id="pa_other" placeholder="${esc(cat.k==='fragrance'?'e.g. the intense version':'e.g. 2 pack')}"></label>
+    <label class="f">Anything else <span class="hint">optional</span><input type="text" id="pa_other" placeholder="only if it matters"></label>
   </div>
  </div>`;
 }
@@ -1191,17 +1215,22 @@ function pendingCard(p){
    </div>
    ${catFields(p)}
    <hr class="hr">
-   <div class="field-grid two">
-     <label class="f">If this exact item is unavailable
-       <select id="pSubs">
-         <option value="no">Do not substitute, ask me first</option>
-         <option value="yes">A close substitute is fine</option>
-         <option value="cancel">Cancel this item and refund me</option>
+   <div class="stack-s">
+     <label class="f" style="max-width:340px">If this exact item is unavailable
+       <select id="pSubs" data-act="pickSubs">
+         <option value="no" ${p.subs==='no'||!p.subs?'selected':''}>Ask me first</option>
+         <option value="link" ${p.subs==='link'?'selected':''}>Buy this instead, I will give you the link</option>
+         <option value="cancel" ${p.subs==='cancel'?'selected':''}>Cancel this item and refund me</option>
        </select>
      </label>
-     <label class="f">What substitutes are acceptable<input type="text" id="pSubsNotes" placeholder="e.g. any CeraVe moisturiser, same size"></label>
+     ${p.subs==='link'?`<div class="field-grid">
+       <label class="f" style="grid-column:1/-1">Backup product link<input type="url" id="pSubsUrl" value="${esc(p.subsUrl||'')}" placeholder="https://..."></label>
+       <label class="f">Backup size<input type="text" id="pSubsSize" placeholder="same as above if blank"></label>
+       <label class="f">Backup price<input type="number" step="0.01" id="pSubsPrice" placeholder="optional"></label>
+     </div>
+     <div class="tiny muted">A link is unambiguous. We buy the backup only if the first is unavailable, and only up to the price you have agreed.</div>`:''}
    </div>
-   <label class="f">Notes for this item<input type="text" id="pNotes" placeholder="Anything specific about this product"></label>
+   <label class="f">Notes for this item <span class="hint">optional</span><input type="text" id="pNotes" placeholder="Anything specific about this product"></label>
    <div class="row wrap">
      <button class="btn btn-primary btn-s" data-act="addItem">${icon('plus',15)}Add to request</button>
      <button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button>
@@ -1219,7 +1248,7 @@ function draftItemCard(it,ix){
      <b style="font-size:14.5px">${esc(it.name||'Unnamed item')}</b>
      ${variantBits?`<div class="tiny muted">${esc(variantBits)}</div>`:''}
      <div class="tiny muted">Qty ${it.qty} · ${it.displayedPrice!=null?`shown at <span class="mono">${money(it.displayedPrice)}</span> each`:'price to be confirmed by us'}${it.priceSource==='Read from page'?' · read from the page':''}</div>
-     ${it.subsAllowed==='yes'?`<div class="tiny" style="color:var(--accent)">Substitutes allowed${it.subsNotes?': '+esc(it.subsNotes):''}</div>`:it.subsAllowed==='cancel'?`<div class="tiny muted">Cancel and refund if unavailable</div>`:`<div class="tiny muted">Ask before substituting</div>`}
+     ${it.subsAllowed&&it.subsAllowed!=='no'?`<div class="tiny" style="color:var(--accent)">${subsText(it)}</div>`:`<div class="tiny muted">${subsText(it)}</div>`}
    </div>
    <div class="col" style="align-items:flex-end;gap:6px">
      <div class="mono" style="font-weight:700">${it.displayedPrice!=null?money(it.displayedPrice*it.qty):'—'}</div>
@@ -1375,7 +1404,7 @@ function viewQuote(ref,token){
           <b class="small">${esc(it.name)}</b>
           ${v?`<div class="tiny muted">${esc(v)}</div>`:''}
           <div class="tiny muted">Qty ${it.qty} at ${money(itemPrice(it))} · <a class="link" href="${esc(it.url)}" target="_blank" rel="noopener">view on ${esc(g.name)} ${icon('ext',10)}</a></div>
-          <div class="tiny muted">${it.subsAllowed==='yes'?'Substitutes allowed'+(it.subsNotes?': '+esc(it.subsNotes):''):it.subsAllowed==='cancel'?'Cancel and refund if unavailable':'Ask me before substituting'}</div>
+          <div class="tiny muted">${subsText(it)}</div>
         </div>
         <b class="mono">${money(itemLine(it))}</b>
       </div>`}).join('')}
@@ -1699,15 +1728,13 @@ function paneReview(o){
          <select data-act="setCat" data-ref="${o.ref}" data-id="${it.id}">
            ${CATEGORIES.map(c=>`<option value="${c.k}" ${c.k===it.category?'selected':''}>${esc(c.label)}</option>`).join('')}
          </select></label>
-       ${catOf(it.category).fields.map(f=>{
+       ${catFieldList(it.category).map(f=>{
          const v=(it.attrs&&it.attrs[f.id])||'';
-         return f.type==='select'
-          ? `<label class="f">${esc(f.label)}<select data-attr="${it.id}" data-k="${f.id}"><option value="">Not specified</option>${f.opts.map(op=>`<option ${op===v?'selected':''}>${esc(op)}</option>`).join('')}</select></label>`
-          : `<label class="f">${esc(f.label)}<input type="text" data-attr="${it.id}" data-k="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"></label>`;
+         return `<label class="f">${esc(f.label)}<input type="text" data-attr="${it.id}" data-k="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"></label>`;
        }).join('')}
        <label class="f">Anything else<input type="text" data-attr="${it.id}" data-k="other" value="${esc((it.attrs&&it.attrs.other)||'')}"></label>
      </div>
-     <div class="note n-mute" style="font-size:12.5px">${icon('user',14)}<div><b>Customer instruction:</b> ${it.subsAllowed==='yes'?'substitutes allowed'+(it.subsNotes?' ('+esc(it.subsNotes)+')':''):it.subsAllowed==='cancel'?'cancel and refund if unavailable':'do not substitute, ask first'}${it.customerNotes?' · '+esc(it.customerNotes):''}</div></div>
+     <div class="note n-mute" style="font-size:12.5px">${icon('user',14)}<div><b>Customer instruction:</b> ${subsText(it,true)}${it.customerNotes?' · '+esc(it.customerNotes):''}</div></div>
      <label class="f">Administrator notes<input type="text" data-item="${it.id}" data-k="adminNotes" value="${esc(it.adminNotes)}" placeholder="Basket check, seller, quantity limits"></label>
      <div class="row wrap">
        <button class="btn btn-s btn-primary" data-act="approveItem" data-ref="${o.ref}" data-id="${it.id}">${icon('check',15)}Approve item</button>
@@ -1852,7 +1879,7 @@ function panePurchase(o){
        <b class="small">${esc(it.name)}</b>
        <div class="tiny muted">Qty ${it.qty} · approved at ${money(itemPrice(it))} each · total ${money(itemLine(it))}</div>
        <div class="tiny muted">${esc(attrText(it))||'no options specified'}</div>
-       <div class="tiny" style="color:var(--info)">${it.subsAllowed==='yes'?'Substitutes allowed'+(it.subsNotes?': '+esc(it.subsNotes):''):it.subsAllowed==='cancel'?'Cancel and refund if unavailable':'Do not substitute, ask the customer first'}</div>
+       <div class="tiny" style="color:var(--info)">${subsText(it,true)}</div>
        <a class="link tiny" href="${esc(it.url)}" target="_blank" rel="noopener">Open retailer page ${icon('ext',10)}</a>
      </div>
      <span class="tiny muted nowrap">${p?'Purchased '+fmtDate(p.date):'Not purchased'}</span>
@@ -2270,6 +2297,11 @@ document.addEventListener('change',e=>{
    logAudit(o.ref,'Receiving issue logged','',el.value,it.name);
    logMsg(o.ref,'Goods issue identified','Email',o.customer.email,'We found an issue with one of your items ('+el.value+'). We are resolving it with the retailer and will update you.');
    save();rerender(true)}
+ else if(act==='pickSubs'){
+   const dr=draft();
+   if(dr.pending){dr.pending.subs=el.value;dr.pending.name=val('pName')||dr.pending.name;
+     dr.pending.subsUrl=val('pSubsUrl')||dr.pending.subsUrl;save();rerender(true)}
+ }
  else if(act==='pickCat'){
    const dr=draft();
    if(dr.pending){dr.pending.cat={k:el.value,confident:true};if(dr.pending.name)dr.pending.name=val('pName')||dr.pending.name;save();rerender(true)}
@@ -2326,7 +2358,9 @@ document.addEventListener('click',e=>{
       displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
       priceSource:val('pPrice')===''?'':(p.price!=null&&round2(Number(val('pPrice')))===p.price?srcLabel(p.via||'live'):'Customer reported'),
       wasPrice:p.wasPrice||null,image:p.image||null,availability:p.availability,
-      extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',subsNotes:val('pSubsNotes'),customerNotes:val('pNotes'),
+      extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',
+      subsUrl:val('pSubsUrl'),subsSize:val('pSubsSize'),subsPrice:val('pSubsPrice')===''?null:round2(Number(val('pSubsPrice'))),
+      customerNotes:val('pNotes'),
       cancelIfUnavailable:val('pSubs')==='cancel'});
     it.restricted=restrictedHits([name,it.url,it.customerNotes].join(' '));
     dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);
@@ -2495,8 +2529,8 @@ document.addEventListener('click',e=>{
     const kind=prompt('Type: temporarily out of stock, permanently unavailable, variant unavailable, quantity unavailable, or listing removed','temporarily out of stock');
     if(kind===null)return;
     it.itemStatus='Out of stock';
-    if(it.subsAllowed==='yes'){setStatus(o,'Substitute approval required','Suggest an alternative for '+it.name);
-      logMsg(o.ref,'Substitute approval required','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. You said substitutes are acceptable ('+(it.subsNotes||'no detail given')+'). Please confirm the alternative we have suggested before we buy.');}
+    if(it.subsAllowed==='yes'||it.subsAllowed==='link'){setStatus(o,'Substitute approval required','Suggest an alternative for '+it.name);
+      logMsg(o.ref,'Substitute approval required','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. You said substitutes are acceptable ('+(it.subsUrl||it.subsNotes||'no detail given')+'). Please confirm the alternative we have suggested before we buy.');}
     else if(it.subsAllowed==='cancel'){setStatus(o,'Product out of stock','Customer asked to cancel and refund');
       logMsg(o.ref,'Product unavailable','Email',o.customer.email,it.name+' is '+kind+'. As instructed we will cancel this item and refund it.');}
     else {setStatus(o,'Customer decision required',it.name+' is '+kind);

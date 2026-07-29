@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tenga hero motion · three concepts</title>
+<style>
+:root{
+  --drench:#0B2620; --drench-2:#08201B; --on:#F0F3F0; --on-2:#A9BDB6;
+  --gold:#E0AE5C; --gold-ink:#7E520F; --accent:#2E7F6C; --line:rgba(240,243,240,.14);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#070E0C;color:var(--on);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;letter-spacing:-.02em}
+p{margin:0}
+.wrapper{max-width:1180px;margin:0 auto;padding:34px 22px 90px}
+
+.page-head{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:34px}
+.page-head h1{font-family:var(--serif);font-weight:400;font-size:clamp(26px,4vw,38px);margin-bottom:8px}
+.page-head p{color:var(--on-2);max-width:66ch;line-height:1.6;font-size:15px}
+
+.concept{margin-bottom:56px}
+.concept-bar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  border:1px solid rgba(224,174,92,.4);padding:3px 9px;border-radius:100px}
+.concept h2{font-size:clamp(19px,2.4vw,24px)}
+.concept .why{color:var(--on-2);font-size:14.5px;line-height:1.6;max-width:72ch;margin:8px 0 16px}
+.replay{background:transparent;border:1px solid var(--line);color:var(--on-2);font-family:var(--mono);
+  font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:4px;cursor:pointer}
+.replay:hover{color:var(--on);border-color:var(--on-2)}
+
+/* the hero frame every concept sits inside */
+.hero{background:var(--drench);border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg,var(--accent) 0%,var(--accent) 42%,var(--gold) 58%,var(--gold) 100%);opacity:.6}
+.hero-in{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:clamp(20px,4vw,48px);
+  align-items:center;padding:clamp(26px,4vw,52px)}
+.hero h3{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4.2vw,50px);line-height:1.04;letter-spacing:-.025em}
+.hero h3 .zw{color:var(--gold);font-style:italic}
+.hero .sub{margin-top:14px;color:var(--on-2);font-size:15px;line-height:1.6;max-width:40ch}
+.fakefield{margin-top:22px;max-width:420px;display:flex;gap:8px;background:var(--on);border-radius:6px;padding:6px}
+.fakefield span{flex:1;padding:10px 12px;color:#5C6A64;font-size:14px}
+.fakefield b{background:var(--drench);color:var(--on);padding:10px 16px;border-radius:4px;font-size:14px;font-weight:600}
+.stage{position:relative;justify-self:center;width:100%;max-width:400px;aspect-ratio:1/1.16}
+@media (max-width:860px){.hero-in{grid-template-columns:1fr}.stage{max-width:330px}}
+
+/* ============ A. order ticker ============ */
+#a .tk-photo{position:absolute;inset:0 0 96px 0;border-radius:8px;overflow:hidden;background:#16332C}
+#a .tk-photo img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.06);
+  transition:opacity .55s ease,transform 3.2s ease-out;position:absolute;inset:0}
+#a .tk-photo img.on{opacity:1;transform:scale(1)}
+#a .tk-card{position:absolute;left:0;right:0;bottom:0;background:var(--on);color:#101614;border-radius:6px;padding:12px 14px}
+#a .tk-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#a .tk-shop{font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:#5C6A64}
+#a .tk-total{font-family:var(--mono);font-weight:700;font-size:17px;color:var(--gold-ink);font-variant-numeric:tabular-nums}
+#a .tk-name{font-size:13.5px;font-weight:600;margin:3px 0 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#a .tk-steps{display:flex;gap:3px}
+#a .tk-steps i{flex:1;height:3px;border-radius:2px;background:#D7DDD8;transition:background .35s ease}
+#a .tk-steps i.done{background:var(--accent)}
+#a .tk-steps i.zw{background:var(--gold)}
+#a .tk-status{margin-top:7px;font-size:11.5px;color:#5C6A64;display:flex;align-items:center;gap:6px;min-height:15px}
+#a .tk-status .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+#a .tk-status.landed{color:var(--gold-ink);font-weight:600}
+#a .tk-status.landed .dot{background:var(--gold)}
+
+/* ============ B. the price resolving ============ */
+#b .bg{position:absolute;inset:0;border-radius:8px;overflow:hidden}
+#b .bg img{width:100%;height:100%;object-fit:cover;display:block;animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.12) translate(-2%,-3%)}}
+#b .tag{transition:opacity .35s ease;position:absolute;right:-10px;bottom:20px;width:min(255px,86%);background:var(--on);color:#101614;
+  border-radius:6px;padding:14px 16px;box-shadow:0 22px 44px -20px rgba(0,0,0,.9);border:0;font-family:var(--sans);
+  font-size:inherit;letter-spacing:normal;text-transform:none}
+#b .tag-h{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#5C6A64;margin-bottom:9px}
+#b .l{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:#2C3A35;padding:3px 0;
+  opacity:0;transform:translateY(6px)}
+#b .l.show{animation:lin .5s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes lin{to{opacity:1;transform:none}}
+#b .l .n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+#b .sum{display:flex;justify-content:space-between;gap:12px;margin-top:9px;padding-top:10px;
+  border-top:1px solid #D8DED9;font-weight:700;font-size:16px;color:#101614;opacity:0}
+#b .sum.show{animation:lin .5s cubic-bezier(.16,1,.3,1) forwards}
+#b .sum .n{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--gold-ink)}
+#b .stamp{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);padding:2px 6px;border-radius:3px;
+  opacity:0;transform:rotate(-6deg) scale(1.4)}
+#b .stamp.show{animation:stamp .45s cubic-bezier(.16,1,.3,1) forwards}
+#b .tag.resetting{opacity:0}
+@keyframes stamp{to{opacity:1;transform:rotate(-6deg) scale(1)}}
+
+/* ============ C. shelf, picked and sent ============ */
+#c .stage{aspect-ratio:1/1.16;overflow:hidden;border-radius:8px;background:#0F2A24}
+#c .rails{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:10px}
+#c .rail{display:flex;gap:10px;width:max-content}
+#c .rail.r1{animation:slideL 26s linear infinite}
+#c .rail.r2{animation:slideR 32s linear infinite}
+#c .rail.r3{animation:slideL 30s linear infinite}
+@keyframes slideL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes slideR{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+#c .tile{width:104px;height:104px;border-radius:6px;overflow:hidden;flex:none;position:relative;background:#16332C}
+#c .tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:.55;transition:opacity .4s}
+#c .picked{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:8px;
+  overflow:hidden;box-shadow:0 26px 54px -18px rgba(0,0,0,.95);opacity:0;z-index:3;
+  outline:2px solid var(--gold);outline-offset:2px}
+#c .picked img{width:100%;height:100%;object-fit:cover;display:block}
+#c .picked.run{animation:pick 4.6s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes pick{
+  0%{opacity:0;transform:scale(.7)}
+  14%{opacity:1;transform:scale(1)}
+  55%{opacity:1;transform:scale(1) translate(0,0)}
+  100%{opacity:0;transform:scale(.5) translate(150%,-40%)}
+}
+#c .ptag{position:absolute;left:50%;top:calc(50% + 84px);transform:translateX(-50%);background:var(--on);color:#101614;
+  border-radius:5px;padding:7px 12px;font-family:var(--mono);font-size:12.5px;font-weight:700;white-space:nowrap;
+  opacity:0;z-index:4;box-shadow:0 12px 26px -14px rgba(0,0,0,.9)}
+#c .ptag.run{animation:ptag 4.6s ease forwards}
+@keyframes ptag{0%{opacity:0}18%{opacity:0}26%{opacity:1}62%{opacity:1}72%{opacity:0}100%{opacity:0}}
+#c .dest{position:absolute;right:12px;top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);background:rgba(11,38,32,.85);border:1px solid rgba(224,174,92,.35);
+  padding:4px 8px;border-radius:100px;z-index:5}
+#c .fade{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,var(--drench) 0%,transparent 16%,transparent 84%,var(--drench) 100%)}
+
+@media (prefers-reduced-motion:reduce){
+  #a .tk-photo img{transition:none}
+  #b .bg img{animation:none}
+  #b .l,#b .sum,#b .stamp{opacity:1;transform:none;animation:none}
+  #c .rail{animation:none}
+  #c .picked{opacity:1;animation:none}
+  #c .ptag{opacity:1;animation:none}
+}
+.note{margin-top:14px;font-size:13px;color:var(--on-2);line-height:1.6;max-width:74ch}
+.note b{color:var(--on)}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<header class="page-head">
+  <h1>Three ways to make the hero move</h1>
+  <p>Same headline, same photographs, same price arithmetic in all three. Only the motion differs. Each one loops; press replay to watch it again from the start. All of them stop entirely if your system is set to reduce motion.</p>
+</header>
+
+<!-- ============ A ============ -->
+<section class="concept" id="a">
+  <div class="concept-bar">
+    <span class="tag">Concept A</span>
+    <h2>Three orders, fulfilled in front of you</h2>
+    <button class="replay" data-replay="a">Replay</button>
+  </div>
+  <p class="why">Your idea. Three real-looking orders run through the whole lifecycle, link to landed, one after another. It answers "what is this?" without a word of explanation, and it quietly proves the thing people doubt: that parcels actually arrive. The risk is that it is busy, and that a visitor has to wait to see the end.</p>
+  <div class="hero"><div class="hero-in">
+    <div>
+      <h3>UK shelves.<br><span class="zw">Harare doorstep.</span></h3>
+      <p class="sub">Paste a link from a UK shop. We buy it, check it by hand, and fly it to Zimbabwe. One price, shipping included.</p>
+      <div class="fakefield"><span>Paste a Boots, Superdrug or ASOS link</span><b>Get my price</b></div>
+    </div>
+    <div class="stage">
+      <div class="tk-photo" id="a-photo"></div>
+      <div class="tk-card">
+        <div class="tk-top"><span class="tk-shop" id="a-shop">Boots</span><span class="tk-total" id="a-total">£0.00</span></div>
+        <div class="tk-name" id="a-name">&nbsp;</div>
+        <div class="tk-steps" id="a-steps"></div>
+        <div class="tk-status" id="a-status"><span class="dot"></span><span id="a-statustext">Link sent</span></div>
+      </div>
+    </div>
+  </div></div>
+  <p class="note"><b>Watch for:</b> the bar under the card turns green through the UK leg and gold once it hands over to cargo, which is the same two-colour system the tracking page uses.</p>
+</section>
+
+<!-- ============ B ============ -->
+<section class="concept" id="b">
+  <div class="concept-bar">
+    <span class="tag">Concept B</span>
+    <h2>The price assembling itself</h2>
+    <button class="replay" data-replay="b">Replay</button>
+  </div>
+  <p class="why">My first. Nothing moves except the number. The photograph drifts almost imperceptibly, and the price tag builds one line at a time until the total lands and gets stamped confirmed. It makes one argument rather than five: you will know the whole cost before you pay. Quietest of the three, and the least likely to feel like a banner ad.</p>
+  <div class="hero"><div class="hero-in">
+    <div>
+      <h3>UK shelves.<br><span class="zw">Harare doorstep.</span></h3>
+      <p class="sub">Paste a link from a UK shop. We buy it, check it by hand, and fly it to Zimbabwe. One price, shipping included.</p>
+      <div class="fakefield"><span>Paste a Boots, Superdrug or ASOS link</span><b>Get my price</b></div>
+    </div>
+    <div class="stage">
+      <div class="bg"><img src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=800&q=80" alt="Perfume bottles in warm light"></div>
+      <div class="tag" id="b-tag">
+        <div class="stamp" id="b-stamp">Confirmed</div>
+        <div class="tag-h">Boots · landed in Harare</div>
+        <div class="l" data-i="0"><span>Perfume, 100ml</span><span class="n">£63.99</span></div>
+        <div class="l" data-i="1"><span>UK delivery</span><span class="n">free</span></div>
+        <div class="l" data-i="2"><span>Our fee, 20%</span><span class="n">£12.80</span></div>
+        <div class="l" data-i="3"><span>Flight and clearance</span><span class="n">£28.60</span></div>
+        <div class="sum" id="b-sum"><span>You pay</span><span class="n" id="b-total">£0.00</span></div>
+      </div>
+    </div>
+  </div></div>
+  <p class="note"><b>Watch for:</b> the total counts up rather than appearing, so your eye is pulled to the one number the whole business turns on.</p>
+</section>
+
+<!-- ============ C ============ -->
+<section class="concept" id="c">
+  <div class="concept-bar">
+    <span class="tag">Concept C</span>
+    <h2>A shelf going past, one thing picked off it</h2>
+    <button class="replay" data-replay="c">Replay</button>
+  </div>
+  <p class="why">My second, and the most literal reading of the headline. Rows of UK products drift past like shelves. Every few seconds one is lifted out, given a price, and flown off to the right. It sells range rather than a single perfume, which matters now that you buy from any shop, and it needs no reading at all. The risk is that it is the busiest of the three and leans decorative.</p>
+  <div class="hero"><div class="hero-in">
+    <div>
+      <h3>UK shelves.<br><span class="zw">Harare doorstep.</span></h3>
+      <p class="sub">Any UK shop. We buy it, check it by hand, and fly it to Zimbabwe. One price, shipping included.</p>
+      <div class="fakefield"><span>Paste any UK product link</span><b>Get my price</b></div>
+    </div>
+    <div class="stage">
+      <div class="rails" id="c-rails"></div>
+      <div class="fade"></div>
+      <div class="dest" id="c-dest">→ Harare</div>
+      <div class="picked" id="c-picked"><img alt=""></div>
+      <div class="ptag" id="c-ptag">£105.39 landed</div>
+    </div>
+  </div></div>
+  <p class="note"><b>Watch for:</b> the destination chip changes each time, so it reads as a service moving many parcels rather than one.</p>
+</section>
+
+</div>
+
+<script>
+const U = id => 'https://images.unsplash.com/photo-' + id + '?auto=format&fit=crop&w=600&q=75';
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const PHOTOS = [
+  '1622618991746-fe6004db3a47','1613521076081-2820f9746a2d','1615900119312-2acd3a71f3aa',
+  '1586495777744-4413f21062fa','1624886656674-9bf7352dfb52','1641471290868-e0a2cc647da8',
+  '1581919277494-d11e63132a8b','1700301534611-cd44193b8947','1775255487971-af15499994b1',
+  '1760860992203-85ca32536788','1772987714654-2df39af2c658'
+];
+
+/* number that counts, so the eye follows it */
+function countTo(el, target, ms){
+  const start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - start) / ms);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = '£' + (target * eased).toFixed(2);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---------------- A ---------------- */
+const A_ORDERS = [
+  {shop:'Boots',       name:"Dior J'adore Eau de Parfum 100ml", img:'1622618991746-fe6004db3a47', total:105.39, city:'Harare'},
+  {shop:'ASOS',        name:'Nike Air Force 1, UK 8',           img:'1615900119312-2acd3a71f3aa', total:186.04, city:'Bulawayo'},
+  {shop:'Cult Beauty', name:'The Ordinary, four items',         img:'1775255487971-af15499994b1', total:96.55,  city:'Mutare'}
+];
+const A_STEPS = ['Link sent','Price confirmed','Paid','Bought in the UK','In the air','Landed'];
+
+const aPhoto = document.getElementById('a-photo');
+A_ORDERS.forEach(o => { const im = new Image(); im.src = U(o.img); im.alt = o.name; aPhoto.appendChild(im); });
+const aImgs = aPhoto.querySelectorAll('img');
+const aSteps = document.getElementById('a-steps');
+A_STEPS.forEach(() => aSteps.appendChild(document.createElement('i')));
+const aBars = aSteps.querySelectorAll('i');
+
+let aTimers = [];
+function aClear(){ aTimers.forEach(clearTimeout); aTimers = []; }
+function aRun(idx){
+  const o = A_ORDERS[idx % A_ORDERS.length];
+  aImgs.forEach((im, i) => im.classList.toggle('on', i === idx % A_ORDERS.length));
+  document.getElementById('a-shop').textContent = o.shop;
+  document.getElementById('a-name').textContent = o.name;
+  document.getElementById('a-total').textContent = '£0.00';
+  document.getElementById('a-status').classList.remove('landed');
+  aBars.forEach(b => { b.className = ''; });
+
+  if (REDUCED){
+    aBars.forEach((b,i) => b.className = i >= 4 ? 'zw' : 'done');
+    document.getElementById('a-statustext').textContent = 'Landed in ' + o.city;
+    document.getElementById('a-total').textContent = '£' + o.total.toFixed(2);
+    return;
+  }
+  A_STEPS.forEach((label, i) => {
+    aTimers.push(setTimeout(() => {
+      aBars[i].className = i >= 4 ? 'zw' : 'done';
+      const txt = i === A_STEPS.length - 1 ? 'Landed in ' + o.city : label;
+      document.getElementById('a-statustext').textContent = txt;
+      document.getElementById('a-status').classList.toggle('landed', i === A_STEPS.length - 1);
+      if (i === 1) countTo(document.getElementById('a-total'), o.total, 700);
+    }, 520 + i * 780));
+  });
+  aTimers.push(setTimeout(() => aRun(idx + 1), 520 + A_STEPS.length * 780 + 1500));
+}
+
+/* ---------------- B ---------------- */
+const bLines = document.querySelectorAll('#b .l');
+let bTimers = [];
+function bClear(){ bTimers.forEach(clearTimeout); bTimers = []; }
+function bRun(){
+  document.getElementById('b-tag').classList.remove('resetting');
+  bLines.forEach(l => l.classList.remove('show'));
+  document.getElementById('b-sum').classList.remove('show');
+  document.getElementById('b-stamp').classList.remove('show');
+  document.getElementById('b-total').textContent = '£0.00';
+  if (REDUCED){
+    bLines.forEach(l => l.classList.add('show'));
+    document.getElementById('b-sum').classList.add('show');
+    document.getElementById('b-stamp').classList.add('show');
+    document.getElementById('b-total').textContent = '£105.39';
+    return;
+  }
+  bLines.forEach((l, i) => bTimers.push(setTimeout(() => l.classList.add('show'), 400 + i * 420)));
+  bTimers.push(setTimeout(() => {
+    document.getElementById('b-sum').classList.add('show');
+    countTo(document.getElementById('b-total'), 105.39, 900);
+  }, 400 + bLines.length * 420 + 200));
+  bTimers.push(setTimeout(() => document.getElementById('b-stamp').classList.add('show'), 400 + bLines.length * 420 + 1300));
+  const hold = 400 + bLines.length * 420 + 4400;
+  bTimers.push(setTimeout(() => document.getElementById('b-tag').classList.add('resetting'), hold));
+  bTimers.push(setTimeout(bRun, hold + 380));
+}
+
+/* ---------------- C ---------------- */
+const cRails = document.getElementById('c-rails');
+[0,1,2].forEach(r => {
+  const rail = document.createElement('div');
+  rail.className = 'rail r' + (r + 1);
+  const set = PHOTOS.slice(r * 3, r * 3 + 5).concat(PHOTOS.slice(0, 2));
+  // duplicated once so the marquee can loop seamlessly at -50%
+  set.concat(set).forEach(id => {
+    const t = document.createElement('div');
+    t.className = 'tile';
+    const im = new Image(); im.src = U(id); im.alt = ''; im.loading = 'lazy';
+    t.appendChild(im); rail.appendChild(t);
+  });
+  cRails.appendChild(rail);
+});
+
+const C_PICKS = [
+  {img:'1622618991746-fe6004db3a47', price:'£105.39 landed', city:'Harare'},
+  {img:'1586495777744-4413f21062fa', price:'£61.20 landed',  city:'Bulawayo'},
+  {img:'1624886656674-9bf7352dfb52', price:'£78.40 landed',  city:'Mutare'},
+  {img:'1641471290868-e0a2cc647da8', price:'£54.80 landed',  city:'Gweru'}
+];
+let cIdx = 0, cTimer = null;
+function cClear(){ clearTimeout(cTimer); }
+function cRun(){
+  const p = C_PICKS[cIdx % C_PICKS.length];
+  const picked = document.getElementById('c-picked');
+  const ptag = document.getElementById('c-ptag');
+  picked.querySelector('img').src = U(p.img);
+  ptag.textContent = p.price;
+  document.getElementById('c-dest').textContent = '→ ' + p.city;
+  picked.classList.remove('run'); ptag.classList.remove('run');
+  void picked.offsetWidth;
+  if (!REDUCED){ picked.classList.add('run'); ptag.classList.add('run'); }
+  cIdx++;
+  cTimer = setTimeout(cRun, 5600);
+}
+
+/* ---------------- start, and only while on screen ---------------- */
+const CONTROL = { a:{run:()=>aRun(0), stop:aClear}, b:{run:bRun, stop:bClear}, c:{run:cRun, stop:cClear} };
+Object.keys(CONTROL).forEach(k => {
+  const el = document.getElementById(k);
+  new IntersectionObserver(entries => {
+    entries.forEach(e => e.isIntersecting ? CONTROL[k].run() : CONTROL[k].stop());
+  }, {threshold:0.25}).observe(el);
+});
+document.querySelectorAll('[data-replay]').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.replay; CONTROL[k].stop(); CONTROL[k].run();
+}));
+</script>
+</body>
+</html>

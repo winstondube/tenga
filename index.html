@@ -268,8 +268,6 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .foot{border-top:1px solid var(--line);margin-top:50px;padding:20px;text-align:center;font-size:12.5px;color:var(--ink-3)}
 .foot a{color:var(--ink-2)}
 
-.banner{background:var(--ink);color:var(--bg);font-size:12.5px;padding:6px 20px;text-align:center;font-family:var(--mono);letter-spacing:.02em}
-.banner b{color:var(--ochre)}
 
 /* ---------- hero: committed viridian, the product wearing its own price ---------- */
 .hero{position:relative;background:var(--drench);color:var(--on-drench);overflow:clip;isolation:isolate}
@@ -364,6 +362,39 @@ body:has(.paybar) #themeSwitch{bottom:80px}
   @keyframes barin{from{transform:translateY(100%)}}
 }
 
+/* ---------- mobile menu ---------- */
+.burger{display:none;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);
+  padding:6px 9px;cursor:pointer;color:var(--ink);align-items:center}
+.menu-panel{border-bottom:1px solid var(--line);background:var(--surface)}
+.menu-in{max-width:1400px;margin:0 auto;padding:8px 16px 14px;display:flex;flex-direction:column}
+.menu-in a{padding:11px 2px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:15px;
+  display:flex;align-items:center;gap:10px}
+.menu-in a:last-of-type{border-bottom:0}
+.menu-in .btn{margin-top:12px;justify-content:center}
+@media (max-width:760px){ .burger{display:inline-flex} }
+@media (min-width:761px){ .menu-panel{display:none} }
+
+/* ---------- CTA that returns once the hero one has gone ---------- */
+.floatcta{position:fixed;left:0;right:0;bottom:0;z-index:88;background:var(--drench);color:var(--on-drench);
+  border-top:1px solid color-mix(in srgb,var(--gold) 30%,transparent);
+  transform:translateY(110%);transition:transform .28s cubic-bezier(.16,1,.3,1)}
+.floatcta.on{transform:none}
+.floatcta-in{max-width:1180px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:14px}
+.floatcta .txt{flex:1;min-width:0;font-size:13.5px;line-height:1.35;color:var(--on-drench-2)}
+.floatcta .txt b{color:var(--on-drench);display:block;font-size:15px}
+.floatcta .btn{flex:none;background:var(--gold);border-color:var(--gold);color:#231703;font-weight:650}
+.floatcta .btn:hover{background:#EDC078;border-color:#EDC078;color:#231703}
+body:has(.floatcta.on){padding-bottom:82px}
+@media (prefers-reduced-motion:reduce){.floatcta{transition:none}}
+.floatcta .btn .short{display:none}
+@media (max-width:560px){
+  .floatcta-in{padding:9px 14px}
+  .floatcta .txt{display:none}
+  .floatcta .btn{flex:1;justify-content:center;padding:12px 16px;font-size:15px}
+  .floatcta .btn .long{display:none}
+  .floatcta .btn .short{display:inline}
+}
+
 /* ---------- shipping cycle band ---------- */
 .ship-band{background:var(--ochre-soft);border-bottom:1px solid color-mix(in srgb,var(--ochre) 26%,transparent)}
 .ship-in{max-width:1180px;margin:0 auto;padding:20px 24px;display:flex;align-items:center;gap:clamp(18px,3vw,34px);flex-wrap:wrap}
@@ -430,7 +461,6 @@ body:has(.paybar) #themeSwitch{bottom:80px}
    of sitting in a 340px box, and anything that was two rows of chrome
    becomes one. */
 @media (max-width:600px){
-  .banner{font-size:11.5px;padding:5px 14px}
   .topbar-in{padding:7px 14px;gap:8px;flex-wrap:nowrap}
   .topbar-in .lbl{display:none}
   .topbar-in [data-act="reset"]{display:none}
@@ -560,7 +590,6 @@ body > *{min-width:0}
 
 
 <div id="app">
- <div class="banner">Prototype · <b>no real payments</b></div>
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
      <span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span>
@@ -574,7 +603,11 @@ body > *{min-width:0}
       </nav>
       <a class="btn btn-s btn-ghost" href="#/lookup" aria-label="Track an order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><span class="lbl">Track an order</span></a>
       <button class="btn btn-s" data-act="signin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z"/></svg><span class="lbl">Sign in</span></button>
+      <button class="burger" data-act="menu" aria-label="Open menu" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
  </div></div>
+ 
  <section class="hero">
   <div class="hero-in">
     <div>
@@ -699,7 +732,13 @@ body > *{min-width:0}
    <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
  </div>
- </div>
+ 
+ <div class="floatcta" id="floatCta">
+   <div class="floatcta-in">
+     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included · pay by Sunday 9 August for the next flight</span></div>
+     <a class="btn" href="#/request"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6"/></svg><span class="long">Send a link</span><span class="short">Get my price</span></a>
+   </div>
+ </div></div>
 
 
 <script>
@@ -745,7 +784,8 @@ const ICONS={
  down:'M12 4v12M6.5 11 12 16.5 17.5 11M4.5 20h15',
  star:'M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z',
  lock:'M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z',
- note:'M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4'
+ note:'M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4',
+ menu:'M4 7h16M4 12h16M4 17h16'
 };
 function icon(n,s){s=s||16;const d=ICONS[n]||ICONS.box;
  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`}
@@ -856,6 +896,7 @@ function load(){
     S.settings=Object.assign({},DEFAULT_SETTINGS,S.settings||{});
     if(!Array.isArray(S.batches))S.batches=[];
     if(S.session===undefined)S.session=null;
+    S.menuOpen=false;
     S.signinOpen=false;
     if(!Array.isArray(S.restricted)||!S.restricted.length)S.restricted=[...DEFAULT_RESTRICTED];
     return true;
@@ -866,7 +907,7 @@ function load(){
 }
 function fresh(){
  S={v:1,settings:{...DEFAULT_SETTINGS},retailers:JSON.parse(JSON.stringify(DEFAULT_RETAILERS)),restricted:[...DEFAULT_RESTRICTED],
-    orders:[],audit:[],messages:[],batches:[],counter:1040,draft:null,session:null,signinOpen:false};
+    orders:[],audit:[],messages:[],batches:[],counter:1040,draft:null,session:null,signinOpen:false,menuOpen:false};
  seed(); save();
 }
 function logAudit(ref,action,before,after,reason){
@@ -1481,14 +1522,14 @@ function render(){
  $('#app').innerHTML=shell(body,isAdmin);
  // The shelf only exists on the landing page, so it starts and stops with it
  // rather than ticking away behind every other route.
- stopShelf();stopLinkbar();
+ stopShelf();stopLinkbar();stopCtaWatch();
  if(document.getElementById('heroPicked'))runShelf();
  if(document.getElementById('linkUrl'))runLinkbar();
+ watchCta();
  window.scrollTo(0,VIEW.keepScroll?window.scrollY:0);VIEW.keepScroll=false;
 }
 function shell(body,isAdmin){
  return `
- <div class="banner">Prototype · <b>no real payments</b></div>
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
      <span class="mark">${icon('plane',14)}</span>
@@ -1508,15 +1549,44 @@ function shell(body,isAdmin){
         <a href="contact/">Contact</a>
       </nav>
       <a class="btn btn-s btn-ghost" href="#/lookup" aria-label="Track an order">${icon('search',15)}<span class="lbl">Track an order</span></a>
-      <button class="btn btn-s" data-act="signin">${icon('lock',15)}<span class="lbl">Sign in</span></button>`}
+      <button class="btn btn-s" data-act="signin">${icon('lock',15)}<span class="lbl">Sign in</span></button>
+      <button class="burger" data-act="menu" aria-label="${S.menuOpen?'Close menu':'Open menu'}" aria-expanded="${S.menuOpen?'true':'false'}">
+        ${S.menuOpen?icon('x',18):icon('menu',18)}
+      </button>`}
  </div></div>
+ ${!S.session&&S.menuOpen?`<div class="menu-panel"><div class="menu-in">
+   <a href="how-it-works/" data-act="closeMenu">${icon('layers',16)}How it works</a>
+   <a href="what-it-costs/" data-act="closeMenu">${icon('pound',16)}What it costs</a>
+   <a href="shop/" data-act="closeMenu">${icon('shield',16)}Shops we buy from</a>
+   <a href="collection/" data-act="closeMenu">${icon('pin',16)}Collection in Harare</a>
+   <a href="faqs/" data-act="closeMenu">${icon('note',16)}Questions</a>
+   <a href="contact/" data-act="closeMenu">${icon('chat',16)}Contact</a>
+   <a href="#/lookup" data-act="closeMenu">${icon('search',16)}Track an order</a>
+   <button class="btn btn-primary" data-act="signin">${icon('lock',16)}Sign in</button>
+ </div></div>`:''}
  ${body}
  ${isAdmin?'':`<div class="foot">
    <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
    <div style="margin-bottom:8px"><a href="faqs/">Questions</a> · <a href="contact/">Contact</a> · <a href="what-it-costs/">What it costs</a> · <a href="collection/">Collection</a> · <a href="what-we-cannot-send/">What we cannot send</a></div>
    <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
  </div>`}
- ${S.signinOpen?signinPanel():''}`;
+ ${S.signinOpen?signinPanel():''}
+ ${floatCta()}`;
+}
+
+/* The hero has the only input that matters. Once it scrolls away the page
+   still has plenty to say, so the ask comes back along the bottom rather
+   than making someone scroll all the way up to find it again. */
+function floatCta(){
+ const onLanding=!location.hash||location.hash==='#/'||location.hash==='#';
+ if(!onLanding)return '';
+ const st=S.settings, n=nextShipment();
+ return `<div class="floatcta" id="floatCta">
+   <div class="floatcta-in">
+     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included${n.cutoffDays>0?` · pay by ${fmtDay(n.cutoff)} for the next flight`:''}</span></div>
+     <a class="btn" href="#/request">${icon('link',16)}<span class="long">Send a link</span><span class="short">Get my price</span></a>
+   </div>
+ </div>`;
 }
 
 /* Signed out, the top bar should look like the finished product: navigation
@@ -1804,6 +1874,20 @@ function runShelf(){
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){picked.classList.add('run');ptag.classList.add('run')}
  pickIdx++;
  pickTimer=setTimeout(runShelf,6000);
+}
+
+/* Show the returning CTA only once the hero's own input has left the screen,
+   so the two are never asking for the same thing at the same time. */
+let ctaObserver=null;
+function stopCtaWatch(){ if(ctaObserver){ctaObserver.disconnect();ctaObserver=null} }
+function watchCta(){
+ const bar=document.getElementById('floatCta');
+ const field=document.querySelector('.hero-form');
+ if(!bar||!field)return;
+ ctaObserver=new IntersectionObserver(entries=>{
+   entries.forEach(e=>bar.classList.toggle('on',!e.isIntersecting));
+ },{threshold:0});
+ ctaObserver.observe(field);
 }
 
 /* Instant feedback under the hero input. No network: the retailer comes from
@@ -3256,7 +3340,9 @@ document.addEventListener('click',e=>{
  const o=d.ref?getOrder(d.ref):curOrder();
  const A={
   role(){ location.hash = d.v==='admin' ? '#/admin' : '#/'; },
-  signin(){ S.signinOpen=true; save(); rerender(true) },
+  menu(){ S.menuOpen=!S.menuOpen; save(); rerender(true) },
+  closeMenu(){ S.menuOpen=false; save(); },
+  signin(){ S.signinOpen=true; S.menuOpen=false; save(); rerender(true) },
   closeSignin(){ if(el.classList.contains('modal-bg') && e.target.closest('.modal') && !e.target.closest('[data-act="closeSignin"][class*=btn]')) return;
     S.signinOpen=false; save(); rerender(true) },
   signinAs(){ S.session=d.v; S.signinOpen=false; save();

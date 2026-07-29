@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tenga · fixing the clipped pick</title>
+<style>
+:root{
+  --drench:#0B2620; --on:#F0F3F0; --on-2:#A9BDB6; --gold:#E0AE5C; --line:rgba(240,243,240,.14);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style",serif;
+  --tw:88px; --gap:8px;              /* the real phone values */
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#070E0C;color:var(--on);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1400px;margin:0 auto;padding:28px 20px 80px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(24px,3.6vw,34px);margin:0 0 8px;letter-spacing:-.02em}
+.intro{color:var(--on-2);max-width:70ch;line-height:1.6;font-size:14.5px;margin:0 0 8px}
+.intro b{color:var(--on)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 26px;align-items:center}
+button.ctl{background:transparent;border:1px solid var(--line);color:var(--on-2);font-family:var(--mono);
+  font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:7px 13px;border-radius:4px;cursor:pointer}
+button.ctl:hover,button.ctl.on{color:var(--on);border-color:var(--gold)}
+.grid{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.col{width:412px;max-width:100%}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  border:1px solid rgba(224,174,92,.4);padding:3px 9px;border-radius:100px;display:inline-block;margin-bottom:8px}
+.col h2{font-size:17px;margin:0 0 6px;letter-spacing:-.01em}
+.col p{color:var(--on-2);font-size:13.5px;line-height:1.55;margin:0 0 12px;min-height:76px}
+.col p b{color:var(--on)}
+.frame{background:var(--drench);border:1px dashed rgba(240,243,240,.22);position:relative}
+.frame::after{content:attr(data-edge);position:absolute;right:6px;bottom:4px;font-family:var(--mono);
+  font-size:9px;letter-spacing:.1em;color:rgba(240,243,240,.35)}
+
+/* the shelf, same construction as the live hero */
+.art{position:relative;width:100%;aspect-ratio:1/0.78;background:#0F2A24}
+.rails{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:var(--gap)}
+.rail{display:flex;gap:var(--gap);width:calc(20 * (var(--tw) + var(--gap)))}
+.tile{width:var(--tw);height:var(--tw);border-radius:6px;overflow:hidden;flex:none;background:#16332C}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:.5}
+.fade{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,var(--drench) 0%,transparent 15%,transparent 85%,var(--drench) 100%)}
+.pick{position:absolute;left:50%;top:calc(50% + var(--picky,0px));width:132px;height:132px;margin:-66px 0 0 -66px;
+  border-radius:8px;overflow:hidden;z-index:3;outline:2px solid var(--gold);outline-offset:2px;
+  box-shadow:0 26px 54px -18px rgba(0,0,0,.95)}
+.pick img{width:100%;height:100%;object-fit:cover;display:block}
+.ptag{position:absolute;left:50%;top:calc(50% + 76px + var(--picky,0px));transform:translateX(-50%);
+  background:var(--on);color:#101614;border-radius:5px;padding:6px 10px;font-family:var(--mono);
+  font-size:11.5px;font-weight:700;white-space:nowrap;z-index:4;box-shadow:0 12px 26px -14px rgba(0,0,0,.9)}
+
+/* A — how it behaves today */
+#a .art{overflow:hidden}
+
+/* B — clip only the moving rails, let the pick sit above the shelf */
+#b .art{overflow:visible}
+#b .rails-clip{position:absolute;inset:0;overflow:hidden}
+
+/* C — give the shelf room, and flip the tag above on the bottom row */
+#c .art{overflow:hidden;aspect-ratio:1/0.92}
+#c .ptag.flip{top:calc(50% - 76px + var(--picky,0px))}
+
+.readout{margin-top:10px;font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--on-2)}
+.readout .bad{color:#E8897B}
+.readout .good{color:#7FD8BE}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>The picked card is being clipped</h1>
+<p class="intro">The shelf is 321px tall on a 412px phone and holds 280px of rows, so there is <b>20.5px spare above and below</b>. The enlarged card is 132px against an 88px tile, so it needs <b>22px</b>. It loses about 1.5px top and bottom on the outer rows, and on the bottom row the price tag falls outside the shelf altogether and disappears.</p>
+<p class="intro">The dashed line is the edge of the shelf. Step through the rows and watch what happens at row 1 and row 3.</p>
+
+<div class="controls">
+  <button class="ctl on" data-row="0">Row 1</button>
+  <button class="ctl" data-row="1">Row 2</button>
+  <button class="ctl" data-row="2">Row 3</button>
+  <button class="ctl" data-auto="1">Cycle automatically</button>
+</div>
+
+<div class="grid">
+
+  <div class="col" id="a">
+    <span class="tag">Today</span>
+    <h2>Clipped by the shelf edge</h2>
+    <p>The shelf hides anything that leaves its box, and the enlarged card is taller than the space available. On row 3 the price tag is <b>gone entirely</b>.</p>
+    <div class="frame" data-edge="shelf edge">
+      <div class="art">
+        <div class="rails"></div>
+        <div class="fade"></div>
+        <div class="pick"><img alt=""></div>
+        <div class="ptag">£105.39 landed</div>
+      </div>
+    </div>
+    <div class="readout"></div>
+  </div>
+
+  <div class="col" id="b">
+    <span class="tag">Fix one</span>
+    <h2>Clip the rails, not the pick</h2>
+    <p>Only the scrolling rows are clipped. The picked card and its tag sit <b>above the shelf</b> and can overhang its edge, so the card is always whole and every row stays visible behind it.</p>
+    <div class="frame" data-edge="shelf edge">
+      <div class="art">
+        <div class="rails-clip"><div class="rails"></div><div class="fade"></div></div>
+        <div class="pick"><img alt=""></div>
+        <div class="ptag">£105.39 landed</div>
+      </div>
+    </div>
+    <div class="readout"></div>
+  </div>
+
+  <div class="col" id="c">
+    <span class="tag">Fix two</span>
+    <h2>Give the shelf room, flip the tag</h2>
+    <p>The shelf gets taller so the enlarged card always fits inside it, and the price tag <b>flips above the card</b> on the bottom row instead of falling off. Nothing overhangs.</p>
+    <div class="frame" data-edge="shelf edge">
+      <div class="art">
+        <div class="rails"></div>
+        <div class="fade"></div>
+        <div class="pick"><img alt=""></div>
+        <div class="ptag">£105.39 landed</div>
+      </div>
+    </div>
+    <div class="readout"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const SHELF=['1622618991746-fe6004db3a47','1600185365483-26d7a4cc7519','1613521076081-2820f9746a2d',
+'1555337159-d399aaa99955','1615900119312-2acd3a71f3aa','1559050993-d4e4fbf11769','1586495777744-4413f21062fa',
+'1616150638538-ffb0679a3fc4','1624886656674-9bf7352dfb52','1602532360508-595f449c7c55',
+'1641471290868-e0a2cc647da8','1603808033192-082d6919d3e1','1581919277494-d11e63132a8b',
+'1624280217162-466a76286d0f','1700301534611-cd44193b8947','1586084611164-a9accaeab607',
+'1775255487971-af15499994b1','1622760807800-66cf1466fc08','1760860992203-85ca32536788',
+'1537832816519-689ad163238b','1772987714654-2df39af2c658','1622760807301-4d2351a5a942',
+'1629198688000-71f23e745b6e','1569736135277-1cad6189a532','1760895535234-2c39c57cf187',
+'1530992889211-7273cbf74c17','1768483018807-bd0b9ab86539','1574565083763-40de4ea4cd9b',
+'1667242090556-4313d121a8fc','1589988576838-0676b2ff398e'];
+const U=(id,w)=>'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w='+w+'&h='+w+'&q=70';
+
+// build the three rows in every column
+document.querySelectorAll('.rails').forEach(rails=>{
+  for(let r=0;r<3;r++){
+    const row=document.createElement('div');
+    row.className='rail';
+    const set=SHELF.slice(r*10,r*10+10);
+    set.concat(set).forEach(id=>{
+      const t=document.createElement('div'); t.className='tile';
+      const im=new Image(); im.src=U(id,212); im.alt=''; t.appendChild(im); row.appendChild(t);
+    });
+    rails.appendChild(row);
+  }
+});
+
+let row=0, timer=null;
+function paint(){
+  const offset = row===1 ? '0px' : `calc(${row===0?'-1':'1'} * (var(--tw) + var(--gap)))`;
+  const idx = row*10 + 4;
+  ['a','b','c'].forEach(id=>{
+    const col=document.getElementById(id);
+    const art=col.querySelector('.art');
+    art.style.setProperty('--picky', offset);
+    col.querySelector('.pick img').src=U(SHELF[idx],340);
+    // fix two flips the tag above the card on the bottom row
+    if(id==='c') col.querySelector('.ptag').classList.toggle('flip', row===2);
+    measure(col, id);
+  });
+  document.querySelectorAll('[data-row]').forEach(b=>b.classList.toggle('on', +b.dataset.row===row));
+}
+function measure(col, id){
+  const art=col.querySelector('.art').getBoundingClientRect();
+  const pick=col.querySelector('.pick').getBoundingClientRect();
+  const tag=col.querySelector('.ptag').getBoundingClientRect();
+  const cutTop=Math.max(0, Math.round(art.top-pick.top));
+  const cutBottom=Math.max(0, Math.round(pick.bottom-art.bottom));
+  const tagOut=Math.max(0, Math.round(tag.bottom-art.bottom));
+  const clipped = id!=='b';           // only A and C actually clip
+  const lostTop = clipped?cutTop:0, lostBottom = clipped?cutBottom:0, lostTag = clipped?tagOut:0;
+  const ok = lostTop===0 && lostBottom===0 && lostTag===0;
+  col.querySelector('.readout').innerHTML =
+    (ok ? '<span class="good">card fully visible</span>' : '<span class="bad">card cut '+(lostTop||lostBottom)+'px</span>') +
+    ' &middot; ' +
+    (lostTag>0 ? '<span class="bad">tag cut '+lostTag+'px</span>' : '<span class="good">tag fully visible</span>');
+}
+document.querySelectorAll('[data-row]').forEach(b=>b.addEventListener('click',()=>{
+  clearInterval(timer); timer=null; row=+b.dataset.row; paint();
+}));
+document.querySelector('[data-auto]').addEventListener('click',()=>{
+  clearInterval(timer);
+  timer=setInterval(()=>{ row=(row+1)%3; paint() },2200);
+  paint();
+});
+paint();
+addEventListener('resize',paint);
+</script>
+</body>
+</html>

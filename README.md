@@ -115,11 +115,33 @@ Tested 29 July 2026, against the live sites.
 | Cult Beauty | Likely | Serves full HTML including JSON-LD |
 | Space NK | Likely | Serves full HTML including prices |
 
-The two highest-volume retailers are the two hardest blocked, and the public relays are themselves unreliable. There is **no free client-side path** to a Boots price: anything that defeats bot protection needs an API key, and a key in browser JavaScript is a public key.
+The two highest-volume retailers are the two hardest blocked, and the public relays are themselves unreliable.
 
-So extraction is a typing-saver, not a dependency. The service works entirely without it, which is what the spec prescribes: extracted information is provisional and an administrator confirms every price before a quote goes out.
+### The bookmarklet
 
-When there is a backend, one endpoint calling a scraping service with residential proxies and JS rendering would cover the blocked retailers. Around $30 to $50 a month.
+A retailer can block a server. It cannot block the customer's own browser, which is already past the bot check with the price rendered on screen. So the price is read from there instead.
+
+Open **"Shops that hide their prices from us"** on the request page and drag **Send to Tenga** to the bookmarks bar. Pressing it on any product page lifts the retailer's own data out of the live DOM and opens Tenga with it filled in.
+
+Three layers are tried, most trustworthy first:
+
+| Layer | Source | Trust |
+|---|---|---|
+| `schema.org` `Product` JSON-LD | Retailer stating its own price | High |
+| `product:price:amount`, `itemprop=price` | Retailer stating its own price | High |
+| Elements whose class or id says "price" | Reading the rendered page | Best effort, flagged |
+
+The layer used is recorded and displayed, and carries through to admin review, so a price scraped from page text is visibly weaker than one the retailer stated.
+
+**Verified on a live Boots page, 29 July 2026.** Boots publishes no JSON-LD, so layer 2 supplied £67.20, matching the displayed price. The same page also carries £84.00 (was), £1,344.00 (per litre), £16.80 (payment split) and £3.95 (delivery), any of which a naive text search would have picked instead. Only Boots has been tested end to end.
+
+Images are matched on alt text against the product name and need a 70% match, never picked by size: the largest images on a Boots product page are "customers also bought". Boots' CDN refuses hotlinks, so imports from there show the generated swatch rather than a photo.
+
+### Where this leaves extraction
+
+A typing-saver, not a dependency. The service works entirely without it, which is what the spec prescribes: extracted information is provisional and an administrator confirms every price before a quote goes out.
+
+When there is a backend, one endpoint calling a scraping service with residential proxies and JS rendering would cover the blocked retailers server-side. Around $30 to $50 a month.
 
 ---
 

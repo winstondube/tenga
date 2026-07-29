@@ -267,12 +267,46 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 .hero-trust span{display:flex;align-items:center;gap:10px}
 .hero-trust svg{color:var(--gold);flex:none}
 
-.hero-art{position:relative;justify-self:center;width:100%;max-width:420px}
-.hero-shot{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/5;background:#1a3a33}
-.hero-shot img{width:100%;height:100%;object-fit:cover;display:block}
-.hero-shelf{position:absolute;left:-38px;top:-26px;width:56%;aspect-ratio:16/10;border-radius:6px;overflow:hidden;
-  box-shadow:0 18px 40px -20px rgba(0,0,0,.9);border:3px solid var(--drench)}
-.hero-shelf img{width:100%;height:100%;object-fit:cover;display:block}
+/* Shelves of UK stock drifting past, with one item lifted out, priced and
+   flown off. Thirty photographs, half beauty and half fashion, ten to a row,
+   because the service is no longer about one perfume from one shop. */
+.hero-art{position:relative;justify-self:center;width:100%;max-width:420px;
+  aspect-ratio:1/1.12;border-radius:8px;overflow:hidden;background:#0F2A24}
+.shelf{--tw:106px;--gap:10px;position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:var(--gap)}
+.shelf-row{display:flex;gap:var(--gap);width:calc(var(--n) * (var(--tw) + var(--gap)));will-change:transform}
+.shelf-row.r1{animation:slideL 58s linear infinite}
+.shelf-row.r2{animation:slideR 70s linear infinite}
+.shelf-row.r3{animation:slideL 64s linear infinite}
+@keyframes slideL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes slideR{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.shelf-tile{width:var(--tw);height:var(--tw);border-radius:6px;overflow:hidden;flex:none;background:#16332C}
+.shelf-tile img{width:100%;height:100%;object-fit:cover;display:block;opacity:.5}
+.shelf-fade{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,var(--drench) 0%,transparent 15%,transparent 85%,var(--drench) 100%)}
+.shelf-pick{position:absolute;left:50%;top:50%;width:154px;height:154px;margin:-77px 0 0 -77px;border-radius:8px;
+  overflow:hidden;box-shadow:0 26px 54px -18px rgba(0,0,0,.95);opacity:0;z-index:3;
+  outline:2px solid var(--gold);outline-offset:2px}
+.shelf-pick img{width:100%;height:100%;object-fit:cover;display:block}
+.shelf-pick.run{animation:pick 5s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes pick{
+  0%{opacity:0;transform:scale(.72)}
+  13%{opacity:1;transform:scale(1)}
+  58%{opacity:1;transform:scale(1) translate(0,0)}
+  100%{opacity:0;transform:scale(.5) translate(155%,-42%)}
+}
+.shelf-ptag{position:absolute;left:50%;top:calc(50% + 88px);transform:translateX(-50%);background:var(--on-drench);
+  color:#101614;border-radius:5px;padding:7px 13px;font-family:var(--mono);font-size:12.5px;font-weight:700;
+  white-space:nowrap;opacity:0;z-index:4;box-shadow:0 12px 26px -14px rgba(0,0,0,.9)}
+.shelf-ptag.run{animation:ptagin 5s ease forwards}
+@keyframes ptagin{0%,17%{opacity:0}25%,64%{opacity:1}74%,100%{opacity:0}}
+.shelf-dest{position:absolute;right:12px;top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);background:rgba(11,38,32,.85);
+  border:1px solid color-mix(in srgb,var(--gold) 36%,transparent);padding:4px 9px;border-radius:100px;z-index:5}
+@media (prefers-reduced-motion:reduce){
+  .shelf-row{animation:none}
+  .shelf-pick{opacity:1;animation:none}
+  .shelf-ptag{opacity:1;animation:none}
+}
 .tag{position:absolute;right:-14px;bottom:-20px;width:min(268px,84%);background:var(--on-drench);color:#101614;
   border-radius:6px;padding:15px 17px;box-shadow:0 22px 44px -20px rgba(0,0,0,.9)}
 .tag-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#5C6A64;margin-bottom:9px}
@@ -341,13 +375,15 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 @media (max-width:900px){
   .hero-in{grid-template-columns:1fr;gap:36px}
   .hero-art{order:2;max-width:340px;margin-top:8px}
-  .hero-shelf{left:-18px;top:-16px}
+  .hero-art{aspect-ratio:1/1}
   .tag{right:-8px}
 }
 @media (max-width:420px){
   .hero-field{flex-direction:column;padding:8px}
   .hero-go{padding:11px 18px}
-  .hero-shelf{display:none}
+  .shelf{--tw:84px}
+  .shelf-pick{width:128px;height:128px;margin:-64px 0 0 -64px}
+  .shelf-ptag{top:calc(50% + 74px)}
   .tag{position:static;width:100%;margin-top:16px;box-shadow:none;border:1px solid rgba(255,255,255,.14)}
 }
 
@@ -1139,6 +1175,10 @@ function render(){
   else body=`<div class="narrow"><div class="empty">Page not found. <a class="link" href="#/">Go back</a></div></div>`;
  }catch(e){body=`<div class="narrow">${note('<b>Something went wrong rendering this page.</b><br>'+esc(e.message),'danger','alert')}</div>`;console.error(e)}
  $('#app').innerHTML=shell(body,isAdmin);
+ // The shelf only exists on the landing page, so it starts and stops with it
+ // rather than ticking away behind every other route.
+ stopShelf();
+ if(document.getElementById('heroPicked'))runShelf();
  window.scrollTo(0,VIEW.keepScroll?window.scrollY:0);VIEW.keepScroll=false;
 }
 function shell(body,isAdmin){
@@ -1300,6 +1340,72 @@ function faqSection(faq){
  </section>`;
 }
 
+/* Thirty photographs, fifteen beauty and fifteen fashion, none repeated.
+   Ten to a row across three rows. Half and half because the service takes
+   any UK shop now, and a wall of perfume would say otherwise. */
+const SHELF=[
+ {id:'1622618991746-fe6004db3a47',alt:'Glass perfume bottles in warm light'},
+ {id:'1600185365483-26d7a4cc7519',alt:'White and red Nike trainer'},
+ {id:'1613521076081-2820f9746a2d',alt:'Clear glass perfume bottle'},
+ {id:'1555337159-d399aaa99955',alt:'Pair of brown leather boots'},
+ {id:'1615900119312-2acd3a71f3aa',alt:'White and black cosmetic tube'},
+ {id:'1559050993-d4e4fbf11769',alt:'White Nike low-top trainer'},
+ {id:'1586495777744-4413f21062fa',alt:'Red lipstick on a white background'},
+ {id:'1616150638538-ffb0679a3fc4',alt:'Grey leather jacket'},
+ {id:'1624886656674-9bf7352dfb52',alt:'Green leaf resting on a glass bottle'},
+ {id:'1602532360508-595f449c7c55',alt:'Black leather bag with sunglasses'},
+
+ {id:'1641471290868-e0a2cc647da8',alt:'Tube of body scrub on a table'},
+ {id:'1603808033192-082d6919d3e1',alt:'Pair of white and brown shoes'},
+ {id:'1581919277494-d11e63132a8b',alt:'Two perfume bottles on a black table'},
+ {id:'1624280217162-466a76286d0f',alt:'Brown and black sunglasses'},
+ {id:'1700301534611-cd44193b8947',alt:'Night cream jar and bottle'},
+ {id:'1586084611164-a9accaeab607',alt:'Blue denim jeans folded on white'},
+ {id:'1775255487971-af15499994b1',alt:'Niacinamide serum with a dropper'},
+ {id:'1622760807800-66cf1466fc08',alt:'White adidas low-top trainer'},
+ {id:'1760860992203-85ca32536788',alt:'Perfume bottle on a lit podium'},
+ {id:'1537832816519-689ad163238b',alt:'Tortoiseshell sunglasses'},
+
+ {id:'1772987714654-2df39af2c658',alt:'Skincare bottles lined up on a shelf'},
+ {id:'1622760807301-4d2351a5a942',alt:'White Converse low-top trainers'},
+ {id:'1629198688000-71f23e745b6e',alt:'White and brown plastic bottles'},
+ {id:'1569736135277-1cad6189a532',alt:'Black adidas NMD trainer'},
+ {id:'1760895535234-2c39c57cf187',alt:'Shampoo, conditioner and serum bottles'},
+ {id:'1530992889211-7273cbf74c17',alt:'Pink and white low-top trainers'},
+ {id:'1768483018807-bd0b9ab86539',alt:'Three skincare products on a shelf'},
+ {id:'1574565083763-40de4ea4cd9b',alt:'Grey trainer'},
+ {id:'1667242090556-4313d121a8fc',alt:'A group of coloured lipsticks'},
+ {id:'1589988576838-0676b2ff398e',alt:'Polka dot shirt with accessories'}
+];
+function shelfSrc(id){return 'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=212&h=212&q=70'}
+
+/* One item lifted off the shelf, priced, and flown out. Destinations rotate
+   so it reads as a service moving many parcels rather than one. */
+const PICKS=[
+ {i:0,  price:105.39, city:'Harare'},
+ {i:1,  price:186.04, city:'Bulawayo'},
+ {i:26, price:78.40,  city:'Mutare'},
+ {i:15, price:96.20,  city:'Gweru'},
+ {i:6,  price:61.20,  city:'Harare'},
+ {i:11, price:142.75, city:'Masvingo'}
+];
+let pickTimer=null,pickIdx=0;
+function stopShelf(){clearTimeout(pickTimer);pickTimer=null}
+function runShelf(){
+ const picked=document.getElementById('heroPicked');
+ if(!picked){stopShelf();return}
+ const p=PICKS[pickIdx%PICKS.length], ptag=document.getElementById('heroPtag'), dest=document.getElementById('heroDest');
+ picked.querySelector('img').src=shelfSrc(SHELF[p.i].id).replace('w=212&h=212','w=340&h=340');
+ picked.querySelector('img').alt=SHELF[p.i].alt;
+ ptag.textContent=money(p.price)+' landed';
+ dest.innerHTML=icon('arrow',10)+' '+p.city;
+ picked.classList.remove('run');ptag.classList.remove('run');
+ void picked.offsetWidth;
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){picked.classList.add('run');ptag.classList.add('run')}
+ pickIdx++;
+ pickTimer=setTimeout(runShelf,6000);
+}
+
 /* Instant feedback under the hero input. No network: the retailer comes from
    the domain and the name from the URL, both of which we already have. */
 function heroDetect(url){
@@ -1339,23 +1445,19 @@ function heroSection(dq){
     </div>
 
     <div class="hero-art fade" style="animation-delay:.35s">
-      <div class="hero-shot">
-        <img src="https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&q=80"
-             alt="Two glass perfume bottles catching warm light" loading="eager" decoding="async" width="900" height="1350">
+      <div class="shelf">
+        ${[0,1,2].map(r=>{
+          const row=SHELF.slice(r*10,r*10+10);
+          // duplicated once so the marquee can loop seamlessly at -50%
+          return `<div class="shelf-row r${r+1}" style="--n:${row.length*2}">${row.concat(row).map(p=>
+            `<div class="shelf-tile"><img src="${shelfSrc(p.id)}" alt="${esc(p.alt)}" decoding="async" width="212" height="212"></div>`
+          ).join('')}</div>`;
+        }).join('')}
       </div>
-      <div class="hero-shelf">
-        <img src="https://images.unsplash.com/photo-1772987714654-2df39af2c658?auto=format&fit=crop&w=700&q=80"
-             alt="Skincare bottles and jars lined up on a shop shelf" loading="eager" decoding="async" width="700" height="394">
-      </div>
-      <div class="tag">
-        <div class="tag-h">Boots · landed in Harare</div>
-        <div class="tag-l"><span>Perfume, 100ml</span><span class="n">${money(dq.productTotal)}</span></div>
-        <div class="tag-l"><span>UK delivery</span><span class="n">${dq.deliveryTotal?money(dq.deliveryTotal):'free'}</span></div>
-        <div class="tag-l"><span>Our fee, ${st.procurementPct}%</span><span class="n">${money(dq.fee)}</span></div>
-        <div class="tag-l"><span>Flight and clearance</span><span class="n">${money(dq.cargoEst)}</span></div>
-        <div class="tag-sum"><span>You pay</span><span class="n">${money(dq.total)}</span></div>
-        <div class="tag-foot">One payment. Nothing to settle on arrival.</div>
-      </div>
+      <div class="shelf-fade"></div>
+      <div class="shelf-dest" id="heroDest">${icon('arrow',10)} Harare</div>
+      <div class="shelf-pick" id="heroPicked"><img alt="" width="308" height="308"></div>
+      <div class="shelf-ptag" id="heroPtag">${money(dq.total)} landed</div>
     </div>
   </div>
  </section>`;

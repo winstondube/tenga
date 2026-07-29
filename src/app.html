@@ -3056,7 +3056,12 @@ document.addEventListener('input',e=>{
  if(el.id==='heroLink'){heroDetect(String(v));return}
  if(d.bind){const [a,b]=d.bind.split('.');const dr=draft();if(b)dr[a][b]=v;else dr[a]=v;save();return}
  const o=curOrder();
- if(d.item&&o){const it=o.items.find(i=>i.id===d.item);if(it){it[d.k]=(d.k==='qty'||d.k==='confirmedPrice'||d.k==='displayedPrice'||d.k==='estKg')?(v===''?(d.k==='confirmedPrice'?null:0):Number(v)):v;save()}return}
+ if(d.item&&o){const it=o.items.find(i=>i.id===d.item);if(it){it[d.k]=(d.k==='qty'||d.k==='confirmedPrice'||d.k==='displayedPrice'||d.k==='estKg')?(v===''?(d.k==='confirmedPrice'?null:0):Number(v)):v;
+   // A weight typed by hand has to beat the category guess, or the field is
+   // decoration and we quote shipping off a number nobody agreed to. Clearing
+   // it hands the item back to the automatic estimate.
+   if(d.k==='estKg')it.estKgManual=v!=='';
+   save()}return}
  if(d.attr&&o){const it=o.items.find(i=>i.id===d.attr);if(it){it.attrs=Object.assign({},it.attrs);if(v)it.attrs[d.k]=v;else delete it.attrs[d.k];save()}return}
  if(d.pur&&o){const it=o.items.find(i=>i.id===d.pur);if(it){it.purchase=it.purchase||{};it.purchase[d.k]=v;save()}return}
  if(d.rec&&o){const it=o.items.find(i=>i.id===d.rec);if(it){it.recDraft=it.recDraft||{};it.recDraft[d.k]=v;save()}return}

@@ -231,7 +231,7 @@ export function buildPages(api) {
     faq: [
       ['Do you deliver to my address in Harare?', 'Not yet. Every order is collected from our Harare collection point. We would rather say that plainly than take your money and improvise.'],
       ['Do you deliver to Bulawayo, Mutare or anywhere else?', 'Not yet. You can still order from anywhere in Zimbabwe, but the parcel is collected in Harare and onward transport is yours to arrange. We will tell you that before you pay, not after.'],
-      ['Do I pay anything at collection?', `No. Shipping and clearance are inside the price you agreed before we bought anything. The only exception is if the parcel weighs more than we estimated by more than ${api.money(s.cargoTolerance)}, and we tell you before it ships rather than at the counter.`],
+      ['Do I pay anything at collection?', `No. Shipping and clearance are inside the price you agreed before we bought anything. If the parcel weighs more than we estimated we tell you before it ships, never at the counter. If it weighs less, you get the difference back.`],
       ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
       ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready. You do not need to chase us.']
     ]
@@ -256,7 +256,7 @@ export function buildPages(api) {
       <p>Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos. On a very small order the flight would cost more than the goods, which is not a service anyone should buy. The ${api.money(s.minSpend)} minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
 
       <h2>Why shipping is estimated, and what happens if it is wrong</h2>
-      <p>We work the flight out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. If the real cost is within ${api.money(s.cargoTolerance)} of our estimate we absorb the difference and say nothing. Outside that, we either ask you for the difference or refund it, and we tell you before the parcel ships either way.</p>
+      <p>We work the flight out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. We quote it slightly high on purpose, so the usual outcome is a refund of the unused part. If it comes in heavier we ask you for the difference, and we tell you before the parcel ships either way.</p>
 
       <h2>What we make</h2>
       <p>Our fee, and nothing else. We do not mark up the product, we do not mark up UK delivery, and we do not mark up the flight. If a discount code appears between your quote and our purchase, the saving is yours.</p>
@@ -371,7 +371,7 @@ export function buildPages(api) {
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
       ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
-      ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type, plus packaging and a small safety margin. Once the parcel is weighed in the UK, a difference of more than ${api.money(s.cargoTolerance)} is charged or refunded. Anything smaller we absorb.`],
+      ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type, plus packaging and a small safety margin on the freight. Because of that margin the quote is deliberately a little high, so once the parcel is weighed in the UK you normally get some of it back. If it comes in heavier, we ask you before it ships.`],
       ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready to collect.']
     ]],
     ['What we can and cannot send', [

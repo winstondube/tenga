@@ -29,13 +29,51 @@ node build.mjs
 ### Layout
 
 ```
-src/app.html    source of truth: markup, styles and application logic
-build.mjs       wraps src/app.html into a complete document
-index.html      built output, served by GitHub Pages. Do not edit by hand
-docs/           product notes
+site.json              url, base path and indexable flag. SET BEFORE LAUNCH
+src/app.html           source of truth: markup, styles and app logic
+src/pages.mjs          marketing page content, generated from live config
+build.mjs              builds everything below
+index.html             the app, with the landing page pre-rendered
+shop/<retailer>/       one page per approved retailer
+delivery/<city>/       one page per destination
+what-it-costs/         pricing with live worked examples
+what-we-cannot-send/   restricted goods
+how-it-works/
+sitemap.xml, robots.txt
 ```
 
-`src/app.html` is a fragment with no `<head>` because it is also published as a Claude artifact, where the runtime supplies the document shell. `build.mjs` supplies that shell for the standalone build. One source, two homes.
+Generated files are built output. Do not edit them by hand; edit `src/` and rebuild.
+
+`src/app.html` is a fragment with no `<head>` because it is also published as a Claude artifact, where the runtime supplies the document shell.
+
+---
+
+## Built for search from the start
+
+The application is a single-page app, which is fine for the app and useless for search: a crawler that does not run JavaScript sees an empty `<div>`. So the build does two things about it.
+
+**The landing page is pre-rendered.** `build.mjs` executes the app's own view functions in Node and writes the resulting HTML into `index.html`. A crawler sees the full hero, copy and images in view-source; the app then boots over the top. One source, no duplication, no drift.
+
+**The marketing pages are real static HTML** at real URLs, generated from the live config. Retailer delivery rules, cargo rates, restricted keywords and every worked example come from the same data the app runs on, so the content cannot contradict what the business actually does. Change the fee in Settings and every page's arithmetic changes with it.
+
+Each page carries a canonical, Open Graph tags, `BreadcrumbList` and `FAQPage` structured data. The home page adds `Organization` and `Service`.
+
+Nobody searches for a landing page. They search for their problem, which is why the pages are shaped as *"Buy from Boots and ship to Zimbabwe"* and *"What we cannot send"* rather than as more sections on the homepage.
+
+### Launch checklist
+
+Everything below is `site.json`. Nothing else needs a find-and-replace.
+
+1. Buy the domain.
+2. Set `url` to the real origin, no trailing slash. Set `base` to `/`.
+3. Create a `CNAME` file at the repo root containing the bare domain.
+4. Point the DNS at GitHub Pages, or move the built output to any static host.
+5. Set `indexable` to `true`. This flips the robots meta and swaps `robots.txt` from Disallow-all to Allow.
+6. Rebuild, deploy, then submit `sitemap.xml` in Google Search Console.
+
+Until step 5 the site is deliberately invisible to search, because the demo carries fictional customer data.
+
+**Realistic expectation:** SEO on a new domain takes six to twelve months to compound. For this market the first customers will come from WhatsApp groups and Facebook, not Google. The value of getting this right now is that it starts compounding the day the domain goes live rather than the day someone remembers to do it.
 
 ---
 

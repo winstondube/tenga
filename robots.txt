@@ -1,0 +1,3 @@
+# Prototype. Indexing is disabled until site.json sets "indexable": true.
+User-agent: *
+Disallow: /

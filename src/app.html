@@ -139,8 +139,11 @@ table.t tbody tr.clickable{cursor:pointer}
 table.t tbody tr.clickable:hover{background:var(--surface-2)}
 .scroll-x{overflow-x:auto}
 
-.thumb{width:46px;height:46px;flex:none;border-radius:3px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;border:1px solid rgba(0,0,0,.08)}
+.thumb{position:relative;width:46px;height:46px;flex:none;border-radius:3px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;border:1px solid rgba(0,0,0,.08);overflow:hidden}
 .thumb.lg{width:72px;height:72px;font-size:18px}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
 
 /* ---------- shell ---------- */
 .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
@@ -306,7 +309,9 @@ function until(ts){const m=Math.round((ts-Date.now())/60000);if(m<=0)return 'exp
 const HUES=[168,32,204,340,96,268,14,188];
 function swatch(seed){const h=HUES[hash(seed)%HUES.length];const l=hash(seed+'x')%12+34;return `linear-gradient(140deg,hsl(${h} 42% ${l+14}%),hsl(${h+18} 46% ${l}%))`}
 function initials(name){return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
-function thumb(item,lg){return `<div class="thumb ${lg?'lg':''}" style="background:${swatch(item.name||item.url||'x')}">${esc(initials(item.name||'Item'))}</div>`}
+function thumb(item,lg){
+ const img=item.image?`<img src="${esc(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:'';
+ return `<div class="thumb ${lg?'lg':''}" style="background:${swatch(item.name||item.url||'x')}">${esc(initials(item.name||'Item'))}${img}</div>`}
 function pill(text,tone){return `<span class="pill p-${tone||'mute'}">${esc(text)}</span>`}
 function note(text,tone,ic){return `<div class="note n-${tone||'mute'}">${icon(ic||'alert',15)}<div>${text}</div></div>`}
 let toastT;
@@ -427,16 +432,126 @@ function extract(url){
  slug=slug.replace(/\.(html?|aspx|php)$/i,'').replace(/[-_+]/g,' ').replace(/\b\d{4,}\b/g,'').replace(/\s+/g,' ').trim();
  if(!slug||slug.length<3){out.reason='noname';out.ok=true;out.name='';}
  else {out.ok=true;out.name=titleCase(slug)}
- if(!r.autoExtract){out.reason='noauto';out.price=null;out.availability='Needs manual check';return out}
- const h=hash(host+u.pathname);
- const base=6+(h%56);const pence=[0.99,0.5,0.95,0.0,0.49][h%5];
- out.price=round2(base+pence);
- if(h%3===0){out.wasPrice=round2(out.price*(1.15+(h%9)/40))}
- const sizes=['50ml','100ml','200ml','250ml','400ml','30ml','75ml','1 pack','2 pack'];
- out.size=sizes[h%sizes.length];
- out.availability=(h%11===0)?'Low stock':'In stock';
+ // Size is genuinely readable from most retailer slugs, so we read it.
+ // Price is NOT. A browser cannot fetch a retailer page (CORS), and a real
+ // implementation needs a server-side scraper per retailer. We never invent
+ // a price: an unverified number that looks confirmed is worse than none.
+ const sz=slug.match(/(\d+(?:\.\d+)?)\s?(ml|litre|liter|l|g|kg|oz)\b/i);
+ if(sz)out.size=sz[1]+sz[2].toLowerCase().replace(/^(litre|liter)$/,'l');
+ const pk=slug.match(/(\d+)\s?(pack|pk|piece|pcs|pair)\b/i);
+ if(pk&&!out.size)out.size=pk[1]+' '+pk[2].toLowerCase();
+ out.price=null;out.wasPrice=null;
+ out.availability='To be confirmed';
+ if(!r.autoExtract)out.reason='noauto';
  return out;
 }
+/* ---------------- live product read ----------------
+   A browser cannot fetch a retailer page directly: the retailer sends no
+   CORS header, so the request is blocked. Until there is a server, we relay
+   through a public CORS proxy and parse the retailer's own structured data
+   (schema.org JSON-LD, then Open Graph, then microdata).
+
+   This is a testing stopgap, not production. Proxies are rate limited and
+   some retailers block them at the edge. Every failure path falls through to
+   manual entry, which is what the real service does anyway.                */
+const PROXIES=[
+ u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+ u=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u),
+ u=>'https://thingproxy.freeboard.io/fetch/'+u
+];
+/* Race the relays rather than trying them in turn: a dead one should not
+   make the customer wait for a live one. First usable response wins. */
+async function fetchHTML(url){
+ const attempt=mk=>new Promise((resolve,reject)=>{
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>{ctl.abort();reject(new Error('timeout'))},7000);
+  fetch(mk(url),{signal:ctl.signal,headers:{'Accept':'text/html,*/*'}})
+   .then(res=>{
+     clearTimeout(timer);
+     if(!res.ok)throw new Error('http '+res.status);
+     return res.text();
+   })
+   .then(txt=>{
+     if(!txt||txt.length<800)throw new Error('empty');
+     if(/pardon our interruption|access denied|are you a robot|<title>\s*just a moment/i.test(txt.slice(0,4000)))throw new Error('bot-blocked');
+     resolve(txt);
+   })
+   .catch(e=>{clearTimeout(timer);reject(e)});
+ });
+ try{return await Promise.any(PROXIES.map(attempt))}catch(e){return null}
+}
+function toNum(v){
+ if(v==null)return null;
+ const n=parseFloat(String(v).replace(/[^0-9.]/g,''));
+ return isFinite(n)&&n>0?round2(n):null;
+}
+function flattenLD(node,out){
+ if(!node||typeof node!=='object')return;
+ if(Array.isArray(node)){node.forEach(n=>flattenLD(n,out));return}
+ out.push(node);
+ if(node['@graph'])flattenLD(node['@graph'],out);
+}
+function isType(n,t){const x=n&&n['@type'];return x===t||(Array.isArray(x)&&x.includes(t))}
+function parseProduct(html){
+ const out={name:null,price:null,wasPrice:null,image:null,availability:null,brand:null};
+ let doc;
+ try{doc=new DOMParser().parseFromString(html,'text/html')}catch(e){return out}
+ const meta=sel=>{const el=doc.querySelector(sel);return el?el.getAttribute('content'):null};
+
+ // 1. schema.org Product, what retailers publish for Google Shopping
+ const nodes=[];
+ doc.querySelectorAll('script[type="application/ld+json"]').forEach(s=>{
+  try{flattenLD(JSON.parse(s.textContent),nodes)}catch(e){}
+ });
+ const prod=nodes.find(n=>isType(n,'Product'));
+ if(prod){
+  out.name=typeof prod.name==='string'?prod.name:null;
+  out.brand=prod.brand&&(prod.brand.name||prod.brand)||null;
+  const im=prod.image;
+  out.image=Array.isArray(im)?(typeof im[0]==='string'?im[0]:im[0]&&im[0].url):(typeof im==='string'?im:im&&im.url)||null;
+  let off=prod.offers;
+  if(Array.isArray(off))off=off[0];
+  if(off){
+   out.price=toNum(off.price!=null?off.price:off.lowPrice);
+   if(off.availability)out.availability=/InStock/i.test(off.availability)?'In stock':/OutOfStock|SoldOut/i.test(off.availability)?'Out of stock':null;
+  }
+ }
+ // 2. Open Graph and product meta
+ out.name=out.name||meta('meta[property="og:title"]')||meta('meta[name="twitter:title"]');
+ out.image=out.image||meta('meta[property="og:image"]')||meta('meta[name="twitter:image"]');
+ if(out.price==null)out.price=toNum(meta('meta[property="product:price:amount"]')||meta('meta[property="og:price:amount"]')||meta('meta[itemprop="price"]'));
+ out.wasPrice=toNum(meta('meta[property="product:original_price:amount"]'));
+ // 3. microdata, last resort
+ if(out.price==null){
+  const el=doc.querySelector('[itemprop="price"]');
+  if(el)out.price=toNum(el.getAttribute('content')||el.textContent);
+ }
+ if(!out.name){const h1=doc.querySelector('h1');if(h1)out.name=h1.textContent.trim()}
+ if(out.name)out.name=out.name.replace(/\s+/g,' ').replace(/\s*[|–-]\s*(Boots|Superdrug|ASOS|LookFantastic|Next|Cult Beauty|Beauty Bay|Space NK)\s*$/i,'').trim();
+ if(out.wasPrice&&out.price&&out.wasPrice<=out.price)out.wasPrice=null;
+ return out;
+}
+function sizeFrom(text){
+ const s=String(text||'');
+ const m=s.match(/(\d+(?:\.\d+)?)\s?(ml|litre|liter|l|g|kg|oz)\b/i);
+ if(m)return m[1]+m[2].toLowerCase().replace(/^(litre|liter)$/,'l');
+ const p=s.match(/(\d+)\s?(pack|pk|piece|pcs|pair)\b/i);
+ return p?p[1]+' '+p[2].toLowerCase():'';
+}
+async function enrich(p){
+ const html=await fetchHTML(p.url);
+ if(!html)return {...p,live:'failed'};
+ const d=parseProduct(html);
+ const merged={...p,live:(d.price!=null||d.name)?'ok':'partial'};
+ if(d.name&&d.name.length>3)merged.name=d.name;
+ if(d.price!=null)merged.price=d.price;
+ if(d.wasPrice!=null)merged.wasPrice=d.wasPrice;
+ if(d.image)merged.image=d.image;
+ if(d.availability)merged.availability=d.availability;
+ if(!merged.size)merged.size=sizeFrom(merged.name);
+ return merged;
+}
+
 function restrictedHits(text){
  const t=String(text||'').toLowerCase();
  return S.restricted.filter(k=>t.includes(k.toLowerCase()));
@@ -782,7 +897,7 @@ function viewRequest(){
        </label>
        <button class="btn btn-primary" data-act="fetch" style="height:37px">${icon('link',16)}Read link</button>
      </div>
-     ${d.pending?pendingCard(d.pending):`<div class="tiny muted">We read what the page shows. Whatever we find is provisional until a person confirms it.</div>`}
+     ${d.pending?pendingCard(d.pending):`<div class="tiny muted">We open the page and read the name, price and image. Whatever we find is provisional: a person checks it against the retailer before you get a quote.</div>`}
    </div>
   </div>
 
@@ -838,24 +953,29 @@ function pendingCard(p){
    <div class="row wrap"><button class="btn btn-s" data-act="addManual">${icon('plus',15)}Submit for manual review</button><button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button></div>
  </div>`;
  if(p.reason==='disabled')return note(`<b>We are not buying from ${esc(p.retailerName)} at the moment.</b> Try a different retailer, or contact us if it is important.`,'danger','x');
+ const loading=p.live==='loading';
  return `<div class="card" style="background:var(--surface-2);border-color:var(--line-2)">
   <div class="card-b stack">
    <div class="row" style="align-items:flex-start">
-     ${thumb({name:p.name||p.retailerName},true)}
+     ${thumb({name:p.name||p.retailerName,image:p.image},true)}
      <div class="grow stack-s">
        <div class="row wrap" style="gap:6px">
          ${pill(p.retailerName,'accent')}
-         ${p.availability==='In stock'?pill('In stock','accent'):p.availability==='Low stock'?pill('Low stock','warn'):pill(p.availability,'mute')}
-         ${pill('Provisional','mute')}
+         ${loading?`<span class="pill p-mute"><i class="spin" style="width:9px;height:9px;border-width:1.5px"></i>Reading the page</span>`
+          :p.availability==='In stock'?pill('In stock','accent'):p.availability==='Out of stock'?pill('Out of stock','danger'):pill(p.availability||'To be confirmed','mute')}
+         ${p.live==='ok'&&p.price!=null?pill('Price read from page','accent'):p.live==='failed'?pill('Enter price manually','mute'):''}
        </div>
        <input type="text" id="pName" placeholder="Product name" value="${esc(p.name)}" style="font-weight:600">
-       ${p.reason==='noauto'?`<div class="tiny" style="color:var(--warn)">This shop blocks automatic reading. Tell us the name and options and we will confirm the price for you.</div>`
-        :p.reason==='noname'?`<div class="tiny" style="color:var(--warn)">We could not read a product name from that link. Please type it in.</div>`
-        :`<div class="tiny muted">Shown online: <b class="mono">${p.price!=null?money(p.price):'not readable'}</b>${p.wasPrice?` <s class="mono">${money(p.wasPrice)}</s>`:''} · this is not your final price.</div>`}
+       ${loading?`<div class="tiny muted">Fetching the retailer page for the name, price and image.</div>`
+        :p.live==='failed'?`<div class="tiny muted">${esc(p.retailerName)} does not let us open the page automatically. Check the name below and type the price you can see. We confirm it against the retailer either way.</div>`
+        :p.price!=null?`<div class="tiny muted">Page shows <b class="mono">${money(p.price)}</b>${p.wasPrice?` was <s class="mono">${money(p.wasPrice)}</s>`:''} · read just now, still confirmed by a person before you pay.</div>`
+        :p.reason==='noname'?`<div class="tiny" style="color:var(--warn)">We could not read a product name from that link. Please type it in so we buy the right thing.</div>`
+        :`<div class="tiny muted">Read from your link. Check it matches the page, and correct it if not.</div>`}
      </div>
    </div>
    <div class="field-grid">
      <label class="f">Quantity<input type="number" id="pQty" min="1" max="20" value="1"></label>
+     <label class="f">Price on the page ${p.price!=null?'<span class="hint">read from the page, correct if wrong</span>':'<span class="hint">optional, helps us quote faster</span>'}<input type="number" step="0.01" id="pPrice" value="${p.price!=null?p.price:''}" placeholder="63.99"></label>
      <label class="f">Size<input type="text" id="pSize" value="${esc(p.size||'')}" placeholder="e.g. 250ml"></label>
      <label class="f">Colour<input type="text" id="pColour" placeholder="e.g. natural black"></label>
      <label class="f">Shade<input type="text" id="pShade" placeholder="e.g. 4.5N"></label>
@@ -890,7 +1010,7 @@ function draftItemCard(it,ix){
      <div class="row wrap" style="gap:6px">${pill(it.retailerName||'Unknown shop',it.retailerId?'accent':'warn')}${it.restricted.length?pill('Needs review','danger'):''}</div>
      <b style="font-size:14.5px">${esc(it.name||'Unnamed item')}</b>
      ${variantBits?`<div class="tiny muted">${esc(variantBits)}</div>`:''}
-     <div class="tiny muted">Qty ${it.qty} · ${it.displayedPrice!=null?`shown at <span class="mono">${money(it.displayedPrice)}</span> each`:'price to be confirmed by us'}</div>
+     <div class="tiny muted">Qty ${it.qty} · ${it.displayedPrice!=null?`shown at <span class="mono">${money(it.displayedPrice)}</span> each`:'price to be confirmed by us'}${it.priceSource==='Read from page'?' · read from the page':''}</div>
      ${it.subsAllowed==='yes'?`<div class="tiny" style="color:var(--accent)">Substitutes allowed${it.subsNotes?': '+esc(it.subsNotes):''}</div>`:it.subsAllowed==='cancel'?`<div class="tiny muted">Cancel and refund if unavailable</div>`:`<div class="tiny muted">Ask before substituting</div>`}
    </div>
    <div class="col" style="align-items:flex-end;gap:6px">
@@ -1360,7 +1480,7 @@ function paneReview(o){
     <div style="padding:0 13px 13px" class="stack">
      <div class="field-grid">
        <label class="f">Quantity<input type="number" min="1" data-item="${it.id}" data-k="qty" value="${it.qty}"></label>
-       <label class="f">Shown online <span class="hint">provisional</span><input type="number" step="0.01" data-item="${it.id}" data-k="displayedPrice" value="${it.displayedPrice==null?'':it.displayedPrice}"></label>
+       <label class="f">Shown online <span class="hint">${esc(it.priceSource||'unverified')}</span><input type="number" step="0.01" data-item="${it.id}" data-k="displayedPrice" value="${it.displayedPrice==null?'':it.displayedPrice}"></label>
        <label class="f" style="box-shadow:inset 0 -2px 0 var(--accent);padding-bottom:4px">Confirmed unit price<input type="number" step="0.01" data-item="${it.id}" data-k="confirmedPrice" value="${it.confirmedPrice==null?'':it.confirmedPrice}" placeholder="check the basket"></label>
        <label class="f">Availability<select data-item="${it.id}" data-k="availability">${['Unknown','In stock','Low stock','Out of stock','Variant unavailable','Quantity unavailable','Listing removed','Needs manual check'].map(a=>`<option ${it.availability===a?'selected':''}>${a}</option>`).join('')}</select></label>
        <label class="f">Est. shipping weight (kg)<input type="number" step="0.05" data-item="${it.id}" data-k="estKg" value="${it.estKg}"></label>
@@ -1955,13 +2075,21 @@ document.addEventListener('click',e=>{
   search(){ VIEW.search=val('adminSearch'); rerender(true); },
 
   /* customer request */
-  fetch(){
+  async fetch(){
     const url=val('linkInput'); const dr=draft(); dr.pendingUrl=url;
     if(!url){toast('Paste a product link first');return}
     const r=extract(url);
-    if(!r.ok&&!['unapproved','disabled'].includes(r.reason)){dr.pending={reason:'badurl',msg:r.reason==='' ?'':r.reason};}
-    else dr.pending=r;
-    save();rerender(true);
+    if(!r.ok&&!['unapproved','disabled'].includes(r.reason)){dr.pending={reason:'badurl',msg:r.reason};save();rerender(true);return}
+    if(['unapproved','disabled'].includes(r.reason)){dr.pending=r;save();rerender(true);return}
+    // Show the card immediately, then fill in what the retailer page tells us.
+    dr.pending={...r,live:'loading'};save();rerender(true);
+    const filled=await enrich(dr.pending);
+    const d2=draft();
+    if(d2.pending&&d2.pending.url===filled.url){d2.pending=filled;save();rerender(true);
+      if(filled.live==='ok'&&filled.price!=null)toast('Read '+money(filled.price)+' from '+filled.retailerName);
+      const f=document.getElementById('pPrice');
+      if(f&&!f.value)f.focus();
+    }
   },
   clearPending(){ const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true) },
   addItem(){
@@ -1970,8 +2098,11 @@ document.addEventListener('click',e=>{
     if(!name){toast('Please give the product a name so we buy the right thing');return}
     const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
       size:val('pSize'),colour:val('pColour'),shade:val('pShade'),scent:val('pScent'),variant:val('pVariant'),
-      qty:Math.max(1,Number(val('pQty'))||1),displayedPrice:p.price,wasPrice:p.wasPrice,availability:p.availability,
-      extractOk:!!p.price,subsAllowed:val('pSubs')||'no',subsNotes:val('pSubsNotes'),customerNotes:val('pNotes'),
+      qty:Math.max(1,Number(val('pQty'))||1),
+      displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
+      priceSource:val('pPrice')===''?'':(p.live==='ok'&&p.price!=null&&round2(Number(val('pPrice')))===p.price?'Read from page':'Customer reported'),
+      wasPrice:p.wasPrice||null,image:p.image||null,availability:p.availability,
+      extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',subsNotes:val('pSubsNotes'),customerNotes:val('pNotes'),
       cancelIfUnavailable:val('pSubs')==='cancel'});
     it.restricted=restrictedHits([name,it.url,it.customerNotes].join(' '));
     dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);

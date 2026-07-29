@@ -84,13 +84,42 @@ Every price change, manual adjustment, refund, restriction clearance and status 
 
 The prototype demonstrates the flow. These parts are simulated and will need real implementations.
 
-**Product extraction.** The retailer is matched from the domain, the product name is read from the URL slug, and a plausible price is generated. Real extraction needs a server-side scraper per retailer, and several of the target sites actively block it. The two failure paths are modelled and are the part worth reviewing: a retailer that blocks reading, and a link with no readable name. Both fall through to manual entry rather than failing.
+**Product extraction is real, but limited.** See the section below.
 
 **Payments.** No provider is connected. The demo checkout marks a payment complete without money moving. Paying by PayPal in the demo deliberately lands as *Payment held* rather than completed, so the float decision is visible.
 
 **Messages.** Email and WhatsApp are logged against the order, not sent.
 
 **Attachments.** Invoices, receipts and photographs are recorded as filenames. There is no upload.
+
+---
+
+## Reading a product link
+
+The retailer is matched from the domain. The product name and size are parsed from the URL slug, which works offline and instantly. The app then fetches the retailer page through a public CORS relay and parses the shop's own structured data: schema.org `Product` JSON-LD first, then Open Graph, then microdata. Relays are raced rather than tried in turn, so a dead one does not hold up a live one.
+
+**No price is ever invented.** An earlier build hashed the URL to generate a plausible-looking price. A fabricated number that renders like a confirmed one is worse than no number at all, so it was removed. Where a price cannot be read, the field stays empty and the customer can type what they can see. Admin review records the difference between *read from page* and *customer reported*.
+
+### Which retailers can be read
+
+Tested 29 July 2026, against the live sites.
+
+| Retailer | Automated read | Why |
+|---|---|---|
+| Boots | No | Imperva bot interstitial, "Pardon Our Interruption" |
+| Superdrug | No | 403 Access Denied |
+| ASOS | No | Connection refused to automated clients |
+| Next | No | 403 on product paths |
+| Beauty Bay | No | Client-rendered, 4.9 KB shell with no product data |
+| LookFantastic | Likely | Serves full HTML including JSON-LD |
+| Cult Beauty | Likely | Serves full HTML including JSON-LD |
+| Space NK | Likely | Serves full HTML including prices |
+
+The two highest-volume retailers are the two hardest blocked, and the public relays are themselves unreliable. There is **no free client-side path** to a Boots price: anything that defeats bot protection needs an API key, and a key in browser JavaScript is a public key.
+
+So extraction is a typing-saver, not a dependency. The service works entirely without it, which is what the spec prescribes: extracted information is provisional and an administrator confirms every price before a quote goes out.
+
+When there is a backend, one endpoint calling a scraping service with residential proxies and JS rendering would cover the blocked retailers. Around $30 to $50 a month.
 
 ---
 

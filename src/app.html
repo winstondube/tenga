@@ -106,6 +106,7 @@ input[type=text],input[type=email],input[type=tel],input[type=url],input[type=nu
 textarea{resize:vertical;min-height:64px;font-family:var(--sans)}
 input:disabled,select:disabled{background:var(--surface-2);color:var(--ink-3)}
 .field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.field-grid > label.f{align-self:end}
 .field-grid.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 .check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .check input{margin-top:3px;accent-color:var(--accent);flex:none}
@@ -840,6 +841,8 @@ function quoteCalc(o){
  });
  const productTotal=round2(list.reduce((a,g)=>a+g.subtotal,0));
  const deliveryTotal=round2(list.reduce((a,g)=>a+g.delivery,0));
+ // A shop we have no record of has no known postage. Zero is a lie; say so.
+ const deliveryUnknown=list.some(g=>!g.retailerId&&!g.manual);
  let fee;
  if(st.feeBasis==='per-retailer'){fee=round2(list.reduce((a,g)=>a+Math.max(g.subtotal*st.procurementPct/100,st.procurementMin),0))}
  else {fee=round2(Math.max(productTotal*st.procurementPct/100,st.procurementMin))}
@@ -851,7 +854,7 @@ function quoteCalc(o){
  const cargoAuto=estimateCargo({items});
  const cargoEst=(o.quote&&o.quote.cargoEstimate!=null&&o.quote.cargoEstimate!=='')?round2(Number(o.quote.cargoEstimate)):cargoAuto.amount;
  const total=round2(productTotal+deliveryTotal+fee+adjTotal+cargoEst);
- return {groups:list,productTotal,deliveryTotal,fee,adjTotal,adjustments,cargoEst,cargoKg:cargoAuto.kg,cargoAuto:cargoAuto.amount,
+ return {groups:list,productTotal,deliveryTotal,deliveryUnknown,fee,adjTotal,adjustments,cargoEst,cargoKg:cargoAuto.kg,cargoAuto:cargoAuto.amount,
   total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
 }
 function cargoCalc(o){
@@ -1359,6 +1362,34 @@ function collectAttrs(catKey){
  const other=val('pa_other'); if(other)out.other=other;
  return out;
 }
+function addPending(){
+    const dr=draft(),p=dr.pending;if(!p)return false;
+    const name=val('pName');
+    if(!name){toast('Please give the product a name so we buy the right thing');return false}
+    const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
+      category:val('pCat')||detectCategory(name,p.retailerName).k,
+      attrs:collectAttrs(val('pCat')||detectCategory(name,p.retailerName).k),
+      qty:Math.max(1,Number(val('pQty'))||1),
+      displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
+      priceSource:val('pPrice')===''?'':(p.price!=null&&round2(Number(val('pPrice')))===p.price?srcLabel(p.via||'live'):'Customer reported'),
+      wasPrice:p.wasPrice||null,image:p.image||null,availability:p.availability,
+      extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',
+      subsUrl:val('pSubsUrl'),subsSize:val('pSubsSize'),subsPrice:val('pSubsPrice')===''?null:round2(Number(val('pSubsPrice'))),
+      customerNotes:val('pNotes'),
+      cancelIfUnavailable:val('pSubs')==='cancel'});
+    it.restricted=restrictedHits([name,it.url,it.customerNotes].join(' '));
+    dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);
+    toast(it.restricted.length?'Added. This item needs a manual check before we can quote.':'Added to your request');
+    return true;
+}
+
+function goToStep(id,focus){
+ const el=document.getElementById(id);
+ if(!el)return;
+ el.scrollIntoView({block:"center",behavior:"smooth"});
+ if(focus)el.focus();
+}
+
 function draft(){
  if(!S.draft)S.draft={items:[],pending:null,customer:{name:'',email:'',whatsapp:'',country:'Zimbabwe'},
    recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},partOfLargerOrder:false,notes:''};
@@ -1397,7 +1428,7 @@ function viewRequest(){
   </div>`:''}
 
   <div class="card">
-   <div class="card-h"><b>3. Who you are, and who this is for</b></div>
+   <div class="card-h" id="yourDetails"><b>3. Your details, and who it is for</b></div>
    <div class="card-b stack">
      <div class="eyebrow">Your details</div>
      <div class="field-grid two">
@@ -1422,7 +1453,7 @@ function viewRequest(){
 
   <div class="card card-p stack">
     ${note(`We aim to come back with a confirmed quote within <b>${st.responseHours} hours</b>. Nothing is purchased and no payment is taken until you approve it.`,'accent','clock')}
-    <button class="btn btn-primary btn-lg btn-block" data-act="submitRequest" ${d.items.length?'':'disabled'}>${icon('arrow',17)}Submit request${d.items.length?' ('+d.items.length+' item'+(d.items.length>1?'s':'')+')':''}</button>
+    <button class="btn btn-primary btn-lg btn-block" data-act="submitRequest" ${d.items.length?'':'disabled'}>${icon('arrow',17)}Send ${d.items.length===1?'this item':'these '+d.items.length+' items'} for a price</button>
     <div class="tiny muted center">By submitting you accept our terms. Prices and availability are only guaranteed once we have received payment and successfully placed the retailer order.</div>
   </div>
  </div></div>`;
@@ -1439,14 +1470,15 @@ function runningTotal(d){
  return `<div class="stack-s" style="border-top:1px solid var(--line);padding-top:12px">
   <div class="sum">
     <div class="l"><span>Product value${missing?` <span class="tiny muted">(${missing} item${missing>1?'s':''} still need a price)</span>`:''}</span><span class="v">${money(q.productTotal)}</span></div>
-    <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
+    <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${q.deliveryUnknown?'we confirm':money(q.deliveryTotal)}</span></div>
     <div class="l"><span>Our fee <span class="tiny muted">${st.procurementPct}% of product value, min ${money(st.procurementMin)}</span></span><span class="v">${money(q.fee)}</span></div>
     <div class="l"><span>Zimbabwe shipping <span class="tiny muted">about ${q.cargoKg} kg</span></span><span class="v">${money(q.cargoEst)}</span></div>
-    <div class="l total"><span>Total, paid once</span><span class="v">${money(q.total)}</span></div>
+    <div class="l total"><span>Total, paid once</span><span class="v">${q.deliveryUnknown?'from ':''}${money(q.total)}</span></div>
   </div>
   ${!q.meetsMin
     ? note(`<b>${money(q.shortfall)} under our ${money(st.minSpend)} minimum.</b> Add another item and this order is good to go. You can still submit as it is, and we will come back to you.`,'warn','alert')
     : `<div class="tiny" style="color:var(--accent)">${icon('check',12)} Meets the ${money(st.minSpend)} minimum.</div>`}
+  ${q.deliveryUnknown?'<div class=\"tiny\" style=\"color:var(--warn)\">We have not bought from one of these shops before, so we do not know their UK postage yet. We confirm it with them and show it on your quote before you pay.</div>':''}
   <div class="tiny muted">One payment covers everything, including getting it to Zimbabwe. Shipping is worked out from the products, so it is close but not final until the parcel is weighed. If the scales disagree by more than ${money(st.cargoTolerance)} we tell you and either ask for the difference or refund it. We check every price against the shop before you pay anything.</div>
  </div>`;
 }
@@ -1539,8 +1571,10 @@ function pendingCard(p){
    </div>
    <label class="f">Notes for this item <span class="hint">optional</span><input type="text" id="pNotes" placeholder="Anything specific about this product"></label>
    <div class="row wrap">
-     <button class="btn btn-primary btn-s" data-act="addItem">${icon('plus',15)}Add to order</button>
+     <button class="btn btn-primary btn-s" data-act="addItem">${icon('check',15)}Add and continue</button>
+     <button class="btn btn-s" data-act="addAnother">${icon('plus',15)}Add and send another link</button>
      <button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button>
+      <div class="tiny muted">Nothing is sent yet. You will add your details and confirm at the end, and we will come back to you with a price before anything is bought.</div>
    </div>
   </div>
  </div>`;
@@ -2697,25 +2731,8 @@ document.addEventListener('click',e=>{
     }
   },
   clearPending(){ const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true) },
-  addItem(){
-    const dr=draft(),p=dr.pending;if(!p)return;
-    const name=val('pName');
-    if(!name){toast('Please give the product a name so we buy the right thing');return}
-    const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
-      category:val('pCat')||detectCategory(name,p.retailerName).k,
-      attrs:collectAttrs(val('pCat')||detectCategory(name,p.retailerName).k),
-      qty:Math.max(1,Number(val('pQty'))||1),
-      displayedPrice:val('pPrice')===''?null:round2(Number(val('pPrice'))),
-      priceSource:val('pPrice')===''?'':(p.price!=null&&round2(Number(val('pPrice')))===p.price?srcLabel(p.via||'live'):'Customer reported'),
-      wasPrice:p.wasPrice||null,image:p.image||null,availability:p.availability,
-      extractOk:p.live==='ok',subsAllowed:val('pSubs')||'no',
-      subsUrl:val('pSubsUrl'),subsSize:val('pSubsSize'),subsPrice:val('pSubsPrice')===''?null:round2(Number(val('pSubsPrice'))),
-      customerNotes:val('pNotes'),
-      cancelIfUnavailable:val('pSubs')==='cancel'});
-    it.restricted=restrictedHits([name,it.url,it.customerNotes].join(' '));
-    dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);
-    toast(it.restricted.length?'Added. This item needs a manual check before we can quote.':'Added to your request');
-  },
+  addItem(){ if(addPending()) goToStep('yourDetails') },
+  addAnother(){ if(addPending()) goToStep('linkInput',true) },
   addManual(){
     const dr=draft(),p=dr.pending;
     const it=newItem({url:p.url,retailerId:null,retailerName:p.retailerName,name:'',availability:'Needs manual check',itemStatus:'Manual review required'});

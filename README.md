@@ -1,0 +1,118 @@
+# Tenga UK
+
+A buy-for-me and forwarding service. Customers send links to products sold by approved UK retailers, we confirm the real price and availability by hand, they pay one quote, we buy the item, check it, and forward it to Zimbabwe.
+
+The platform is deliberately **not** a shop. There is no catalogue, no stock, no product descriptions of our own. The proposition is one line:
+
+> Paste a UK product link, receive a confirmed quote, pay, and have the item purchased and forwarded to Zimbabwe.
+
+**Live prototype:** https://winstondube.github.io/tenga/
+
+---
+
+## What this repo currently is
+
+A clickable prototype, not the product. One self-contained HTML file, no server, no database. All state lives in the browser's `localStorage`, so anyone opening the link gets their own private copy of the demo data and cannot affect anyone else's.
+
+It exists so the operating model can be reviewed and argued with before anything expensive gets built.
+
+### Running it
+
+Open `index.html` in a browser. That is the whole thing. There is nothing to install.
+
+To rebuild after editing the source:
+
+```
+node build.mjs
+```
+
+### Layout
+
+```
+src/app.html    source of truth: markup, styles and application logic
+build.mjs       wraps src/app.html into a complete document
+index.html      built output, served by GitHub Pages. Do not edit by hand
+docs/           product notes
+```
+
+`src/app.html` is a fragment with no `<head>` because it is also published as a Claude artifact, where the runtime supplies the document shell. `build.mjs` supplies that shell for the standalone build. One source, two homes.
+
+---
+
+## The two surfaces
+
+Switch between them with **Customer / Operations** in the top bar.
+
+**Customer.** Link submission with provisional extraction, multi-item basket, variant and substitution questions per item, request confirmation with reference, private tracking page, quote with confirmations, demo checkout.
+
+**Operations.** Queue rail with live counts, dashboard, and an eight-tab order record: Review, Quote, Payments, Purchase, UK receiving, Cargo, Messages, History. Plus retailer configuration, restricted keywords, business rules, cargo batches, finance, reports and an audit log.
+
+Seven demo orders are seeded at different stages so the queues are populated on first open. **Reset demo** in the top bar restores them.
+
+---
+
+## Business rules the prototype enforces
+
+| Rule | Value |
+|---|---|
+| Minimum product spend | £40 per request, before fee, UK delivery and cargo |
+| Procurement fee | 20% of product value, minimum £10 |
+| Fee basis | Combined product value (configurable to per-retailer) |
+| UK retailer delivery | At cost, calculated **separately per retailer** |
+| Quote expiry | 60 minutes, configurable per quote |
+| Price rise absorbed at purchase | Up to £2, above that the customer decides |
+| Zimbabwe cargo | Separate payment, estimated at quote, confirmed on the scales |
+
+Worked examples from the spec, both verified in the build:
+
+- £40 product + £4 UK delivery + £10 fee = **£54**
+- £100 product + £0 UK delivery + £20 fee = **£120**
+
+### Gates that cannot be skipped
+
+- A quote cannot be built until every item has a confirmed price.
+- A quote cannot be built while any restricted-keyword flag is unresolved.
+- A quote is never sent without an administrator pressing send.
+- An order does not enter the purchasing queue until payment is completed.
+- Links from unapproved retailers never proceed to quotation automatically.
+
+Every price change, manual adjustment, refund, restriction clearance and status move is written to the audit log with before, after, reason, actor and timestamp.
+
+---
+
+## What is deliberately faked
+
+The prototype demonstrates the flow. These parts are simulated and will need real implementations.
+
+**Product extraction.** The retailer is matched from the domain, the product name is read from the URL slug, and a plausible price is generated. Real extraction needs a server-side scraper per retailer, and several of the target sites actively block it. The two failure paths are modelled and are the part worth reviewing: a retailer that blocks reading, and a link with no readable name. Both fall through to manual entry rather than failing.
+
+**Payments.** No provider is connected. The demo checkout marks a payment complete without money moving. Paying by PayPal in the demo deliberately lands as *Payment held* rather than completed, so the float decision is visible.
+
+**Messages.** Email and WhatsApp are logged against the order, not sent.
+
+**Attachments.** Invoices, receipts and photographs are recorded as filenames. There is no upload.
+
+---
+
+## Route to production
+
+The prototype's data model maps onto a real schema directly: orders, items, quotes, payments, purchases, receipts, cargo records, messages, audit entries.
+
+Roughly in order of what unblocks the business:
+
+1. **Server and database.** Nothing is real until orders survive a browser refresh on someone else's machine.
+2. **Payments.** PayPal Business checkout first, then card via Stripe. Webhooks drive payment status, not the UI.
+3. **Transactional email.** Quote sent, payment received, cargo payment required. These are the messages the business cannot operate without.
+4. **Extraction service.** Start with the three or four retailers that account for most requests. Manual entry stays as the fallback forever.
+5. **WhatsApp.** The channel most customers will actually read.
+6. **File uploads.** Retailer invoices and goods-in photographs, for disputes.
+
+Out of scope until the manual process has been proven at volume: automated retailer checkout, a product catalogue, live stock, cargo company API integration, customer accounts, a mobile app.
+
+---
+
+## Notes
+
+Demo data is fictional. Customer names, retailer order numbers, tracking numbers and payment references are invented.
+
+Website designed and built by [LaunchSite](https://welaunchsites.com/).

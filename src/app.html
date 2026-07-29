@@ -1,0 +1,2273 @@
+<title>Tenga UK · Buy-for-me and Zimbabwe forwarding</title>
+
+<style>
+:root{
+  --paper:#F4F3EE;
+  --surface:#FFFFFF;
+  --surface-2:#EDECE6;
+  --ink:#12181A;
+  --ink-2:#3E4845;
+  --ink-3:#6C7671;
+  --line:#DCDAD1;
+  --line-2:#C8C6BC;
+  --accent:#0B5D4E;
+  --accent-soft:#E2EDE9;
+  --accent-ink:#08463A;
+  --ochre:#B57A1F;
+  --ochre-soft:#F5EAD6;
+  --ochre-ink:#8A5B12;
+  --danger:#A33327;
+  --danger-soft:#F7E4E1;
+  --warn:#8A6100;
+  --warn-soft:#F7EDD6;
+  --info:#3A5C77;
+  --info-soft:#E3EBF1;
+  --shadow:0 1px 2px rgba(18,24,26,.05), 0 8px 24px -12px rgba(18,24,26,.18);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --r:4px;
+  --on-accent:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0E1213;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
+    --line:#2B3234;--line-2:#3A4244;--accent:#4FBFA4;--accent-soft:#12302A;--accent-ink:#8FDCC7;
+    --ochre:#D9A64E;--ochre-soft:#33280F;--ochre-ink:#EFC988;
+    --danger:#E8897B;--danger-soft:#37201C;--warn:#D9B45F;--warn-soft:#33290F;--info:#8FB6D4;--info-soft:#17252F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+    --on-accent:#08201B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1213;--surface:#171C1D;--surface-2:#1F2526;--ink:#EDEFEC;--ink-2:#B6BEBA;--ink-3:#818B87;
+  --line:#2B3234;--line-2:#3A4244;--accent:#4FBFA4;--accent-soft:#12302A;--accent-ink:#8FDCC7;
+  --ochre:#D9A64E;--ochre-soft:#33280F;--ochre-ink:#EFC988;
+  --danger:#E8897B;--danger-soft:#37201C;--warn:#D9B45F;--warn-soft:#33290F;--info:#8FB6D4;--info-soft:#17252F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.7);
+    --on-accent:#08201B;
+}
+:root[data-theme="light"]{
+  --paper:#F4F3EE;--surface:#FFFFFF;--surface-2:#EDECE6;--ink:#12181A;--ink-2:#3E4845;--ink-3:#6C7671;
+  --line:#DCDAD1;--line-2:#C8C6BC;--accent:#0B5D4E;--accent-soft:#E2EDE9;--accent-ink:#08463A;
+  --ochre:#B57A1F;--ochre-soft:#F5EAD6;--ochre-ink:#8A5B12;
+  --danger:#A33327;--danger-soft:#F7E4E1;--warn:#8A6100;--warn-soft:#F7EDD6;--info:#3A5C77;--info-soft:#E3EBF1;
+  --shadow:0 1px 2px rgba(18,24,26,.05), 0 8px 24px -12px rgba(18,24,26,.18);
+  --on-accent:#FFFFFF;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:620;letter-spacing:-.01em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+svg{display:block}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- primitives ---------- */
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+.small{font-size:13px}
+.tiny{font-size:12px}
+.row{display:flex;gap:10px;align-items:center}
+.row.wrap{flex-wrap:wrap}
+.spread{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.col{display:flex;flex-direction:column}
+.stack{display:flex;flex-direction:column;gap:14px}
+.stack-s{display:flex;flex-direction:column;gap:8px}
+.stack-l{display:flex;flex-direction:column;gap:26px}
+.grow{flex:1;min-width:0}
+.hr{height:1px;background:var(--line);border:0;margin:0}
+.center{text-align:center}
+.nowrap{white-space:nowrap}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:520;transition:background .13s,border-color .13s,transform .06s}
+.btn:hover{background:var(--surface-2)}
+.btn:active{transform:translateY(.5px)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent-ink);border-color:var(--accent-ink);color:var(--on-accent)}
+.btn-danger{color:var(--danger);border-color:var(--danger)}
+.btn-danger:hover{background:var(--danger-soft)}
+.btn-s{padding:5px 10px;font-size:13px}
+.btn-xs{padding:3px 8px;font-size:12px}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-block{width:100%;justify-content:center}
+.btn-lg{padding:12px 20px;font-size:15.5px}
+
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:560;color:var(--ink-2)}
+label.f > .hint{font-weight:400;color:var(--ink-3);font-size:12px}
+input[type=text],input[type=email],input[type=tel],input[type=url],input[type=number],input[type=date],select,textarea{
+  width:100%;padding:8px 10px;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);font-size:14px;font-weight:400;color:var(--ink)}
+textarea{resize:vertical;min-height:64px;font-family:var(--sans)}
+input:disabled,select:disabled{background:var(--surface-2);color:var(--ink-3)}
+.field-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.field-grid.two{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink-2);cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--accent);flex:none}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card-p{padding:18px}
+.card-h{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-b{padding:16px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:100px;font-size:11.5px;font-weight:600;font-family:var(--mono);letter-spacing:.02em;white-space:nowrap;border:1px solid transparent}
+.p-accent{background:var(--accent-soft);color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent) 24%,transparent)}
+.p-ochre{background:var(--ochre-soft);color:var(--ochre-ink);border-color:color-mix(in srgb,var(--ochre) 26%,transparent)}
+.p-danger{background:var(--danger-soft);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 26%,transparent)}
+.p-warn{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 26%,transparent)}
+.p-info{background:var(--info-soft);color:var(--info);border-color:color-mix(in srgb,var(--info) 26%,transparent)}
+.p-mute{background:var(--surface-2);color:var(--ink-3);border-color:var(--line)}
+
+.note{padding:11px 13px;border-radius:var(--r);font-size:13.5px;display:flex;gap:9px;align-items:flex-start;line-height:1.5}
+.note svg{flex:none;margin-top:2px}
+.n-accent{background:var(--accent-soft);color:var(--accent-ink)}
+.n-warn{background:var(--warn-soft);color:var(--warn)}
+.n-danger{background:var(--danger-soft);color:var(--danger)}
+.n-info{background:var(--info-soft);color:var(--info)}
+.n-mute{background:var(--surface-2);color:var(--ink-2)}
+
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t tbody tr.clickable{cursor:pointer}
+table.t tbody tr.clickable:hover{background:var(--surface-2)}
+.scroll-x{overflow-x:auto}
+
+.thumb{width:46px;height:46px;flex:none;border-radius:3px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:.02em;border:1px solid rgba(0,0,0,.08)}
+.thumb.lg{width:72px;height:72px;font-size:18px}
+
+/* ---------- shell ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1400px;margin:0 auto;padding:9px 20px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-weight:700;font-size:14px;letter-spacing:-.02em;text-decoration:none}
+.brand .mark{width:22px;height:22px;border-radius:3px;background:var(--accent);display:grid;place-items:center;color:var(--on-accent)}
+.brand .tld{color:var(--ochre)}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:2px;gap:2px}
+.seg button{border:0;background:transparent;padding:5px 12px;border-radius:2px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink-3);font-family:var(--mono);letter-spacing:.03em}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+
+.wrap{max-width:1400px;margin:0 auto;padding:22px 20px 80px}
+.narrow{max-width:800px;margin:0 auto;padding:28px 20px 80px}
+.narrow-s{max-width:620px;margin:0 auto;padding:28px 20px 80px}
+
+/* ---------- admin shell ---------- */
+.admin{display:grid;grid-template-columns:232px minmax(0,1fr);gap:22px;align-items:start}
+.rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px}
+.rail-grp{display:flex;flex-direction:column;gap:1px}
+.rail-grp > .eyebrow{padding:0 8px 6px}
+.rail a{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:3px;text-decoration:none;font-size:13.5px;color:var(--ink-2)}
+.rail a:hover{background:var(--surface-2)}
+.rail a.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 2px 0 0 var(--accent)}
+.rail a .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);background:var(--surface-2);padding:0 6px;border-radius:100px;min-width:20px;text-align:center}
+.rail a.on .cnt{background:var(--accent-soft);color:var(--accent-ink)}
+.rail a .cnt.hot{background:var(--danger-soft);color:var(--danger)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column;gap:3px}
+.kpi .v{font-family:var(--mono);font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.kpi .l{font-size:12px;color:var(--ink-3)}
+.kpi.stripe-a{box-shadow:inset 0 -2px 0 var(--accent)}
+.kpi.stripe-d{box-shadow:inset 0 -2px 0 var(--danger)}
+.kpi.stripe-o{box-shadow:inset 0 -2px 0 var(--ochre)}
+.kpi.stripe-w{box-shadow:inset 0 -2px 0 var(--warn)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:0}
+.tabs button{border:0;background:transparent;padding:9px 13px;cursor:pointer;font-size:13.5px;font-weight:560;color:var(--ink-3);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--danger);margin-left:5px;vertical-align:middle}
+
+/* ---------- timeline ---------- */
+.tl{display:flex;flex-direction:column;gap:0;position:relative}
+.tl-row{display:grid;grid-template-columns:22px 1fr;gap:12px;padding-bottom:16px;position:relative}
+.tl-row:last-child{padding-bottom:0}
+.tl-row::before{content:"";position:absolute;left:10px;top:18px;bottom:0;width:1px;background:var(--line-2)}
+.tl-row:last-child::before{display:none}
+.tl-dot{width:21px;height:21px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;z-index:1}
+.tl-row.done .tl-dot{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.tl-row.done.zw .tl-dot{background:var(--ochre);border-color:var(--ochre)}
+.tl-row.now .tl-dot{border-color:var(--accent);border-width:2px;background:var(--surface)}
+.tl-row.now.zw .tl-dot{border-color:var(--ochre)}
+.tl-row.done::before{background:var(--accent)}
+.tl-row.done.zw::before{background:var(--ochre)}
+.tl-t{font-weight:600;font-size:14px}
+.tl-row.todo .tl-t{color:var(--ink-3);font-weight:500}
+
+/* ---------- misc ---------- */
+.item-card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.item-head{display:flex;gap:12px;padding:13px;align-items:flex-start}
+.retailer-grp{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.retailer-grp > .rg-h{background:var(--surface-2);padding:8px 13px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+.sum{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.sum .l{display:flex;justify-content:space-between;gap:16px}
+.sum .l.total{border-top:1px solid var(--line-2);margin-top:5px;padding-top:9px;font-weight:700;font-size:16px}
+.sum .l .v{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.modal-bg{position:fixed;inset:0;background:rgba(10,14,15,.45);z-index:100;display:grid;place-items:center;padding:20px;overflow:auto}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);max-width:520px;width:100%;box-shadow:var(--shadow);margin:auto}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:100px;font-size:13.5px;z-index:200;box-shadow:var(--shadow);animation:tin .2s ease}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(6px)}}
+
+.hero-lede{font-family:var(--serif);font-size:clamp(30px,5.4vw,46px);line-height:1.1;letter-spacing:-.02em;font-weight:400}
+.hero-lede em{font-style:italic;color:var(--accent)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.step{background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:6px}
+.step .n{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:700}
+.step.zw .n{color:var(--ochre)}
+
+.empty{padding:40px 20px;text-align:center;color:var(--ink-3);font-size:14px}
+.link{color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.foot{border-top:1px solid var(--line);margin-top:50px;padding:20px;text-align:center;font-size:12.5px;color:var(--ink-3)}
+.foot a{color:var(--ink-2)}
+
+.banner{background:var(--ink);color:var(--paper);font-size:12.5px;padding:6px 20px;text-align:center;font-family:var(--mono);letter-spacing:.02em}
+.banner b{color:var(--ochre)}
+
+@media (max-width:880px){
+  .admin{grid-template-columns:1fr}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .rail-grp{flex-direction:row;gap:2px;flex:none}
+  .rail-grp > .eyebrow{display:none}
+  .rail a{white-space:nowrap}
+  .topbar-in{flex-wrap:wrap;gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app"></div>
+
+<script>
+/* ================================================================
+   Tenga UK — prototype
+   Single-file demo. All data lives in localStorage.
+   ================================================================ */
+"use strict";
+/* ---------------- icons (flat line, inherit currentColor) ---------------- */
+const ICONS={
+ link:'M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6',
+ box:'M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12m0 0 8.5-4.5M12 12v9',
+ check:'M4.5 12.5 9.5 17.5 19.5 6.5',
+ clock:'M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+ alert:'M12 9v4.5M12 17h.01M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20.4h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+ card:'M2.5 9.5h19M2.5 6.5a2 2 0 0 1 2-2h15a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2zM6 15.5h3',
+ truck:'M2.5 15.5V5.5h10v10M12.5 9h4l3.5 3.5v3h-2M5.5 15.5h3M8.5 17.5a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0ZM19.5 17.5a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0Z',
+ plane:'M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z',
+ user:'M4.5 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h6a4.5 4.5 0 0 1 4.5 4.5V20M16 7.5a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+ users:'M3 20v-1.2A4.3 4.3 0 0 1 7.3 14.5h4.4a4.3 4.3 0 0 1 4.3 4.3V20M15.5 14.8a4.3 4.3 0 0 1 5.5 4v1.2M13.5 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM16 4.4a3.7 3.7 0 0 1 0 7.2',
+ cog:'M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z M19.2 14.2a1.5 1.5 0 0 0 .3 1.6l.1.1a1.8 1.8 0 1 1-2.6 2.6l-.1-.1a1.5 1.5 0 0 0-2.5 1v.2a1.8 1.8 0 1 1-3.6 0v-.1a1.5 1.5 0 0 0-2.6-1l-.1.1a1.8 1.8 0 1 1-2.6-2.6l.1-.1a1.5 1.5 0 0 0-1-2.5H4.4a1.8 1.8 0 1 1 0-3.6h.1a1.5 1.5 0 0 0 1-2.6l-.1-.1A1.8 1.8 0 1 1 8 4.5l.1.1a1.5 1.5 0 0 0 1.6.3h.1a1.5 1.5 0 0 0 .9-1.4v-.2a1.8 1.8 0 1 1 3.6 0v.1a1.5 1.5 0 0 0 2.5 1l.1-.1a1.8 1.8 0 1 1 2.6 2.6l-.1.1a1.5 1.5 0 0 0-.3 1.6v.1a1.5 1.5 0 0 0 1.4.9h.2a1.8 1.8 0 1 1 0 3.6h-.1a1.5 1.5 0 0 0-1.4.9Z',
+ search:'M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z',
+ plus:'M12 5v14M5 12h14',
+ x:'M6 6l12 12M18 6 6 18',
+ edit:'M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3ZM14.5 6.5l3 3',
+ file:'M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5zM14 3.5V8.5H19M8.5 13h7M8.5 16.5h5',
+ camera:'M4.5 8.5h2.2l1.4-2.2h7.8l1.4 2.2h2.2a1.6 1.6 0 0 1 1.6 1.6v7.2a1.6 1.6 0 0 1-1.6 1.6H4.5a1.6 1.6 0 0 1-1.6-1.6v-7.2A1.6 1.6 0 0 1 4.5 8.5ZM15 13.6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+ scale:'M12 4v16M7 20h10M12 6 5 13h14zM5 13a3.5 3.5 0 0 0 7 0M12 13a0 0 0 0 0 0 0',
+ pin:'M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11ZM14.5 10a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z',
+ arrow:'M4 12h16M14 6l6 6-6 6',
+ chev:'M6 9.5 12 15.5 18 9.5',
+ refresh:'M20 11.5A8 8 0 0 0 6.2 6.2L3.5 8.8M4 12.5a8 8 0 0 0 13.8 5.3l2.7-2.6M3.5 4v4.8h4.8M20.5 20v-4.8h-4.8',
+ layers:'M12 3 3 7.5l9 4.5 9-4.5zM3 12.5l9 4.5 9-4.5M3 17l9 4.5 9-4.5',
+ inbox:'M3.5 13h4l1.5 3h6l1.5-3h4M3.5 13 6 5.5h12L20.5 13v5.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z',
+ shield:'M12 3 4.5 6v6c0 4.6 3.1 8.1 7.5 9 4.4-.9 7.5-4.4 7.5-9V6zM9 12l2.2 2.2L15 10.5',
+ mail:'M3.5 6.5h17v11h-17zM3.5 7l8.5 6 8.5-6',
+ chat:'M20.5 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.3-5.4A7.5 7.5 0 1 1 20.5 12Z',
+ trash:'M4.5 6.5h15M9.5 6.5V4.5h5v2M6.5 6.5 7.5 20h9l1-13.5M10 10v6.5M14 10v6.5',
+ ext:'M14 4.5h5.5V10M19 5l-7.5 7.5M17 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 4 18.5v-10A1.5 1.5 0 0 1 5.5 7H10',
+ pound:'M7 20h10M7 12.5h6M9.5 20v-9a3.5 3.5 0 0 1 6.6-1.6M9.5 20c0-1.5-.7-2.4-2-3',
+ chart:'M4 20V9M10 20V4M16 20v-7M22 20H2',
+ flag:'M5.5 21V4h13l-2.5 4.5L18.5 13h-13',
+ down:'M12 4v12M6.5 11 12 16.5 17.5 11M4.5 20h15',
+ star:'M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z',
+ lock:'M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z',
+ note:'M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4'
+};
+function icon(n,s){s=s||16;const d=ICONS[n]||ICONS.box;
+ return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`}
+
+/* ---------------- helpers ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'£'+(Math.round((Number(n)||0)*100)/100).toFixed(2);
+const round2=n=>Math.round((Number(n)||0)*100)/100;
+const uid=p=>(p||'id')+'_'+Math.random().toString(36).slice(2,9);
+function hash(str){let h=2166136261;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,16777619)}return Math.abs(h)}
+function fmtDate(ts){if(!ts)return '';const d=new Date(ts);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
+function fmtTime(ts){if(!ts)return '';const d=new Date(ts);return d.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+function fmtFull(ts){if(!ts)return '';return new Date(ts).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+function ago(ts){const m=Math.round((Date.now()-ts)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.round(m/60);if(h<24)return h+'h ago';return Math.round(h/24)+'d ago'}
+function until(ts){const m=Math.round((ts-Date.now())/60000);if(m<=0)return 'expired';if(m<60)return m+' min left';const h=Math.floor(m/60);return h+'h '+(m%60)+'m left';}
+const HUES=[168,32,204,340,96,268,14,188];
+function swatch(seed){const h=HUES[hash(seed)%HUES.length];const l=hash(seed+'x')%12+34;return `linear-gradient(140deg,hsl(${h} 42% ${l+14}%),hsl(${h+18} 46% ${l}%))`}
+function initials(name){return String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+function thumb(item,lg){return `<div class="thumb ${lg?'lg':''}" style="background:${swatch(item.name||item.url||'x')}">${esc(initials(item.name||'Item'))}</div>`}
+function pill(text,tone){return `<span class="pill p-${tone||'mute'}">${esc(text)}</span>`}
+function note(text,tone,ic){return `<div class="note n-${tone||'mute'}">${icon(ic||'alert',15)}<div>${text}</div></div>`}
+let toastT;
+function toast(msg){const old=$('.toast');if(old)old.remove();const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);clearTimeout(toastT);toastT=setTimeout(()=>el.remove(),2600)}
+
+/* ---------------- status catalogue (spec section 16) ---------------- */
+const STATUS_GROUPS=[
+ ['Request and quotation',['Request submitted','Product information captured','Manual review required','Restricted-product review','Awaiting price confirmation','Awaiting UK delivery confirmation','Quote ready','Quote sent','Quote expired','Quote rejected','Customer declined quote']],
+ ['Payment',['Awaiting initial payment','Initial payment pending','Initial payment held','Initial payment completed','Payment failed','Payment disputed','Payment refunded']],
+ ['Retailer purchase',['Paid — awaiting retailer purchase','Purchase in progress','Additional payment required','Customer decision required','Purchased from retailer','Retailer order partially placed','Product out of stock','Substitute approval required','Retailer order cancelled']],
+ ['UK delivery',['Awaiting retailer dispatch','Retailer dispatched','On the way to UK address','Partially received','Received in the UK','Received and checked','Receiving issue identified','Retailer return in progress','Retailer replacement in progress']],
+ ['Cargo',['Awaiting parcel consolidation','Awaiting final weight','Zimbabwe shipping payment required','Cargo payment pending','Cargo payment received','Ready for cargo','Assigned to cargo batch','Handed to cargo company','In transit to Zimbabwe','Customs clearance','Arrived in Zimbabwe','Ready for collection','Out for delivery','Delivered']],
+ ['Exceptions',['Customer action required','Administrator action required','Order on hold','Cancellation requested','Partially refunded','Fully refunded','Unclaimed goods','Closed']]
+];
+const ALL_STATUSES=STATUS_GROUPS.flatMap(g=>g[1]);
+const ZW_STATUSES=new Set(STATUS_GROUPS[4][1].concat(['Zimbabwe shipping payment required']));
+function statusTone(s){
+ if(/refund|failed|disputed|cancel|expired|rejected|declined|issue|unavailable|out of stock|hold|unclaimed/i.test(s))return 'danger';
+ if(/required|pending|awaiting|review|decision|in progress/i.test(s))return 'warn';
+ if(ZW_STATUSES.has(s))return 'ochre';
+ if(/completed|purchased|received|delivered|sent|ready|captured|paid/i.test(s))return 'accent';
+ return 'mute';
+}
+/* customer-facing journey, used for the tracking timeline */
+const JOURNEY=[
+ {k:'Request submitted',label:'Request received',desc:'We are checking price, availability and UK delivery.',leg:'uk'},
+ {k:'Quote sent',label:'Quote sent',desc:'Confirm the details and pay to start the purchase.',leg:'uk'},
+ {k:'Initial payment completed',label:'Payment received',desc:'Your payment has cleared with us.',leg:'uk'},
+ {k:'Purchased from retailer',label:'Bought from the retailer',desc:'We have placed the order in the UK.',leg:'uk'},
+ {k:'Received and checked',label:'Received and checked in the UK',desc:'Your item arrived at our UK address and passed inspection.',leg:'uk'},
+ {k:'Cargo payment received',label:'Zimbabwe shipping paid',desc:'Weight confirmed and cargo charges settled.',leg:'zw'},
+ {k:'Handed to cargo company',label:'Handed to the cargo company',desc:'Packed and booked onto a shipment.',leg:'zw'},
+ {k:'In transit to Zimbabwe',label:'In transit to Zimbabwe',desc:'On its way.',leg:'zw'},
+ {k:'Arrived in Zimbabwe',label:'Arrived in Zimbabwe',desc:'Through customs clearance.',leg:'zw'},
+ {k:'Delivered',label:'Delivered',desc:'Collected or delivered to the recipient.',leg:'zw'}
+];
+const JOURNEY_RANK={};
+(function(){
+ const map={'Request submitted':0,'Product information captured':0,'Manual review required':0,'Restricted-product review':0,'Awaiting price confirmation':0,'Awaiting UK delivery confirmation':0,'Quote ready':0,
+ 'Quote sent':1,'Awaiting initial payment':1,'Quote expired':1,'Initial payment pending':1,'Initial payment held':2,'Initial payment completed':2,'Paid — awaiting retailer purchase':2,'Purchase in progress':2,
+ 'Purchased from retailer':3,'Awaiting retailer dispatch':3,'Retailer dispatched':3,'On the way to UK address':3,'Partially received':3,'Received in the UK':3,
+ 'Received and checked':4,'Awaiting parcel consolidation':4,'Awaiting final weight':4,'Zimbabwe shipping payment required':4,'Cargo payment pending':4,
+ 'Cargo payment received':5,'Ready for cargo':5,'Assigned to cargo batch':5,
+ 'Handed to cargo company':6,'In transit to Zimbabwe':7,'Customs clearance':7,'Arrived in Zimbabwe':8,'Ready for collection':8,'Out for delivery':8,'Delivered':9};
+ Object.assign(JOURNEY_RANK,map);
+})();
+
+/* ---------------- defaults ---------------- */
+const DEFAULT_SETTINGS={
+ procurementPct:20, procurementMin:10, minSpend:40,
+ quoteExpiryMins:60, responseHours:24,
+ absorbIncrease:2, priceDropPolicy:'credit', priceDropThreshold:2,
+ feeBasis:'combined',
+ cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:5, volDivisor:5000, packagingKg:0.3,
+ currency:'GBP'
+};
+const DEFAULT_RETAILERS=[
+ {id:'boots',name:'Boots',domains:['boots.com'],status:'approved',delivery:4.5,freeOver:25,autoExtract:true,notes:'Marketplace sellers ship separately. Check the sold-by line.'},
+ {id:'superdrug',name:'Superdrug',domains:['superdrug.com'],status:'approved',delivery:3.49,freeOver:25,autoExtract:true,notes:'Health & Beautycard prices do not apply to us.'},
+ {id:'lookfantastic',name:'LookFantastic',domains:['lookfantastic.com'],status:'approved',delivery:3.99,freeOver:40,autoExtract:true,notes:'Frequent site-wide discount codes, always recheck at basket.'},
+ {id:'cultbeauty',name:'Cult Beauty',domains:['cultbeauty.co.uk'],status:'approved',delivery:3.95,freeOver:30,autoExtract:true,notes:''},
+ {id:'beautybay',name:'Beauty Bay',domains:['beautybay.com'],status:'approved',delivery:3.95,freeOver:20,autoExtract:true,notes:''},
+ {id:'spacenk',name:'Space NK',domains:['spacenk.com'],status:'approved',delivery:4.95,freeOver:50,autoExtract:false,notes:'Prices need manual reading, page blocks extraction.'},
+ {id:'asos',name:'ASOS',domains:['asos.com'],status:'approved',delivery:4.5,freeOver:35,autoExtract:true,notes:'Fashion and footwear. Check size guide before ordering.'},
+ {id:'next',name:'Next',domains:['next.co.uk'],status:'approved',delivery:3.99,freeOver:0,autoExtract:true,notes:''},
+ {id:'afrohair',name:'Afro Hair & Beauty',domains:['afrohairandbeauty.co.uk','hairandbeautyworld.co.uk'],status:'approved',delivery:4.25,freeOver:50,autoExtract:false,notes:'Wigs and extensions. Confirm lace colour and density by phone.'},
+ {id:'sephora',name:'Sephora UK',domains:['sephora.co.uk'],status:'manual',delivery:4.99,freeOver:40,autoExtract:false,notes:'New retailer, every order needs manual review until we trust it.'},
+ {id:'shein',name:'SHEIN',domains:['shein.co.uk','shein.com'],status:'disabled',delivery:3.99,freeOver:35,autoExtract:false,notes:'Disabled: long dispatch times and inconsistent stock.'}
+];
+const DEFAULT_RESTRICTED=['bleach','peroxide','developer','aerosol','pressurised','flammable','nail polish remover','acetone','perfume','eau de parfum','eau de toilette','fragrance spray','battery','batteries','lithium','rechargeable','hair dryer','straightener','electric','prescription','medicated','retinoid','tretinoin','hydroquinone','minoxidil','benzoyl','supplement','capsules','tablets','lighter','gas'];
+
+/* ---------------- store ---------------- */
+const KEY='tenga_uk_v1';
+let S=null;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){
+ try{const raw=localStorage.getItem(KEY);if(raw){S=JSON.parse(raw);if(S&&S.v===1)return true}}catch(e){}
+ return false;
+}
+function fresh(){
+ S={v:1,settings:{...DEFAULT_SETTINGS},retailers:JSON.parse(JSON.stringify(DEFAULT_RETAILERS)),restricted:[...DEFAULT_RESTRICTED],
+    orders:[],audit:[],messages:[],batches:[],counter:1040,draft:null,role:'customer'};
+ seed(); save();
+}
+function logAudit(ref,action,before,after,reason){
+ S.audit.unshift({id:uid('a'),ref:ref||'',action,before:before==null?'':String(before),after:after==null?'':String(after),actor:'Admin (demo)',at:Date.now(),reason:reason||''});
+ if(S.audit.length>400)S.audit.length=400;
+}
+function logMsg(ref,type,channel,to,body,status){
+ S.messages.unshift({id:uid('m'),ref,type,channel:channel||'Email',to:to||'',body:body||'',status:status||'Delivered',at:Date.now()});
+ if(S.messages.length>400)S.messages.length=400;
+}
+function nextRef(){S.counter++;return 'TU-'+S.counter}
+function getOrder(ref){return S.orders.find(o=>o.ref===ref)}
+function retailerById(id){return S.retailers.find(r=>r.id===id)}
+function setStatus(o,st,note){
+ if(o.status===st)return;
+ const before=o.status;o.status=st;
+ o.timeline.push({status:st,at:Date.now(),note:note||'',actor:'System'});
+ logAudit(o.ref,'Status changed',before,st,note||'');
+}
+
+/* ---------------- link reading (simulated extraction) ---------------- */
+const STOP=new Set(['p','dp','product','products','shop','uk','en','gb','item','ref','sku','html','buy','detail','details','pd','prd','g','a','c','b']);
+function titleCase(s){return s.replace(/\b[a-z]/g,c=>c.toUpperCase())}
+function extract(url){
+ const out={ok:false,url:url,retailerId:null,retailerName:'',name:'',price:null,wasPrice:null,size:'',variant:'',availability:'Unknown',reason:''};
+ let u;
+ try{u=new URL(url.trim().match(/^https?:\/\//i)?url.trim():'https://'+url.trim())}catch(e){out.reason='That does not look like a web address.';return out}
+ const host=u.hostname.replace(/^www\./,'').toLowerCase();
+ const r=S.retailers.find(x=>x.domains.some(d=>host===d||host.endsWith('.'+d)));
+ out.host=host;
+ if(!r){out.reason='unapproved';out.retailerName=titleCase(host.split('.')[0]);return out}
+ out.retailerId=r.id;out.retailerName=r.name;
+ if(r.status==='disabled'){out.reason='disabled';return out}
+ const segs=u.pathname.split('/').filter(Boolean).map(s=>decodeURIComponent(s));
+ let slug=segs.filter(s=>!STOP.has(s.toLowerCase())&&!/^\d+$/.test(s)).pop()||'';
+ slug=slug.replace(/\.(html?|aspx|php)$/i,'').replace(/[-_+]/g,' ').replace(/\b\d{4,}\b/g,'').replace(/\s+/g,' ').trim();
+ if(!slug||slug.length<3){out.reason='noname';out.ok=true;out.name='';}
+ else {out.ok=true;out.name=titleCase(slug)}
+ if(!r.autoExtract){out.reason='noauto';out.price=null;out.availability='Needs manual check';return out}
+ const h=hash(host+u.pathname);
+ const base=6+(h%56);const pence=[0.99,0.5,0.95,0.0,0.49][h%5];
+ out.price=round2(base+pence);
+ if(h%3===0){out.wasPrice=round2(out.price*(1.15+(h%9)/40))}
+ const sizes=['50ml','100ml','200ml','250ml','400ml','30ml','75ml','1 pack','2 pack'];
+ out.size=sizes[h%sizes.length];
+ out.availability=(h%11===0)?'Low stock':'In stock';
+ return out;
+}
+function restrictedHits(text){
+ const t=String(text||'').toLowerCase();
+ return S.restricted.filter(k=>t.includes(k.toLowerCase()));
+}
+
+/* ---------------- pricing ---------------- */
+function itemPrice(it){const p=(it.confirmedPrice!=null&&it.confirmedPrice!=='')?Number(it.confirmedPrice):Number(it.displayedPrice||0);return round2(p)}
+function itemLine(it){return round2(itemPrice(it)*(Number(it.qty)||1))}
+function activeItems(o){return o.items.filter(i=>i.itemStatus!=='Removed'&&i.itemStatus!=='Refunded')}
+function quoteCalc(o){
+ const st=S.settings, items=activeItems(o);
+ const groups={};
+ items.forEach(it=>{const k=it.retailerId||('other:'+(it.retailerName||'Unknown'));
+   if(!groups[k])groups[k]={key:k,retailerId:it.retailerId,name:it.retailerName||'Unknown retailer',items:[],subtotal:0,delivery:0,freeApplied:false};
+   groups[k].items.push(it);groups[k].subtotal=round2(groups[k].subtotal+itemLine(it));});
+ const list=Object.values(groups);
+ list.forEach(g=>{
+   const r=g.retailerId?retailerById(g.retailerId):null;
+   const override=o.quote&&o.quote.deliveryOverrides?o.quote.deliveryOverrides[g.key]:undefined;
+   if(override!==undefined&&override!==''&&override!==null){g.delivery=round2(Number(override)||0);g.manual=true;}
+   else if(r){ if(r.freeOver&&g.subtotal>=r.freeOver){g.delivery=0;g.freeApplied=true} else g.delivery=round2(r.delivery||0) }
+   else g.delivery=0;
+ });
+ const productTotal=round2(list.reduce((a,g)=>a+g.subtotal,0));
+ const deliveryTotal=round2(list.reduce((a,g)=>a+g.delivery,0));
+ let fee;
+ if(st.feeBasis==='per-retailer'){fee=round2(list.reduce((a,g)=>a+Math.max(g.subtotal*st.procurementPct/100,st.procurementMin),0))}
+ else {fee=round2(Math.max(productTotal*st.procurementPct/100,st.procurementMin))}
+ const adjustments=(o.quote&&o.quote.adjustments)||[];
+ const adjTotal=round2(adjustments.reduce((a,x)=>a+Number(x.delta||0),0));
+ const total=round2(productTotal+deliveryTotal+fee+adjTotal);
+ return {groups:list,productTotal,deliveryTotal,fee,adjTotal,adjustments,total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
+}
+function cargoCalc(o){
+ const st=S.settings, c=o.cargo||{};
+ const actual=Number(c.actualWeight)||0;
+ const vol=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/(st.volDivisor||5000)):(Number(c.volWeight)||0);
+ const pack=c.packaging!=null&&c.packaging!==''?Number(c.packaging):(st.packagingKg||0);
+ const chargeable=round2(Math.max(actual+pack,vol));
+ const rate=c.rate!=null&&c.rate!==''?Number(c.rate):st.cargoRate;
+ const freight=round2(Math.max(chargeable*rate,st.cargoMin));
+ const clearance=c.clearance!=null&&c.clearance!==''?Number(c.clearance):st.clearance;
+ const local=c.localDelivery!=null&&c.localDelivery!==''?Number(c.localDelivery):st.localDelivery;
+ const other=Number(c.other)||0;
+ const total=round2(freight+clearance+local+other);
+ return {actual,vol,pack,chargeable,rate,freight,clearance,local,other,total};
+}
+function estimateCargo(o){
+ const st=S.settings;
+ const kg=activeItems(o).reduce((a,i)=>a+(Number(i.estKg)||0.45)*(Number(i.qty)||1),0)+ (st.packagingKg||0);
+ const freight=Math.max(kg*st.cargoRate,st.cargoMin);
+ return {kg:round2(kg),low:round2(freight+st.clearance),high:round2(freight*1.35+st.clearance+st.localDelivery)};
+}
+function payTotals(o){
+ const paid=o.payments.filter(p=>['Payment completed','Payment available','Payment held'].includes(p.status));
+ const initialPaid=paid.filter(p=>p.type!=='cargo').reduce((a,p)=>a+p.amount,0);
+ const cargoPaid=paid.filter(p=>p.type==='cargo').reduce((a,p)=>a+p.amount,0);
+ const refunded=(o.refunds||[]).reduce((a,r)=>a+Number(r.amount||0),0);
+ return {initialPaid:round2(initialPaid),cargoPaid:round2(cargoPaid),refunded:round2(refunded),net:round2(initialPaid+cargoPaid-refunded)};
+}
+function margin(o){
+ const t=payTotals(o);
+ const cost=activeItems(o).reduce((a,i)=>a+((i.purchase&&i.purchase.actualCost!=null)?Number(i.purchase.actualCost):itemLine(i)),0);
+ const del=activeItems(o).reduce((a,i)=>a+((i.purchase&&i.purchase.actualDelivery!=null)?Number(i.purchase.actualDelivery):0),0);
+ const q=quoteCalc(o);
+ const ukDel=del||q.deliveryTotal;
+ return round2(t.net-cost-ukDel-(o.cargo&&o.cargo.paidOut?Number(o.cargo.paidOut):0));
+}
+function quoteExpired(o){return !!(o.quote&&o.quote.sentAt&&o.quote.expiresAt&&Date.now()>o.quote.expiresAt&&!payTotals(o).initialPaid)}
+
+/* ---------------- order factory ---------------- */
+function newItem(p){
+ return Object.assign({
+  id:uid('it'),url:'',retailerId:null,retailerName:'',name:'',size:'',colour:'',shade:'',scent:'',variant:'',other:'',
+  qty:1,displayedPrice:null,wasPrice:null,confirmedPrice:null,availability:'Unknown',
+  extractOk:false,restricted:[],restrictedCleared:false,estKg:0.45,
+  subsAllowed:'no',subsNotes:'',cancelIfUnavailable:true,customerNotes:'',adminNotes:'',
+  itemStatus:'Awaiting review',purchase:null,received:null,issues:[]
+ },p||{});
+}
+function newOrder(p){
+ const ref=nextRef();
+ return Object.assign({
+  ref,token:uid('t'),createdAt:Date.now(),status:'Request submitted',
+  customer:{name:'',email:'',whatsapp:'',country:'United Kingdom'},
+  recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},
+  items:[],partOfLargerOrder:false,customerNotes:'',
+  quote:null,payments:[],cargo:{},refunds:[],timeline:[{status:'Request submitted',at:Date.now(),note:'',actor:'Customer'}],
+  batchId:null,holds:[]
+ },p||{});
+}
+
+/* ---------------- seed ---------------- */
+function seed(){
+ const mk=(cfg)=>{
+  const o=newOrder({});
+  o.createdAt=Date.now()-cfg.ageH*3600e3;
+  o.timeline=[{status:'Request submitted',at:o.createdAt,note:'',actor:'Customer'}];
+  Object.assign(o.customer,cfg.customer);
+  Object.assign(o.recipient,cfg.recipient);
+  o.items=cfg.items.map(i=>newItem(i));
+  S.orders.push(o);
+  return o;
+ };
+ // 1. brand new request awaiting review
+ const o1=mk({ageH:2,customer:{name:'Rutendo Chikafu',email:'rutendo.c@example.com',whatsapp:'+263 77 412 8890',country:'Zimbabwe'},
+  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'12 Arundel Rd, Mount Pleasant',collection:'',instructions:'Call before delivery'},
+  items:[
+   {url:'https://www.boots.com/cerave-moisturising-lotion-473ml-10263847',retailerId:'boots',retailerName:'Boots',name:'CeraVe Moisturising Lotion 473ml',size:'473ml',qty:2,displayedPrice:16.5,availability:'In stock',extractOk:true,estKg:0.55,subsAllowed:'yes',subsNotes:'CeraVe cream tub is fine if the lotion is out',cancelIfUnavailable:false},
+   {url:'https://www.superdrug.com/palmers-cocoa-butter-formula-400ml-p-9928311',retailerId:'superdrug',retailerName:'Superdrug',name:'Palmers Cocoa Butter Formula 400ml',size:'400ml',qty:3,displayedPrice:7.99,wasPrice:9.99,availability:'In stock',extractOk:true,estKg:0.45}
+  ]});
+ setStatus(o1,'Product information captured');
+ setStatus(o1,'Awaiting price confirmation');
+
+ // 2. restricted flag, needs review
+ const o2=mk({ageH:6,customer:{name:'Tapiwa Moyo',email:'t.moyo@example.co.uk',whatsapp:'+44 7700 900412',country:'United Kingdom'},
+  recipient:{name:'Grace Moyo',phone:'+263 71 220 5514',town:'Bulawayo',address:'',collection:'Swift Bulawayo depot, Fife St',instructions:'Recipient collects with ID'},
+  items:[
+   {url:'https://www.lookfantastic.com/olaplex-no3-hair-perfector-100ml/11902334.html',retailerId:'lookfantastic',retailerName:'LookFantastic',name:'Olaplex No 3 Hair Perfector 100ml',size:'100ml',qty:1,displayedPrice:28.0,availability:'In stock',extractOk:true,estKg:0.25},
+   {url:'https://www.superdrug.com/jerome-russell-bblonde-peroxide-developer-30-vol-p-1188420',retailerId:'superdrug',retailerName:'Superdrug',name:'Jerome Russell Bblonde Peroxide Developer 30 Vol',size:'150ml',qty:2,displayedPrice:4.29,availability:'In stock',extractOk:true,estKg:0.3,restricted:['peroxide','developer']}
+  ]});
+ setStatus(o2,'Restricted-product review');
+
+ // 3. quote sent, awaiting payment
+ const o3=mk({ageH:1,customer:{name:'Nyasha Dube',email:'nyasha.dube@example.com',whatsapp:'+263 78 991 2200',country:'Zimbabwe'},
+  recipient:{name:'Memory Dube',phone:'+263 78 991 2200',town:'Gweru',address:'44 Mkoba 6',collection:'',instructions:''},
+  items:[
+   {url:'https://www.beautybay.com/p/nars-radiant-creamy-concealer/',retailerId:'beautybay',retailerName:'Beauty Bay',name:'NARS Radiant Creamy Concealer',shade:'Biscuit',qty:1,displayedPrice:26.0,confirmedPrice:26.0,availability:'In stock',extractOk:true,estKg:0.12,itemStatus:'Approved'},
+   {url:'https://www.beautybay.com/p/the-ordinary-niacinamide-10-zinc-1/',retailerId:'beautybay',retailerName:'Beauty Bay',name:'The Ordinary Niacinamide 10% + Zinc 1%',size:'60ml',qty:4,displayedPrice:11.0,confirmedPrice:11.0,availability:'In stock',extractOk:true,estKg:0.14,itemStatus:'Approved'}
+  ]});
+ o3.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-18*60e3,expiresAt:Date.now()+42*60e3,expiryMins:60,status:'Sent'};
+ setStatus(o3,'Quote sent');
+ setStatus(o3,'Awaiting initial payment');
+ o3.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:quoteCalc(o3).total,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o3.ref)%99999,createdAt:Date.now()-18*60e3,paidAt:null,held:false});
+ logMsg(o3.ref,'Quote ready','Email',o3.customer.email,'Your quote for '+o3.ref+' is ready. It expires in 60 minutes.');
+
+ // 4. paid, waiting to be bought
+ const o4=mk({ageH:20,customer:{name:'Chiedza Ncube',email:'chiedza.n@example.com',whatsapp:'+263 71 445 9087',country:'Zimbabwe'},
+  recipient:{name:'Sibongile Ncube',phone:'+263 71 445 9087',town:'Harare',address:'8 Fife Ave',collection:'',instructions:''},
+  items:[
+   {url:'https://www.afrohairandbeauty.co.uk/products/brazilian-body-wave-bundle-22-inch',retailerId:'afrohair',retailerName:'Afro Hair & Beauty',name:'Brazilian Body Wave Bundle 22 Inch',colour:'Natural black 1B',qty:3,displayedPrice:42.0,confirmedPrice:42.0,availability:'In stock',extractOk:false,estKg:0.35,itemStatus:'Approved',subsAllowed:'yes',subsNotes:'20 inch acceptable if 22 is unavailable'}
+  ]});
+ o4.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-19*3600e3,expiresAt:Date.now()-18*3600e3,expiryMins:60,status:'Accepted'};
+ const q4=quoteCalc(o4);
+ o4.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q4.total,currency:'GBP',status:'Payment completed',ref:'PP-8842K19',createdAt:Date.now()-19*3600e3,paidAt:Date.now()-18.6*3600e3,held:true});
+ setStatus(o4,'Quote sent');setStatus(o4,'Initial payment completed');setStatus(o4,'Paid — awaiting retailer purchase');
+ logMsg(o4.ref,'Payment received','Email',o4.customer.email,'We have received '+money(q4.total)+' for '+o4.ref+'. We will now place the retailer order.');
+
+ // 5. received in UK, awaiting weight and cargo payment
+ const o5=mk({ageH:200,customer:{name:'Farai Zimuto',email:'farai.z@example.com',whatsapp:'+44 7700 900771',country:'United Kingdom'},
+  recipient:{name:'Loveness Zimuto',phone:'+263 77 300 1122',town:'Mutare',address:'',collection:'Chimanimani Cargo, Mutare branch',instructions:''},
+  items:[
+   {url:'https://www.boots.com/no7-protect-and-perfect-serum-50ml-10281142',retailerId:'boots',retailerName:'Boots',name:'No7 Protect And Perfect Serum 50ml',size:'50ml',qty:2,displayedPrice:24.95,confirmedPrice:24.95,availability:'In stock',extractOk:true,estKg:0.2,itemStatus:'Received',
+    purchase:{orderNumber:'BOO-77341902',date:Date.now()-160*3600e3,actualCost:49.9,actualDelivery:0,tracking:'JD0002284471GB',courier:'Yodel',eta:Date.now()-120*3600e3,by:'Admin (demo)',notes:'Free delivery applied over £25'},
+    received:{at:Date.now()-96*3600e3,qtyOk:true,variantOk:true,condition:'Good',photos:['no7-front.jpg','no7-batch.jpg'],notes:''}},
+   {url:'https://www.boots.com/soap-and-glory-righteous-butter-300ml-10112233',retailerId:'boots',retailerName:'Boots',name:'Soap And Glory Righteous Butter 300ml',size:'300ml',qty:2,displayedPrice:9.0,confirmedPrice:9.0,availability:'In stock',extractOk:true,estKg:0.4,itemStatus:'Received',
+    purchase:{orderNumber:'BOO-77341902',date:Date.now()-160*3600e3,actualCost:18.0,actualDelivery:0,tracking:'JD0002284471GB',courier:'Yodel',eta:Date.now()-120*3600e3,by:'Admin (demo)',notes:''},
+    received:{at:Date.now()-96*3600e3,qtyOk:true,variantOk:true,condition:'Good',photos:['sg-butter.jpg'],notes:''}}
+  ]});
+ o5.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-199*3600e3,expiresAt:Date.now()-198*3600e3,expiryMins:60,status:'Accepted'};
+ const q5=quoteCalc(o5);
+ o5.payments.push({id:uid('p'),type:'initial',provider:'Card',amount:q5.total,currency:'GBP',status:'Payment completed',ref:'ch_3PkQ22Lm',createdAt:Date.now()-199*3600e3,paidAt:Date.now()-198.8*3600e3,held:false});
+ ['Quote sent','Initial payment completed','Purchased from retailer','Retailer dispatched','Received in the UK','Received and checked','Awaiting final weight'].forEach(s=>setStatus(o5,s));
+ o5.cargo={actualWeight:1.4,packaging:0.3,l:32,w:24,h:16,rate:9.5,clearance:6,localDelivery:5,other:0};
+
+ // 6. in transit to Zimbabwe, cargo paid
+ const o6=mk({ageH:600,customer:{name:'Blessing Marufu',email:'b.marufu@example.com',whatsapp:'+263 77 880 4412',country:'Zimbabwe'},
+  recipient:{name:'Blessing Marufu',phone:'+263 77 880 4412',town:'Harare',address:'',collection:'Tenga collection point, Belgravia',instructions:''},
+  items:[
+   {url:'https://www.asos.com/nike/nike-air-force-1-white/prd/203991884',retailerId:'asos',retailerName:'ASOS',name:'Nike Air Force 1 White',size:'UK 8',colour:'White',qty:1,displayedPrice:99.95,confirmedPrice:99.95,availability:'In stock',extractOk:true,estKg:1.2,itemStatus:'Received',
+    purchase:{orderNumber:'ASOS-901233114',date:Date.now()-560*3600e3,actualCost:99.95,actualDelivery:0,tracking:'HRM7712004GB',courier:'Evri',eta:Date.now()-520*3600e3,by:'Admin (demo)',notes:''},
+    received:{at:Date.now()-480*3600e3,qtyOk:true,variantOk:true,condition:'Good',photos:['af1-box.jpg'],notes:''}}
+  ]});
+ o6.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-599*3600e3,expiresAt:Date.now()-598*3600e3,expiryMins:60,status:'Accepted'};
+ const q6=quoteCalc(o6);
+ o6.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712C04',createdAt:Date.now()-599*3600e3,paidAt:Date.now()-598*3600e3,held:false});
+ o6.cargo={actualWeight:2.2,packaging:0.3,l:34,w:22,h:14,rate:9.5,clearance:6,localDelivery:5,other:0,company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,shipRef:'SCZ-2026-0714',eta:Date.now()+96*3600e3,tracking:'SCZ714-0092'};
+ const c6=cargoCalc(o6);
+ o6.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:c6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712D88',createdAt:Date.now()-120*3600e3,paidAt:Date.now()-118*3600e3,held:false});
+ S.batches.push({id:'BATCH-0714',company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,eta:Date.now()+96*3600e3,ref:'SCZ-2026-0714',manifest:'manifest-0714.pdf',status:'In transit to Zimbabwe',orders:[o6.ref]});
+ o6.batchId='BATCH-0714';
+ ['Quote sent','Initial payment completed','Purchased from retailer','Received and checked','Cargo payment received','Assigned to cargo batch','Handed to cargo company','In transit to Zimbabwe'].forEach(s=>setStatus(o6,s));
+
+ // 7. delivered (history)
+ const o7=mk({ageH:1400,customer:{name:'Rutendo Chikafu',email:'rutendo.c@example.com',whatsapp:'+263 77 412 8890',country:'Zimbabwe'},
+  recipient:{name:'Rutendo Chikafu',phone:'+263 77 412 8890',town:'Harare',address:'12 Arundel Rd, Mount Pleasant',collection:'',instructions:''},
+  items:[{url:'https://www.cultbeauty.co.uk/p/the-inkey-list-hyaluronic-acid-serum',retailerId:'cultbeauty',retailerName:'Cult Beauty',name:'The Inkey List Hyaluronic Acid Serum',size:'30ml',qty:5,displayedPrice:8.99,confirmedPrice:8.99,availability:'In stock',extractOk:true,estKg:0.1,itemStatus:'Received',
+   purchase:{orderNumber:'CB-5590231',date:Date.now()-1380*3600e3,actualCost:44.95,actualDelivery:0,tracking:'RM99123GB',courier:'Royal Mail',eta:Date.now()-1340*3600e3,by:'Admin (demo)',notes:''},
+   received:{at:Date.now()-1300*3600e3,qtyOk:true,variantOk:true,condition:'Good',photos:[],notes:''}}]});
+ o7.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-1399*3600e3,expiresAt:Date.now()-1398*3600e3,expiryMins:60,status:'Accepted'};
+ const q7=quoteCalc(o7);
+ o7.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q7.total,currency:'GBP',status:'Payment completed',ref:'PP-5590A2',createdAt:Date.now()-1399*3600e3,paidAt:Date.now()-1398*3600e3,held:false});
+ o7.cargo={actualWeight:0.7,packaging:0.3,rate:9.5,clearance:6,localDelivery:5,other:0,company:'Swift Cargo Zimbabwe',shipRef:'SCZ-2026-0620'};
+ o7.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:cargoCalc(o7).total,currency:'GBP',status:'Payment completed',ref:'PP-5590B7',createdAt:Date.now()-1290*3600e3,paidAt:Date.now()-1288*3600e3,held:false});
+ ['Quote sent','Initial payment completed','Purchased from retailer','Received and checked','Cargo payment received','Handed to cargo company','In transit to Zimbabwe','Arrived in Zimbabwe','Ready for collection','Delivered'].forEach(s=>setStatus(o7,s));
+
+ logAudit('','Demo data seeded','','7 orders','');
+}
+/* ================================================================
+   ROUTER + SHELL
+   ================================================================ */
+let VIEW={tab:'request',adminTab:'review',search:'',filter:'all'};
+function go(h){location.hash=h}
+function route(){
+ const raw=location.hash.replace(/^#\/?/,'');
+ const [path,qs]=raw.split('?');
+ const parts=path.split('/').filter(Boolean);
+ const q={};(qs||'').split('&').filter(Boolean).forEach(kv=>{const [k,v]=kv.split('=');q[decodeURIComponent(k)]=decodeURIComponent(v||'')});
+ return {parts,q};
+}
+function render(){
+ const {parts,q}=route();
+ const isAdmin=parts[0]==='admin';
+ let body='';
+ try{
+  if(!parts.length)body=viewHome();
+  else if(parts[0]==='request')body=viewRequest();
+  else if(parts[0]==='submitted')body=viewSubmitted(parts[1]);
+  else if(parts[0]==='track')body=viewTrack(parts[1],parts[2]);
+  else if(parts[0]==='quote')body=viewQuote(parts[1],parts[2]);
+  else if(parts[0]==='pay')body=viewPay(parts[1],parts[2],parts[3]);
+  else if(parts[0]==='lookup')body=viewLookup();
+  else if(isAdmin)body=viewAdmin(parts.slice(1),q);
+  else body=`<div class="narrow"><div class="empty">Page not found. <a class="link" href="#/">Go back</a></div></div>`;
+ }catch(e){body=`<div class="narrow">${note('<b>Something went wrong rendering this page.</b><br>'+esc(e.message),'danger','alert')}</div>`;console.error(e)}
+ $('#app').innerHTML=shell(body,isAdmin);
+ window.scrollTo(0,VIEW.keepScroll?window.scrollY:0);VIEW.keepScroll=false;
+}
+function shell(body,isAdmin){
+ return `
+ <div class="banner">Prototype build · demo data only · <b>no real payments are taken</b></div>
+ <div class="topbar"><div class="topbar-in">
+   <a class="brand" href="#/">
+     <span class="mark">${icon('plane',14)}</span>
+     <span>tenga<span class="tld">.uk</span></span>
+   </a>
+   <div class="seg" style="margin-left:auto">
+     <button data-act="role" data-v="customer" class="${isAdmin?'':'on'}">Customer</button>
+     <button data-act="role" data-v="admin" class="${isAdmin?'on':''}">Operations</button>
+   </div>
+   <button class="btn btn-s btn-ghost" data-act="reset" title="Clear all demo data and start again">${icon('refresh',15)}<span class="tiny">Reset demo</span></button>
+ </div></div>
+ ${body}
+ ${isAdmin?'':`<div class="foot">
+   <div style="margin-bottom:6px">Tenga UK, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.</div>
+   <div>Website designed &amp; built by <a href="https://welaunchsites.com/" target="_blank" rel="noopener">LaunchSite</a></div>
+ </div>`}`;
+}
+window.addEventListener('hashchange',render);
+
+/* ================================================================
+   CUSTOMER: home
+   ================================================================ */
+function viewHome(){
+ const st=S.settings;
+ return `<div class="narrow">
+  <div class="stack-l">
+   <div class="stack">
+     <div class="eyebrow">United Kingdom to Zimbabwe</div>
+     <h1 class="hero-lede">Paste a UK product link.<br>We buy it, check it, and <em>send it home</em>.</h1>
+     <p style="max-width:56ch;color:var(--ink-2);font-size:16px">Beauty, personal care and fashion from retailers we already work with. You never pay the shop. You pay us one confirmed price, and we do the buying.</p>
+     <div class="row wrap" style="margin-top:4px">
+       <a class="btn btn-primary btn-lg" href="#/request">${icon('link',17)}Start a request</a>
+       <a class="btn btn-lg" href="#/lookup">${icon('search',17)}Track an order</a>
+     </div>
+   </div>
+
+   <div class="steps">
+    <div class="step"><span class="n">01</span><b>You send links</b><span class="small muted">Product page, size, shade, quantity, and who it is for.</span></div>
+    <div class="step"><span class="n">02</span><b>We confirm the real price</b><span class="small muted">A person opens every link and checks stock and UK delivery.</span></div>
+    <div class="step"><span class="n">03</span><b>You pay one quote</b><span class="small muted">Product, UK delivery and our fee. Valid for ${st.quoteExpiryMins} minutes.</span></div>
+    <div class="step zw"><span class="n">04</span><b>Zimbabwe shipping</b><span class="small muted">Charged after weighing, so you are not guessing.</span></div>
+   </div>
+
+   <div class="card">
+    <div class="card-h"><b>What it costs</b><span class="eyebrow">Before Zimbabwe shipping</span></div>
+    <div class="card-b stack">
+      <div class="field-grid">
+        <div class="stack-s"><div class="eyebrow">Minimum spend</div><div class="mono" style="font-size:20px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per request</div></div>
+        <div class="stack-s"><div class="eyebrow">Our fee</div><div class="mono" style="font-size:20px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
+        <div class="stack-s"><div class="eyebrow">UK delivery</div><div class="mono" style="font-size:20px;font-weight:700">At cost</div><div class="tiny muted">Per retailer, no mark up</div></div>
+        <div class="stack-s"><div class="eyebrow">Zimbabwe cargo</div><div class="mono" style="font-size:20px;font-weight:700">Separate</div><div class="tiny muted">From ${money(st.cargoRate)} per kg, billed on weight</div></div>
+      </div>
+      ${note('<b>Two payments, not one.</b> The first payment covers buying the item in the UK. Zimbabwe shipping is quoted as an estimate up front, then confirmed once your parcel is weighed. If the confirmed amount is higher, we ask before shipping.','info','alert')}
+    </div>
+   </div>
+
+   <div class="card">
+    <div class="card-h"><b>Retailers we buy from</b><a class="link tiny" href="#/request">Submit a different shop for review</a></div>
+    <div class="card-b row wrap" style="gap:7px">
+      ${S.retailers.filter(r=>r.status!=='disabled').map(r=>`<span class="pill ${r.status==='approved'?'p-accent':'p-warn'}">${esc(r.name)}${r.status==='manual'?' · manual':''}</span>`).join('')}
+    </div>
+   </div>
+
+   <div class="card">
+    <div class="card-h"><b>What we cannot send</b></div>
+    <div class="card-b stack-s small">
+      <div>Cargo rules rule out aerosols, bleach and strong developers, prescription or medicated products, and anything with a battery. If your link contains one of these we will flag it and come back to you before asking for any money.</div>
+      <div class="muted">Accepted: lotions, creams, non medicated skincare, shampoo, conditioner, soap, makeup, wigs and extensions, beauty accessories, non electrical tools, clothing, shoes and accessories.</div>
+    </div>
+   </div>
+  </div>
+ </div>`;
+}
+
+function viewLookup(){
+ return `<div class="narrow-s"><div class="stack">
+  <h2>Track an order</h2>
+  <p class="muted small">Enter the reference we sent you, for example TU-1041.</p>
+  <div class="card card-p stack">
+    <label class="f">Order reference<input type="text" id="lookupRef" placeholder="TU-1041" autocomplete="off"></label>
+    <button class="btn btn-primary" data-act="lookup">${icon('search',16)}Find my order</button>
+    <div id="lookupMsg"></div>
+  </div>
+  <div class="small muted">Demo shortcut: ${S.orders.slice(-4).map(o=>`<a class="link" href="#/track/${o.ref}/${o.token}">${o.ref}</a>`).join(' · ')}</div>
+ </div></div>`;
+}
+/* ================================================================
+   CUSTOMER: request builder
+   ================================================================ */
+function draft(){
+ if(!S.draft)S.draft={items:[],pending:null,customer:{name:'',email:'',whatsapp:'',country:'Zimbabwe'},
+   recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},partOfLargerOrder:false,notes:''};
+ return S.draft;
+}
+function viewRequest(){
+ const d=draft(), st=S.settings;
+ const total=round2(d.items.reduce((a,i)=>a+(Number(i.displayedPrice)||0)*(Number(i.qty)||1),0));
+ const known=d.items.filter(i=>i.displayedPrice!=null).length;
+ return `<div class="narrow"><div class="stack-l">
+  <div class="stack-s">
+   <div class="eyebrow">New request</div>
+   <h2 style="font-size:26px">Add your product links</h2>
+   <p class="muted small" style="max-width:60ch">Add as many items as you like, from one shop or several. Nothing is bought and nothing is charged until you approve a quote from us.</p>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>1. Paste a product link</b><span class="eyebrow">Step one of three</span></div>
+   <div class="card-b stack">
+     <div class="row" style="align-items:flex-end;gap:8px">
+       <label class="f grow">Product page address
+         <input type="url" id="linkInput" placeholder="https://www.boots.com/..." autocomplete="off" value="${esc(d.pendingUrl||'')}">
+       </label>
+       <button class="btn btn-primary" data-act="fetch" style="height:37px">${icon('link',16)}Read link</button>
+     </div>
+     ${d.pending?pendingCard(d.pending):`<div class="tiny muted">We read what the page shows. Whatever we find is provisional until a person confirms it.</div>`}
+   </div>
+  </div>
+
+  ${d.items.length?`<div class="card">
+   <div class="card-h"><b>2. Your items</b><span class="pill p-mute">${d.items.length} item${d.items.length>1?'s':''}</span></div>
+   <div class="card-b stack">
+     ${d.items.map((it,ix)=>draftItemCard(it,ix)).join('')}
+     <div class="sum" style="border-top:1px solid var(--line);padding-top:12px">
+       <div class="l"><span>Estimated product value${known<d.items.length?' (from the items we could read)':''}</span><span class="v">${money(total)}</span></div>
+       ${total<st.minSpend?`<div class="tiny" style="color:var(--warn)">Our minimum is ${money(st.minSpend)} of product value per request. You can still submit, and we will tell you what is needed to reach it.</div>`:`<div class="tiny" style="color:var(--accent)">Meets the ${money(st.minSpend)} minimum.</div>`}
+       <div class="tiny muted">Our fee and UK delivery are added on the quote. Zimbabwe shipping is charged separately.</div>
+     </div>
+   </div>
+  </div>`:''}
+
+  <div class="card">
+   <div class="card-h"><b>3. Who you are, and who this is for</b></div>
+   <div class="card-b stack">
+     <div class="eyebrow">Your details</div>
+     <div class="field-grid two">
+       <label class="f">Full name<input type="text" data-bind="customer.name" value="${esc(d.customer.name)}"></label>
+       <label class="f">Email address<input type="email" data-bind="customer.email" value="${esc(d.customer.email)}"></label>
+       <label class="f">WhatsApp number<input type="tel" data-bind="customer.whatsapp" placeholder="+263 or +44" value="${esc(d.customer.whatsapp)}"></label>
+       <label class="f">Where are you<select data-bind="customer.country">${['Zimbabwe','United Kingdom','South Africa','Other'].map(c=>`<option ${d.customer.country===c?'selected':''}>${c}</option>`).join('')}</select></label>
+     </div>
+     <hr class="hr">
+     <div class="eyebrow">Recipient in Zimbabwe</div>
+     <div class="field-grid two">
+       <label class="f">Recipient name<input type="text" data-bind="recipient.name" value="${esc(d.recipient.name)}"></label>
+       <label class="f">Recipient phone<input type="tel" data-bind="recipient.phone" placeholder="+263" value="${esc(d.recipient.phone)}"></label>
+       <label class="f">Town or city<input type="text" data-bind="recipient.town" placeholder="Harare" value="${esc(d.recipient.town)}"></label>
+       <label class="f">Collection point <span class="hint">If they will collect rather than have it delivered</span><input type="text" data-bind="recipient.collection" value="${esc(d.recipient.collection)}"></label>
+     </div>
+     <label class="f">Delivery address <span class="hint">Optional if collecting</span><input type="text" data-bind="recipient.address" value="${esc(d.recipient.address)}"></label>
+     <label class="f">Anything we should know<textarea data-bind="notes" placeholder="Delivery notes, timing, who to call">${esc(d.notes)}</textarea></label>
+     <label class="check"><input type="checkbox" data-bind="partOfLargerOrder" ${d.partOfLargerOrder?'checked':''}><span>This is part of a larger order I am putting together, please hold it for consolidation.</span></label>
+   </div>
+  </div>
+
+  <div class="card card-p stack">
+    ${note(`We aim to come back with a confirmed quote within <b>${st.responseHours} hours</b>. Nothing is purchased and no payment is taken until you approve it.`,'accent','clock')}
+    <button class="btn btn-primary btn-lg btn-block" data-act="submitRequest" ${d.items.length?'':'disabled'}>${icon('arrow',17)}Submit request${d.items.length?' ('+d.items.length+' item'+(d.items.length>1?'s':'')+')':''}</button>
+    <div class="tiny muted center">By submitting you accept our terms. Prices and availability are only guaranteed once we have received payment and successfully placed the retailer order.</div>
+  </div>
+ </div></div>`;
+}
+
+function pendingCard(p){
+ const d=draft();
+ if(p.reason==='badurl')return note(esc(p.msg||'That does not look like a web address.'),'danger','alert');
+ if(p.reason==='unapproved')return `<div class="stack-s">
+   ${note(`<b>${esc(p.retailerName)} is not currently approved.</b> You can still submit the link for manual review and we will tell you whether we can buy from them.`,'warn','alert')}
+   <div class="row wrap"><button class="btn btn-s" data-act="addManual">${icon('plus',15)}Submit for manual review</button><button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button></div>
+ </div>`;
+ if(p.reason==='disabled')return note(`<b>We are not buying from ${esc(p.retailerName)} at the moment.</b> Try a different retailer, or contact us if it is important.`,'danger','x');
+ return `<div class="card" style="background:var(--surface-2);border-color:var(--line-2)">
+  <div class="card-b stack">
+   <div class="row" style="align-items:flex-start">
+     ${thumb({name:p.name||p.retailerName},true)}
+     <div class="grow stack-s">
+       <div class="row wrap" style="gap:6px">
+         ${pill(p.retailerName,'accent')}
+         ${p.availability==='In stock'?pill('In stock','accent'):p.availability==='Low stock'?pill('Low stock','warn'):pill(p.availability,'mute')}
+         ${pill('Provisional','mute')}
+       </div>
+       <input type="text" id="pName" placeholder="Product name" value="${esc(p.name)}" style="font-weight:600">
+       ${p.reason==='noauto'?`<div class="tiny" style="color:var(--warn)">This shop blocks automatic reading. Tell us the name and options and we will confirm the price for you.</div>`
+        :p.reason==='noname'?`<div class="tiny" style="color:var(--warn)">We could not read a product name from that link. Please type it in.</div>`
+        :`<div class="tiny muted">Shown online: <b class="mono">${p.price!=null?money(p.price):'not readable'}</b>${p.wasPrice?` <s class="mono">${money(p.wasPrice)}</s>`:''} · this is not your final price.</div>`}
+     </div>
+   </div>
+   <div class="field-grid">
+     <label class="f">Quantity<input type="number" id="pQty" min="1" max="20" value="1"></label>
+     <label class="f">Size<input type="text" id="pSize" value="${esc(p.size||'')}" placeholder="e.g. 250ml"></label>
+     <label class="f">Colour<input type="text" id="pColour" placeholder="e.g. natural black"></label>
+     <label class="f">Shade<input type="text" id="pShade" placeholder="e.g. 4.5N"></label>
+     <label class="f">Scent<input type="text" id="pScent" placeholder="e.g. vanilla"></label>
+     <label class="f">Other option<input type="text" id="pVariant" placeholder="e.g. 22 inch, UK 8"></label>
+   </div>
+   <hr class="hr">
+   <div class="field-grid two">
+     <label class="f">If this exact item is unavailable
+       <select id="pSubs">
+         <option value="no">Do not substitute, ask me first</option>
+         <option value="yes">A close substitute is fine</option>
+         <option value="cancel">Cancel this item and refund me</option>
+       </select>
+     </label>
+     <label class="f">What substitutes are acceptable<input type="text" id="pSubsNotes" placeholder="e.g. any CeraVe moisturiser, same size"></label>
+   </div>
+   <label class="f">Notes for this item<input type="text" id="pNotes" placeholder="Anything specific about this product"></label>
+   <div class="row wrap">
+     <button class="btn btn-primary btn-s" data-act="addItem">${icon('plus',15)}Add to request</button>
+     <button class="btn btn-s btn-ghost" data-act="clearPending">Cancel</button>
+   </div>
+  </div>
+ </div>`;
+}
+
+function draftItemCard(it,ix){
+ const variantBits=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+ return `<div class="item-card"><div class="item-head">
+   ${thumb(it)}
+   <div class="grow stack-s">
+     <div class="row wrap" style="gap:6px">${pill(it.retailerName||'Unknown shop',it.retailerId?'accent':'warn')}${it.restricted.length?pill('Needs review','danger'):''}</div>
+     <b style="font-size:14.5px">${esc(it.name||'Unnamed item')}</b>
+     ${variantBits?`<div class="tiny muted">${esc(variantBits)}</div>`:''}
+     <div class="tiny muted">Qty ${it.qty} · ${it.displayedPrice!=null?`shown at <span class="mono">${money(it.displayedPrice)}</span> each`:'price to be confirmed by us'}</div>
+     ${it.subsAllowed==='yes'?`<div class="tiny" style="color:var(--accent)">Substitutes allowed${it.subsNotes?': '+esc(it.subsNotes):''}</div>`:it.subsAllowed==='cancel'?`<div class="tiny muted">Cancel and refund if unavailable</div>`:`<div class="tiny muted">Ask before substituting</div>`}
+   </div>
+   <div class="col" style="align-items:flex-end;gap:6px">
+     <div class="mono" style="font-weight:700">${it.displayedPrice!=null?money(it.displayedPrice*it.qty):'—'}</div>
+     <button class="btn btn-xs btn-ghost" data-act="delDraft" data-ix="${ix}" title="Remove">${icon('trash',14)}</button>
+   </div>
+ </div></div>`;
+}
+/* ================================================================
+   CUSTOMER: confirmation, tracking, quote, payment
+   ================================================================ */
+function viewSubmitted(ref){
+ const o=getOrder(ref); if(!o)return `<div class="narrow"><div class="empty">We cannot find that request.</div></div>`;
+ const st=S.settings;
+ return `<div class="narrow"><div class="stack-l">
+  <div class="stack-s">
+    <div class="row" style="gap:8px;color:var(--accent)">${icon('check',20)}<div class="eyebrow" style="color:var(--accent)">Request received</div></div>
+    <h2 style="font-size:26px">We have your request, ${esc(o.customer.name.split(' ')[0]||'there')}.</h2>
+    <p style="color:var(--ink-2)">We are checking the current product price, availability and UK delivery cost. You will receive a final quote before any payment. Nothing has been purchased.</p>
+  </div>
+  <div class="card card-p stack">
+    <div class="spread"><span class="eyebrow">Your reference</span>${pill('Within '+st.responseHours+' hours','info')}</div>
+    <div class="mono" style="font-size:30px;font-weight:700;letter-spacing:-.02em">${esc(o.ref)}</div>
+    <div class="small muted">Save this. You can check progress at any time with your private tracking link.</div>
+    <a class="btn btn-primary" href="#/track/${o.ref}/${o.token}">${icon('search',16)}Open my tracking page</a>
+  </div>
+  <div class="card">
+    <div class="card-h"><b>What you asked for</b></div>
+    <div class="card-b stack-s">${o.items.map(it=>`<div class="row" style="align-items:flex-start">${thumb(it)}<div class="grow"><b class="small">${esc(it.name||'Unnamed item')}</b><div class="tiny muted">${esc(it.retailerName)} · qty ${it.qty}${it.size?' · '+esc(it.size):''}${it.shade?' · '+esc(it.shade):''}</div></div>${it.restricted.length?pill('Under review','warn'):''}</div>`).join('')}</div>
+  </div>
+  ${note('<b>Next:</b> a person opens every link, confirms stock and the real price, then sends you one quote. It stays valid for '+st.quoteExpiryMins+' minutes because retailer prices move.','info','clock')}
+ </div></div>`;
+}
+
+function customerStatusLine(o){
+ const t=payTotals(o), q=o.quote?quoteCalc(o):null;
+ if(quoteExpired(o))return {tone:'danger',ic:'clock',text:'Your quote has expired. Ask us for an updated one and we will recheck the prices.',cta:null};
+ if(/Restricted|Manual review/i.test(o.status))return {tone:'warn',ic:'alert',text:'One of your items needs a closer look before we can quote. We will come back to you.',cta:null};
+ if(o.status==='Quote sent'||o.status==='Awaiting initial payment')return {tone:'accent',ic:'card',text:'Your quote is ready. Review it and pay to start the purchase.',cta:{label:'View and pay quote',href:`#/quote/${o.ref}/${o.token}`}};
+ if(o.status==='Zimbabwe shipping payment required'||o.status==='Cargo payment pending')return {tone:'ochre',ic:'scale',text:'Your parcel has been weighed. The Zimbabwe shipping charge is ready to pay.',cta:{label:'Pay Zimbabwe shipping',href:`#/pay/${o.ref}/${o.token}/cargo`}};
+ if(o.status==='Additional payment required')return {tone:'warn',ic:'pound',text:'The retailer price changed. We need your decision before we buy.',cta:{label:'See what changed',href:`#/pay/${o.ref}/${o.token}/additional`}};
+ if(o.status==='Substitute approval required')return {tone:'warn',ic:'alert',text:'An item is unavailable. We have suggested an alternative and need your approval.',cta:null};
+ if(o.status==='Delivered')return {tone:'accent',ic:'check',text:'Delivered. Thank you for using Tenga.',cta:null};
+ if(t.initialPaid&&!/cargo|transit|Zimbabwe|collection|Delivered/i.test(o.status))return {tone:'accent',ic:'check',text:'Paid. We are working through the purchase and will keep this page updated.',cta:null};
+ return {tone:'info',ic:'clock',text:'We are checking price, availability and UK delivery. Your quote is on its way.',cta:null};
+}
+
+function viewTrack(ref,token){
+ const o=getOrder(ref);
+ if(!o||o.token!==token)return `<div class="narrow-s">${note('That tracking link is not valid. Check the link we sent you, or <a class="link" href="#/lookup">look up your reference</a>.','danger','lock')}</div>`;
+ const t=payTotals(o), q=o.quote?quoteCalc(o):null, cur=JOURNEY_RANK[o.status]!=null?JOURNEY_RANK[o.status]:0;
+ const s=customerStatusLine(o);
+ const est=estimateCargo(o);
+ const cargoDue=o.payments.find(p=>p.type==='cargo'&&['Payment link created','Payment not started','Payment pending'].includes(p.status));
+ return `<div class="narrow"><div class="stack-l">
+  <div class="spread wrap">
+   <div class="stack-s">
+     <div class="eyebrow">Order tracking</div>
+     <div class="mono" style="font-size:26px;font-weight:700;letter-spacing:-.02em">${esc(o.ref)}</div>
+     <div class="small muted">Submitted ${fmtDate(o.createdAt)} · for ${esc(o.recipient.name||o.customer.name)} in ${esc(o.recipient.town||'Zimbabwe')}</div>
+   </div>
+   <span class="pill p-${statusTone(o.status)}" style="font-size:12.5px;padding:5px 11px">${esc(o.status)}</span>
+  </div>
+
+  <div class="card card-p stack">
+    <div class="note n-${s.tone}">${icon(s.ic,16)}<div>${s.text}</div></div>
+    ${s.cta?`<a class="btn btn-primary btn-block btn-lg" href="${s.cta.href}">${s.cta.label}</a>`:''}
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Progress</b><span class="row tiny muted" style="gap:12px"><span class="row" style="gap:5px"><i style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:block"></i>UK leg</span><span class="row" style="gap:5px"><i style="width:8px;height:8px;border-radius:50%;background:var(--ochre);display:block"></i>Zimbabwe leg</span></span></div>
+   <div class="card-b"><div class="tl">
+    ${JOURNEY.map((j,i)=>{
+      const cls=i<cur?'done':i===cur?'now':'todo';
+      const ev=o.timeline.slice().reverse().find(e=>JOURNEY_RANK[e.status]===i);
+      return `<div class="tl-row ${cls} ${j.leg==='zw'?'zw':''}">
+        <div class="tl-dot">${i<cur?icon('check',12):i===cur?`<i style="width:7px;height:7px;border-radius:50%;background:${j.leg==='zw'?'var(--ochre)':'var(--accent)'};display:block"></i>`:''}</div>
+        <div class="stack-s" style="gap:2px">
+          <div class="tl-t">${j.label}</div>
+          <div class="tiny ${cls==='todo'?'muted':''}" style="color:${cls==='todo'?'':'var(--ink-2)'}">${j.desc}</div>
+          ${ev&&i<=cur?`<div class="tiny muted mono">${fmtTime(ev.at)}</div>`:''}
+        </div>
+      </div>`}).join('')}
+   </div></div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Your items</b><span class="tiny muted">${o.items.length} item${o.items.length>1?'s':''}</span></div>
+   <div class="card-b stack-s">
+    ${o.items.map(it=>{
+      const v=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+      return `<div class="row" style="align-items:flex-start;padding:6px 0">${thumb(it)}
+       <div class="grow stack-s" style="gap:3px">
+         <b class="small">${esc(it.name||'Unnamed item')}</b>
+         <div class="tiny muted">${esc(it.retailerName)} · qty ${it.qty}${v?' · '+esc(v):''}</div>
+         ${it.purchase&&it.purchase.tracking?`<div class="tiny muted mono">UK tracking ${esc(it.purchase.tracking)} · ${esc(it.purchase.courier||'')}</div>`:''}
+       </div>
+       <div class="col" style="align-items:flex-end;gap:4px">
+         <span class="mono small">${itemPrice(it)?money(itemLine(it)):'—'}</span>
+         ${it.itemStatus&&it.itemStatus!=='Approved'?pill(it.itemStatus,statusTone(it.itemStatus)):''}
+       </div></div>`}).join('')}
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Payments</b></div>
+   <div class="card-b stack">
+    <div class="sum">
+      <div class="l"><span>First payment, UK purchase</span><span class="v">${q?money(q.total):'Not quoted yet'}</span></div>
+      <div class="l tiny muted"><span>Status</span><span class="v">${t.initialPaid?'Paid '+money(t.initialPaid):o.quote?'Awaiting payment':'Awaiting quote'}</span></div>
+      <div class="l" style="margin-top:8px"><span>Zimbabwe shipping</span><span class="v">${o.cargo&&o.cargo.actualWeight?money(cargoCalc(o).total):'Estimated '+money(est.low)+' to '+money(est.high)}</span></div>
+      <div class="l tiny muted"><span>Status</span><span class="v">${t.cargoPaid?'Paid '+money(t.cargoPaid):o.cargo&&o.cargo.actualWeight?'Confirmed by weight, awaiting payment':'Confirmed once weighed'}</span></div>
+      ${t.refunded?`<div class="l" style="color:var(--danger)"><span>Refunded</span><span class="v">-${money(t.refunded)}</span></div>`:''}
+    </div>
+    ${!o.cargo||!o.cargo.actualWeight?`<div class="tiny muted">The Zimbabwe figure is an estimate based on what you ordered. It is confirmed once the parcel is on the scales, and we will tell you before anything ships.</div>`:''}
+    ${cargoDue?`<a class="btn btn-primary btn-block" href="#/pay/${o.ref}/${o.token}/cargo">${icon('card',16)}Pay Zimbabwe shipping ${money(cargoDue.amount)}</a>`:''}
+   </div>
+  </div>
+
+  ${o.batchId?(()=>{const b=S.batches.find(x=>x.id===o.batchId);return b?`<div class="card"><div class="card-h"><b>Shipment</b>${pill(b.status,'ochre')}</div><div class="card-b stack-s small">
+    <div class="spread"><span class="muted">Cargo company</span><b>${esc(b.company)}</b></div>
+    <div class="spread"><span class="muted">Shipment reference</span><b class="mono">${esc(b.ref)}</b></div>
+    <div class="spread"><span class="muted">Expected in Zimbabwe</span><b>${fmtDate(b.eta)}</b></div>
+    <div class="spread"><span class="muted">${o.recipient.collection?'Collection point':'Delivery to'}</span><b>${esc(o.recipient.collection||o.recipient.address||o.recipient.town)}</b></div>
+  </div></div>`:''})():''}
+
+  <div class="card card-p stack-s">
+    <div class="eyebrow">Need us</div>
+    <div class="small">WhatsApp <b class="mono">+44 7700 900 000</b> or email <b>help@tenga.uk</b>. Quote your reference ${esc(o.ref)}.</div>
+  </div>
+ </div></div>`;
+}
+
+function viewQuote(ref,token){
+ const o=getOrder(ref);
+ if(!o||o.token!==token)return `<div class="narrow-s">${note('That link is not valid.','danger','lock')}</div>`;
+ if(!o.quote||!o.quote.sentAt)return `<div class="narrow-s">${note('Your quote is not ready yet. We will email you as soon as it is.','info','clock')}</div>`;
+ const q=quoteCalc(o), expired=quoteExpired(o), t=payTotals(o), est=estimateCargo(o);
+ if(t.initialPaid)return `<div class="narrow-s"><div class="stack">${note('<b>This quote has been paid.</b> Thank you.','accent','check')}<a class="btn btn-primary" href="#/track/${o.ref}/${o.token}">Open tracking page</a></div></div>`;
+ return `<div class="narrow"><div class="stack-l">
+  <div class="spread wrap">
+    <div class="stack-s"><div class="eyebrow">Quote</div><div class="mono" style="font-size:26px;font-weight:700">${esc(o.ref)}</div></div>
+    ${expired?pill('Expired','danger'):`<span class="pill p-warn">${icon('clock',13)}${esc(until(o.quote.expiresAt))}</span>`}
+  </div>
+  ${expired?note('<b>This quote has expired.</b> Retailer prices move, so we need to recheck before you pay. Ask us for an updated quote and we will resend it.','danger','clock'):''}
+
+  ${q.groups.map(g=>`<div class="retailer-grp">
+    <div class="rg-h"><b>${esc(g.name)}</b><span class="mono tiny">${g.freeApplied?'Free UK delivery':'UK delivery '+money(g.delivery)}</span></div>
+    <div style="padding:4px 0">
+     ${g.items.map(it=>{const v=[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).join(' · ');
+      return `<div class="row" style="align-items:flex-start;padding:11px 13px;border-bottom:1px solid var(--line)">
+        ${thumb(it)}
+        <div class="grow stack-s" style="gap:3px">
+          <b class="small">${esc(it.name)}</b>
+          ${v?`<div class="tiny muted">${esc(v)}</div>`:''}
+          <div class="tiny muted">Qty ${it.qty} at ${money(itemPrice(it))} · <a class="link" href="${esc(it.url)}" target="_blank" rel="noopener">view on ${esc(g.name)} ${icon('ext',10)}</a></div>
+          <div class="tiny muted">${it.subsAllowed==='yes'?'Substitutes allowed'+(it.subsNotes?': '+esc(it.subsNotes):''):it.subsAllowed==='cancel'?'Cancel and refund if unavailable':'Ask me before substituting'}</div>
+        </div>
+        <b class="mono">${money(itemLine(it))}</b>
+      </div>`}).join('')}
+    </div>
+    <div class="spread small" style="padding:9px 13px"><span class="muted">${esc(g.name)} subtotal</span><b class="mono">${money(round2(g.subtotal+g.delivery))}</b></div>
+  </div>`).join('')}
+
+  <div class="card card-p">
+   <div class="sum">
+     <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
+     <div class="l"><span>UK retailer delivery${q.groups.length>1?' ('+q.groups.length+' shops, charged separately)':''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
+     <div class="l"><span>Procurement fee <span class="tiny muted">(${S.settings.procurementPct}% of product value, min ${money(S.settings.procurementMin)})</span></span><span class="v">${money(q.fee)}</span></div>
+     ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
+     <div class="l total"><span>Pay now</span><span class="v">${money(q.total)}</span></div>
+   </div>
+   <hr class="hr" style="margin:14px 0">
+   <div class="sum">
+     <div class="l"><span class="muted">Zimbabwe shipping, later</span><span class="v muted">est. ${money(est.low)} to ${money(est.high)}</span></div>
+     <div class="tiny muted">Based on roughly ${est.kg} kg for what you have ordered, at ${money(S.settings.cargoRate)} per kg plus clearance. This is an estimate from product descriptions. The real figure comes from the scales, and we will ask you before shipping if it is higher.</div>
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Delivering to</b></div>
+   <div class="card-b field-grid small">
+     <div class="stack-s" style="gap:2px"><span class="eyebrow">Recipient</span><b>${esc(o.recipient.name)}</b><span class="muted">${esc(o.recipient.phone)}</span></div>
+     <div class="stack-s" style="gap:2px"><span class="eyebrow">In Zimbabwe</span><b>${esc(o.recipient.town)}</b><span class="muted">${esc(o.recipient.collection||o.recipient.address||'Address to confirm')}</span></div>
+   </div>
+  </div>
+
+  <div class="card card-p stack">
+   <div class="eyebrow">Before you pay, please confirm</div>
+   <label class="check"><input type="checkbox" class="qc"><span>The products, sizes, shades and quantities above are correct.</span></label>
+   <label class="check"><input type="checkbox" class="qc"><span>The recipient name, phone number and town are correct.</span></label>
+   <label class="check"><input type="checkbox" class="qc"><span>I understand Zimbabwe shipping is charged separately once the parcel is weighed.</span></label>
+   <label class="check"><input type="checkbox" class="qc"><span>I understand the order is subject to retailer availability, and that prices are only guaranteed once payment is received and the retailer order is placed.</span></label>
+   <label class="check"><input type="checkbox" class="qc"><span>I accept the terms and cancellation policy.</span></label>
+   <hr class="hr">
+   <div class="stack-s">
+     <button class="btn btn-primary btn-lg btn-block" data-act="pay" data-ref="${o.ref}" data-provider="PayPal" ${expired?'disabled':''}>Pay ${money(q.total)} with PayPal</button>
+     <button class="btn btn-lg btn-block" data-act="pay" data-ref="${o.ref}" data-provider="Card" ${expired?'disabled':''}>${icon('card',16)}Pay by card</button>
+     ${expired?`<button class="btn btn-block" data-act="requestNewQuote" data-ref="${o.ref}">${icon('refresh',16)}Request an updated quote</button>`:''}
+   </div>
+   <div class="tiny muted center">You are paying Tenga UK, not the retailer. We buy the item on your behalf.</div>
+  </div>
+ </div></div>`;
+}
+
+function viewPay(ref,token,kind){
+ const o=getOrder(ref);
+ if(!o||o.token!==token)return `<div class="narrow-s">${note('That link is not valid.','danger','lock')}</div>`;
+ const p=o.payments.filter(x=>x.type===(kind||'initial')).slice(-1)[0];
+ if(!p)return `<div class="narrow-s">${note('There is nothing to pay here right now.','info','check')}</div>`;
+ if(['Payment completed','Payment available','Payment held'].includes(p.status))
+   return `<div class="narrow-s"><div class="stack">${note('<b>This payment is already complete.</b>','accent','check')}<a class="btn btn-primary" href="#/track/${o.ref}/${o.token}">Back to tracking</a></div></div>`;
+ const label=kind==='cargo'?'Zimbabwe shipping':kind==='additional'?'Additional payment':'UK purchase';
+ return `<div class="narrow-s"><div class="stack-l">
+  <div class="stack-s"><div class="eyebrow">${label} · ${esc(o.ref)}</div><h2 style="font-size:24px">Pay ${money(p.amount)}</h2></div>
+  ${kind==='cargo'&&o.cargo?(()=>{const c=cargoCalc(o);return `<div class="card"><div class="card-h"><b>How this was worked out</b>${pill('Weighed','ochre')}</div><div class="card-b sum">
+    <div class="l"><span>Actual weight</span><span class="v">${c.actual} kg</span></div>
+    <div class="l"><span>Packaging</span><span class="v">${c.pack} kg</span></div>
+    ${c.vol?`<div class="l"><span>Volumetric weight</span><span class="v">${c.vol} kg</span></div>`:''}
+    <div class="l"><span>Chargeable weight</span><span class="v">${c.chargeable} kg</span></div>
+    <div class="l"><span>Freight at ${money(c.rate)} per kg</span><span class="v">${money(c.freight)}</span></div>
+    <div class="l"><span>Clearance</span><span class="v">${money(c.clearance)}</span></div>
+    <div class="l"><span>Zimbabwe local delivery</span><span class="v">${money(c.local)}</span></div>
+    ${c.other?`<div class="l"><span>Other cargo charges</span><span class="v">${money(c.other)}</span></div>`:''}
+    <div class="l total"><span>Total</span><span class="v">${money(c.total)}</span></div>
+  </div></div>`})():''}
+  <div class="card card-p stack">
+    ${note('<b>Demo checkout.</b> No card details are collected and no money moves. Pressing a button below simply marks the payment as complete in this prototype.','warn','shield')}
+    <button class="btn btn-primary btn-lg btn-block" data-act="payNow" data-ref="${o.ref}" data-kind="${kind||'initial'}" data-provider="PayPal">Pay with PayPal</button>
+    <button class="btn btn-lg btn-block" data-act="payNow" data-ref="${o.ref}" data-kind="${kind||'initial'}" data-provider="Card">${icon('card',16)}Pay by card, Apple Pay or Google Pay</button>
+    <a class="btn btn-ghost btn-block btn-s" href="#/track/${o.ref}/${o.token}">Not now, back to tracking</a>
+  </div>
+ </div></div>`;
+}
+/* ================================================================
+   ADMIN
+   ================================================================ */
+const QUEUES=[
+ ['New requests',[
+   ['new','New requests',o=>/Request submitted|Product information captured|Awaiting price confirmation|Awaiting UK delivery confirmation/.test(o.status)],
+   ['review','Needs manual review',o=>/Manual review required|Restricted-product review/.test(o.status)||o.items.some(i=>i.restricted.length&&!i.restrictedCleared)],
+   ['unapproved','Unapproved retailer',o=>o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved')],
+   ['missing','Missing product detail',o=>o.items.some(i=>!i.name||i.confirmedPrice==null)&&!o.quote]
+ ]],
+ ['Quotes',[
+   ['qready','Ready to send',o=>!!o.quote&&!o.quote.sentAt],
+   ['qsent','Awaiting payment',o=>!!o.quote&&!!o.quote.sentAt&&!payTotals(o).initialPaid&&!quoteExpired(o)],
+   ['qexpired','Expired',o=>quoteExpired(o)]
+ ]],
+ ['Purchasing',[
+   ['tobuy','Paid, to purchase',o=>payTotals(o).initialPaid>0&&activeItems(o).some(i=>!i.purchase)&&!/cargo|transit|Zimbabwe|Delivered|collection/i.test(o.status)],
+   ['decision','Customer decision needed',o=>/Additional payment required|Customer decision required|Substitute approval required|Product out of stock/.test(o.status)],
+   ['dispatch','Awaiting UK dispatch',o=>activeItems(o).some(i=>i.purchase&&!i.received)]
+ ]],
+ ['UK receiving',[
+   ['receiving','To check in',o=>activeItems(o).some(i=>i.purchase&&!i.received)],
+   ['issues','Goods with issues',o=>o.items.some(i=>(i.issues||[]).length)]
+ ]],
+ ['Cargo',[
+   ['weight','Awaiting weight',o=>activeItems(o).length>0&&activeItems(o).every(i=>i.received)&&!(o.cargo&&o.cargo.actualWeight)],
+   ['cargopay','Awaiting cargo payment',o=>!!(o.cargo&&o.cargo.actualWeight)&&!payTotals(o).cargoPaid],
+   ['tobatch','Ready for a batch',o=>payTotals(o).cargoPaid>0&&!o.batchId]
+ ]],
+ ['Everything',[
+   ['all','All orders',()=>true],
+   ['open','Open orders',o=>o.status!=='Delivered'&&o.status!=='Closed'],
+   ['done','Completed',o=>o.status==='Delivered'||o.status==='Closed']
+ ]]
+];
+const QMAP={};QUEUES.forEach(g=>g[1].forEach(q=>QMAP[q[0]]={label:q[1],fn:q[2]}));
+function qCount(k){return S.orders.filter(QMAP[k].fn).length}
+
+function viewAdmin(parts,q){
+ const page=parts[0]||'dash';
+ let inner='';
+ if(page==='dash')inner=adminDash();
+ else if(page==='orders')inner=adminOrders(q.q||'all');
+ else if(page==='order')inner=adminOrder(parts[1]);
+ else if(page==='retailers')inner=adminRetailers();
+ else if(page==='settings')inner=adminSettings();
+ else if(page==='batches')inner=adminBatches();
+ else if(page==='finance')inner=adminFinance();
+ else if(page==='reports')inner=adminReports();
+ else if(page==='audit')inner=adminAudit();
+ else inner=`<div class="empty">Not found.</div>`;
+ const cur=page==='orders'?(q.q||'all'):'';
+ return `<div class="wrap"><div class="admin">
+  <nav class="rail">
+   ${QUEUES.map(g=>`<div class="rail-grp"><div class="eyebrow">${g[0]}</div>
+     ${g[1].map(x=>{const c=qCount(x[0]);const hot=['review','decision','qexpired','issues','cargopay'].includes(x[0])&&c>0;
+       return `<a href="#/admin/orders?q=${x[0]}" class="${cur===x[0]?'on':''}">${esc(x[1])}<span class="cnt ${hot?'hot':''}">${c}</span></a>`}).join('')}
+   </div>`).join('')}
+   <div class="rail-grp"><div class="eyebrow">Manage</div>
+     <a href="#/admin" class="${page==='dash'?'on':''}">${icon('chart',15)}Dashboard</a>
+     <a href="#/admin/finance" class="${page==='finance'?'on':''}">${icon('pound',15)}Finance</a>
+     <a href="#/admin/reports" class="${page==='reports'?'on':''}">${icon('chart',15)}Reports</a>
+     <a href="#/admin/batches" class="${page==='batches'?'on':''}">${icon('layers',15)}Cargo batches</a>
+     <a href="#/admin/retailers" class="${page==='retailers'?'on':''}">${icon('shield',15)}Retailers</a>
+     <a href="#/admin/settings" class="${page==='settings'?'on':''}">${icon('cog',15)}Settings</a>
+     <a href="#/admin/audit" class="${page==='audit'?'on':''}">${icon('note',15)}Audit log</a>
+   </div>
+  </nav>
+  <main class="stack">${inner}</main>
+ </div></div>`;
+}
+
+function adminDash(){
+ const orders=S.orders;
+ const open=orders.filter(o=>o.status!=='Delivered'&&o.status!=='Closed');
+ const revenue=orders.reduce((a,o)=>a+payTotals(o).net,0);
+ const feeRev=orders.filter(o=>payTotals(o).initialPaid).reduce((a,o)=>a+quoteCalc(o).fee,0);
+ const held=orders.flatMap(o=>o.payments).filter(p=>p.status==='Payment held');
+ const acts=[
+  ['review','Manual review','danger'],['qexpired','Expired quotes','warn'],['tobuy','Ready to purchase','accent'],
+  ['receiving','To check in','info'],['weight','Awaiting weight','ochre'],['cargopay','Awaiting cargo payment','ochre']
+ ].map(([k,l,t])=>({k,l,t,c:qCount(k)})).filter(x=>x.c>0);
+ return `<div class="stack-l">
+  <div class="spread wrap">
+    <div class="stack-s"><div class="eyebrow">Operations</div><h2 style="font-size:24px">Today</h2></div>
+    <div class="row"><a class="btn btn-s" href="#/request">${icon('plus',15)}Log a request</a></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi stripe-a"><span class="v num">${open.length}</span><span class="l">Open orders</span></div>
+    <div class="kpi stripe-w"><span class="v num">${qCount('tobuy')}</span><span class="l">Paid, waiting to be bought</span></div>
+    <div class="kpi stripe-o"><span class="v num">${qCount('cargopay')}</span><span class="l">Awaiting cargo payment</span></div>
+    <div class="kpi"><span class="v num">${money(revenue)}</span><span class="l">Collected, net of refunds</span></div>
+    <div class="kpi"><span class="v num">${money(feeRev)}</span><span class="l">Procurement fee revenue</span></div>
+    <div class="kpi stripe-d"><span class="v num">${held.length}</span><span class="l">Payments on provider hold</span></div>
+  </div>
+
+  ${acts.length?`<div class="card">
+   <div class="card-h"><b>Needs a person</b><span class="eyebrow">Work queue</span></div>
+   <div class="card-b row wrap" style="gap:8px">
+     ${acts.map(a=>`<a class="btn btn-s" href="#/admin/orders?q=${a.k}"><span class="pill p-${a.t}">${a.c}</span>${esc(a.l)}</a>`).join('')}
+   </div>
+  </div>`:note('Nothing is waiting on you right now.','accent','check')}
+
+  <div class="card">
+   <div class="card-h"><b>Recent activity</b><a class="link tiny" href="#/admin/audit">Full audit log</a></div>
+   <div class="scroll-x"><table class="t"><tbody>
+     ${S.audit.slice(0,8).map(a=>`<tr><td class="mono tiny nowrap" style="color:var(--ink-3)">${fmtTime(a.at)}</td>
+       <td>${a.ref?`<a class="link mono tiny" href="#/admin/order/${a.ref}">${a.ref}</a>`:'<span class="tiny muted">system</span>'}</td>
+       <td class="small">${esc(a.action)}${a.after?` <span class="muted">${esc(a.before||'—')} → <b>${esc(a.after)}</b></span>`:''}</td></tr>`).join('')||'<tr><td class="empty">No activity yet.</td></tr>'}
+   </tbody></table></div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Latest orders</b><a class="link tiny" href="#/admin/orders?q=all">See all</a></div>
+   ${orderTable(orders.slice().sort((a,b)=>b.createdAt-a.createdAt).slice(0,6))}
+  </div>
+ </div>`;
+}
+
+function orderTable(list){
+ if(!list.length)return `<div class="empty">Nothing in this queue.</div>`;
+ return `<div class="scroll-x"><table class="t">
+  <thead><tr><th>Ref</th><th>Customer</th><th>Items</th><th>Retailers</th><th>Value</th><th>Status</th><th>Age</th></tr></thead>
+  <tbody>${list.map(o=>{
+    const q=quoteCalc(o);
+    const rets=[...new Set(o.items.map(i=>i.retailerName||'Unknown'))];
+    return `<tr class="clickable" data-act="openOrder" data-ref="${o.ref}">
+      <td class="mono nowrap"><b>${esc(o.ref)}</b></td>
+      <td><div class="small"><b>${esc(o.customer.name||'—')}</b></div><div class="tiny muted">${esc(o.recipient.town||'')}</div></td>
+      <td class="num">${o.items.length}</td>
+      <td class="tiny">${rets.map(r=>esc(r)).join(', ')}</td>
+      <td class="mono nowrap">${money(q.total)}</td>
+      <td>${pill(o.status,statusTone(o.status))}</td>
+      <td class="tiny muted nowrap">${ago(o.createdAt)}</td>
+    </tr>`}).join('')}</tbody></table></div>`;
+}
+
+function adminOrders(qk){
+ const def=QMAP[qk]||QMAP.all;
+ let list=S.orders.filter(def.fn);
+ const s=(VIEW.search||'').trim().toLowerCase();
+ if(s)list=list.filter(o=>JSON.stringify([o.ref,o.customer,o.recipient,o.items.map(i=>[i.name,i.retailerName,i.purchase&&i.purchase.orderNumber]),o.payments.map(p=>p.ref),o.batchId]).toLowerCase().includes(s));
+ list.sort((a,b)=>b.createdAt-a.createdAt);
+ return `<div class="stack">
+  <div class="spread wrap">
+    <div class="stack-s"><div class="eyebrow">Queue</div><h2 style="font-size:22px">${esc(def.label)}</h2></div>
+    <div class="row" style="max-width:340px;flex:1;min-width:220px">
+      <input type="text" id="adminSearch" placeholder="Reference, name, phone, retailer order, payment ref" value="${esc(VIEW.search||'')}">
+      <button class="btn btn-s" data-act="search">${icon('search',15)}</button>
+    </div>
+  </div>
+  <div class="card">${orderTable(list)}</div>
+  <div class="tiny muted">${list.length} order${list.length===1?'':'s'}. Search covers order reference, customer and recipient name, phone, email, retailer order number, payment reference and cargo batch.</div>
+ </div>`;
+}
+/* ---------------- order detail ---------------- */
+function adminOrder(ref){
+ const o=getOrder(ref);
+ if(!o)return `<div class="empty">Order ${esc(ref)} not found.</div>`;
+ const q=quoteCalc(o), t=payTotals(o);
+ const tabs=[
+  ['review','Review',o.items.some(i=>i.restricted.length&&!i.restrictedCleared)||!o.quote],
+  ['quote','Quote',!!o.quote&&!o.quote.sentAt],
+  ['payments','Payments',t.initialPaid===0&&!!o.quote],
+  ['purchase','Purchase',t.initialPaid>0&&activeItems(o).some(i=>!i.purchase)],
+  ['receiving','UK receiving',activeItems(o).some(i=>i.purchase&&!i.received)],
+  ['cargo','Cargo',activeItems(o).length>0&&activeItems(o).every(i=>i.received)&&!payTotals(o).cargoPaid],
+  ['comms','Messages',false],
+  ['history','History',false]
+ ];
+ const tab=VIEW.adminTab||'review';
+ let pane='';
+ if(tab==='review')pane=paneReview(o);
+ else if(tab==='quote')pane=paneQuote(o,q);
+ else if(tab==='payments')pane=panePayments(o,q,t);
+ else if(tab==='purchase')pane=panePurchase(o);
+ else if(tab==='receiving')pane=paneReceiving(o);
+ else if(tab==='cargo')pane=paneCargo(o);
+ else if(tab==='comms')pane=paneComms(o);
+ else pane=paneHistory(o);
+ return `<div class="stack">
+  <div class="row" style="gap:8px"><a class="btn btn-xs btn-ghost" href="#/admin/orders?q=all"><span style="display:inline-block;transform:rotate(180deg)">${icon('arrow',13)}</span>All orders</a></div>
+  <div class="spread wrap" style="align-items:flex-start">
+   <div class="stack-s">
+     <div class="row wrap" style="gap:8px"><span class="mono" style="font-size:23px;font-weight:700">${esc(o.ref)}</span>${pill(o.status,statusTone(o.status))}${o.partOfLargerOrder?pill('Consolidate','info'):''}</div>
+     <div class="small muted">${esc(o.customer.name)} · ${esc(o.customer.email)} · ${esc(o.customer.whatsapp)} · submitted ${fmtFull(o.createdAt)}</div>
+     <div class="small muted">Recipient ${esc(o.recipient.name)} · ${esc(o.recipient.phone)} · ${esc(o.recipient.town)}${o.recipient.collection?' · collects at '+esc(o.recipient.collection):''}</div>
+   </div>
+   <div class="col" style="align-items:flex-end;gap:6px">
+     <div class="mono" style="font-size:20px;font-weight:700">${money(q.total)}</div>
+     <div class="tiny muted">${t.initialPaid?'Paid '+money(t.initialPaid):'Not paid'}${t.cargoPaid?' · cargo '+money(t.cargoPaid):''}</div>
+     <div class="row" style="gap:6px">
+       <a class="btn btn-xs" href="#/track/${o.ref}/${o.token}" target="_blank">${icon('ext',13)}Customer view</a>
+       <select data-act="forceStatus" data-ref="${o.ref}" style="width:auto;font-size:12px;padding:3px 6px">
+         <option value="">Set status…</option>
+         ${STATUS_GROUPS.map(g=>`<optgroup label="${esc(g[0])}">${g[1].map(s=>`<option ${o.status===s?'selected':''}>${esc(s)}</option>`).join('')}</optgroup>`).join('')}
+       </select>
+     </div>
+   </div>
+  </div>
+  <div class="tabs">${tabs.map(([k,l,dot])=>`<button data-act="tab" data-v="${k}" class="${tab===k?'on':''}">${esc(l)}${dot?'<span class="dot"></span>':''}</button>`).join('')}</div>
+  <div>${pane}</div>
+ </div>`;
+}
+
+/* ---- review ---- */
+function paneReview(o){
+ const st=S.settings, q=quoteCalc(o);
+ return `<div class="stack" style="padding-top:16px">
+  ${o.items.some(i=>i.restricted.length&&!i.restrictedCleared)?note('<b>Restricted keywords found.</b> Clear or reject each flagged item before a quote can be sent. The customer must not be asked to pay first.','danger','alert'):''}
+  ${o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved')?note('<b>This order contains a retailer that is not approved.</b> Decide whether to buy from them before quoting.','warn','shield'):''}
+  ${o.customerNotes||o.notes?note('<b>Customer note:</b> '+esc(o.customerNotes||o.notes),'info','note'):''}
+
+  ${o.items.map((it,ix)=>{
+   const r=it.retailerId?retailerById(it.retailerId):null;
+   const flagged=it.restricted.length&&!it.restrictedCleared;
+   return `<div class="item-card">
+    <div class="item-head">
+     ${thumb(it,true)}
+     <div class="grow stack-s">
+       <div class="row wrap" style="gap:6px">
+         ${pill(it.retailerName||'Unknown retailer',r&&r.status==='approved'?'accent':'warn')}
+         ${r&&r.status==='manual'?pill('Manual review retailer','warn'):''}
+         ${!r?pill('Not approved','danger'):''}
+         ${flagged?pill('Restricted: '+it.restricted.join(', '),'danger'):it.restricted.length?pill('Restriction cleared','accent'):''}
+         ${pill(it.itemStatus,statusTone(it.itemStatus))}
+       </div>
+       <input type="text" data-item="${it.id}" data-k="name" value="${esc(it.name)}" style="font-weight:600">
+       <div class="tiny muted"><a class="link" href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.url.slice(0,86))}${it.url.length>86?'…':''} ${icon('ext',10)}</a></div>
+       ${r&&r.notes?`<div class="tiny" style="color:var(--warn)">${icon('alert',12)} ${esc(r.notes)}</div>`:''}
+     </div>
+    </div>
+    <div style="padding:0 13px 13px" class="stack">
+     <div class="field-grid">
+       <label class="f">Quantity<input type="number" min="1" data-item="${it.id}" data-k="qty" value="${it.qty}"></label>
+       <label class="f">Shown online <span class="hint">provisional</span><input type="number" step="0.01" data-item="${it.id}" data-k="displayedPrice" value="${it.displayedPrice==null?'':it.displayedPrice}"></label>
+       <label class="f" style="box-shadow:inset 0 -2px 0 var(--accent);padding-bottom:4px">Confirmed unit price<input type="number" step="0.01" data-item="${it.id}" data-k="confirmedPrice" value="${it.confirmedPrice==null?'':it.confirmedPrice}" placeholder="check the basket"></label>
+       <label class="f">Availability<select data-item="${it.id}" data-k="availability">${['Unknown','In stock','Low stock','Out of stock','Variant unavailable','Quantity unavailable','Listing removed','Needs manual check'].map(a=>`<option ${it.availability===a?'selected':''}>${a}</option>`).join('')}</select></label>
+       <label class="f">Est. shipping weight (kg)<input type="number" step="0.05" data-item="${it.id}" data-k="estKg" value="${it.estKg}"></label>
+       <label class="f">Sold by<select data-item="${it.id}" data-k="soldBy">${['Retailer direct','Marketplace seller'].map(a=>`<option ${it.soldBy===a?'selected':''}>${a}</option>`).join('')}</select></label>
+     </div>
+     <div class="field-grid">
+       <label class="f">Size<input type="text" data-item="${it.id}" data-k="size" value="${esc(it.size)}"></label>
+       <label class="f">Colour<input type="text" data-item="${it.id}" data-k="colour" value="${esc(it.colour)}"></label>
+       <label class="f">Shade<input type="text" data-item="${it.id}" data-k="shade" value="${esc(it.shade)}"></label>
+       <label class="f">Scent<input type="text" data-item="${it.id}" data-k="scent" value="${esc(it.scent)}"></label>
+       <label class="f">Other option<input type="text" data-item="${it.id}" data-k="variant" value="${esc(it.variant)}"></label>
+     </div>
+     <div class="note n-mute" style="font-size:12.5px">${icon('user',14)}<div><b>Customer instruction:</b> ${it.subsAllowed==='yes'?'substitutes allowed'+(it.subsNotes?' ('+esc(it.subsNotes)+')':''):it.subsAllowed==='cancel'?'cancel and refund if unavailable':'do not substitute, ask first'}${it.customerNotes?' · '+esc(it.customerNotes):''}</div></div>
+     <label class="f">Administrator notes<input type="text" data-item="${it.id}" data-k="adminNotes" value="${esc(it.adminNotes)}" placeholder="Basket check, seller, quantity limits"></label>
+     <div class="row wrap">
+       <button class="btn btn-s btn-primary" data-act="approveItem" data-ref="${o.ref}" data-id="${it.id}">${icon('check',15)}Approve item</button>
+       ${flagged?`<button class="btn btn-s" data-act="clearRestricted" data-ref="${o.ref}" data-id="${it.id}">${icon('shield',15)}Clear restriction</button>`:''}
+       <button class="btn btn-s btn-danger" data-act="rejectItem" data-ref="${o.ref}" data-id="${it.id}">${icon('x',15)}Reject item</button>
+       <span class="grow"></span>
+       <b class="mono">${money(itemLine(it))}</b>
+     </div>
+    </div>
+   </div>`}).join('')}
+
+  <div class="card card-p stack">
+   <div class="sum">
+     <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
+     <div class="l"><span>Minimum spend ${money(st.minSpend)}</span><span class="v" style="color:${q.meetsMin?'var(--accent)':'var(--danger)'}">${q.meetsMin?'met':'short by '+money(q.shortfall)}</span></div>
+   </div>
+   ${!q.meetsMin?note('<b>Below the '+money(st.minSpend)+' minimum.</b> Ask the customer to add items, or override on the quote tab with a recorded reason.','warn','alert'):''}
+   <button class="btn btn-primary" data-act="buildQuote" data-ref="${o.ref}">${icon('file',16)}Build the quote${o.quote?' again':''}</button>
+  </div>
+ </div>`;
+}
+
+/* ---- quote ---- */
+function paneQuote(o,q){
+ const st=S.settings;
+ if(!o.quote)return `<div style="padding-top:16px">${note('No quote built yet. Confirm prices on the Review tab, then press <b>Build the quote</b>.','info','file')}</div>`;
+ const expired=quoteExpired(o);
+ return `<div class="stack" style="padding-top:16px">
+  <div class="card">
+   <div class="card-h"><b>UK delivery, per retailer</b><span class="eyebrow">Charged separately</span></div>
+   <div class="card-b stack">
+    ${q.groups.map(g=>{const r=g.retailerId?retailerById(g.retailerId):null;
+     return `<div class="row wrap" style="gap:10px;align-items:flex-end">
+       <div class="grow stack-s" style="gap:2px">
+         <b class="small">${esc(g.name)}</b>
+         <div class="tiny muted">${g.items.length} item${g.items.length>1?'s':''} · subtotal ${money(g.subtotal)}${r&&r.freeOver?` · free over ${money(r.freeOver)}`:''}${g.freeApplied?' · free delivery applies':''}</div>
+       </div>
+       <label class="f" style="width:150px">Delivery charge<input type="number" step="0.01" data-act="delOverride" data-ref="${o.ref}" data-key="${esc(g.key)}" value="${g.delivery}"></label>
+     </div>`}).join('')}
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Quote</b>${o.quote.sentAt?pill('Sent '+fmtTime(o.quote.sentAt),'accent'):pill('Draft','warn')}</div>
+   <div class="card-b stack">
+    <div class="sum">
+      <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
+      <div class="l"><span>UK retailer delivery</span><span class="v">${money(q.deliveryTotal)}</span></div>
+      <div class="l"><span>Procurement fee <span class="tiny muted">${st.procurementPct}% min ${money(st.procurementMin)}, ${st.feeBasis==='combined'?'combined basis':'per retailer'}</span></span><span class="v">${money(q.fee)}</span></div>
+      ${q.adjustments.map((a,i)=>`<div class="l"><span>${esc(a.reason)} <span class="tiny muted">${esc(a.by)} ${fmtTime(a.at)}</span></span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))} <button class="btn btn-xs btn-ghost" data-act="delAdj" data-ref="${o.ref}" data-i="${i}">${icon('x',12)}</button></span></div>`).join('')}
+      <div class="l total"><span>Initial payment</span><span class="v">${money(q.total)}</span></div>
+    </div>
+    ${!q.meetsMin?note('Product value is below the '+money(st.minSpend)+' minimum.','warn','alert'):''}
+    <hr class="hr">
+    <div class="row wrap" style="align-items:flex-end">
+      <label class="f" style="width:130px">Adjustment £<input type="number" step="0.01" id="adjAmt" placeholder="-5.00"></label>
+      <label class="f grow" style="min-width:180px">Reason <span class="hint">recorded in the audit log</span><input type="text" id="adjReason" placeholder="Goodwill discount, agreed by phone"></label>
+      <button class="btn btn-s" data-act="addAdj" data-ref="${o.ref}">${icon('plus',15)}Add adjustment</button>
+    </div>
+    <hr class="hr">
+    <div class="row wrap" style="align-items:flex-end">
+      <label class="f" style="width:150px">Expires after<select id="expMins">${[30,60,120,240,1440].map(m=>`<option value="${m}" ${(o.quote.expiryMins||st.quoteExpiryMins)===m?'selected':''}>${m<60?m+' minutes':m===1440?'24 hours':m/60+' hours'}</option>`).join('')}</select></label>
+      <button class="btn btn-primary" data-act="sendQuote" data-ref="${o.ref}">${icon('mail',16)}${o.quote.sentAt?'Resend quote':'Send quote to customer'}</button>
+      ${o.quote.sentAt?`<span class="pill p-${expired?'danger':'warn'}">${expired?'Expired '+fmtTime(o.quote.expiresAt):until(o.quote.expiresAt)}</span>`:''}
+    </div>
+    ${o.quote.sentAt?`<div class="tiny muted">Customer link: <a class="link" href="#/quote/${o.ref}/${o.token}" target="_blank">#/quote/${o.ref}/${o.token}</a></div>`:''}
+    ${note('The quote states: prices and availability are only guaranteed once we have received payment and successfully placed the retailer order.','mute','note')}
+   </div>
+  </div>
+ </div>`;
+}
+
+/* ---- payments ---- */
+function panePayments(o,q,t){
+ const cargo=o.cargo&&o.cargo.actualWeight?cargoCalc(o):null;
+ return `<div class="stack" style="padding-top:16px">
+  <div class="kpis">
+   <div class="kpi stripe-a"><span class="v num">${money(t.initialPaid)}</span><span class="l">Initial payments received</span></div>
+   <div class="kpi stripe-o"><span class="v num">${money(t.cargoPaid)}</span><span class="l">Cargo payments received</span></div>
+   <div class="kpi stripe-d"><span class="v num">${money(t.refunded)}</span><span class="l">Refunded</span></div>
+   <div class="kpi"><span class="v num">${money(margin(o))}</span><span class="l">Gross margin</span></div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Payment records</b><span class="eyebrow">Provider, status, hold</span></div>
+   ${o.payments.length?`<div class="scroll-x"><table class="t">
+     <thead><tr><th>Type</th><th>Provider</th><th>Amount</th><th>Reference</th><th>Status</th><th>Funds</th><th>Created</th><th></th></tr></thead>
+     <tbody>${o.payments.map(p=>`<tr>
+       <td class="small">${p.type==='cargo'?pill('Cargo','ochre'):p.type==='additional'?pill('Additional','warn'):pill('Initial','accent')}</td>
+       <td class="small">${esc(p.provider)}</td>
+       <td class="mono nowrap"><b>${money(p.amount)}</b></td>
+       <td class="mono tiny">${esc(p.ref||'—')}</td>
+       <td>${pill(p.status,/completed|available/i.test(p.status)?'accent':/failed|refund|dispute|cancel|reversed/i.test(p.status)?'danger':'warn')}</td>
+       <td class="tiny">${p.status==='Payment held'?'<span style="color:var(--warn)">On hold</span>':/completed|available/i.test(p.status)?'<span style="color:var(--accent)">Available</span>':'—'}</td>
+       <td class="tiny muted nowrap">${fmtTime(p.createdAt)}</td>
+       <td><select data-act="payStatus" data-ref="${o.ref}" data-id="${p.id}" style="width:auto;font-size:11.5px;padding:2px 4px">
+         <option value="">Change…</option>
+         ${['Payment link created','Payment not started','Payment pending','Payment completed','Payment held','Payment available','Payment failed','Payment cancelled','Payment refunded','Payment partially refunded','Payment disputed','Payment reversed'].map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}
+       </select></td>
+     </tr>`).join('')}</tbody></table></div>`:`<div class="empty">No payment records yet.</div>`}
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Create a payment request</b></div>
+   <div class="card-b row wrap">
+     <button class="btn btn-s" data-act="mkPay" data-ref="${o.ref}" data-kind="initial">${icon('card',15)}Initial payment ${money(q.total)}</button>
+     <button class="btn btn-s" data-act="mkPay" data-ref="${o.ref}" data-kind="cargo" ${cargo?'':'disabled'}>${icon('scale',15)}Cargo payment ${cargo?money(cargo.total):'(needs weight)'}</button>
+     <button class="btn btn-s" data-act="mkPayCustom" data-ref="${o.ref}">${icon('plus',15)}Additional payment</button>
+   </div>
+  </div>
+
+  ${t.initialPaid&&o.payments.some(p=>p.status==='Payment held')?note('<b>Funds are held by the provider.</b> You can still buy using the business float, but that is a manual decision. Record it here so the float is traceable.','warn','pound'):''}
+
+  <div class="card">
+   <div class="card-h"><b>Refunds and credits</b></div>
+   <div class="card-b stack">
+    ${(o.refunds||[]).length?`<div class="scroll-x"><table class="t"><thead><tr><th>Amount</th><th>Type</th><th>Reason</th><th>Reference</th><th>When</th></tr></thead>
+      <tbody>${o.refunds.map(r=>`<tr><td class="mono">${money(r.amount)}</td><td class="small">${esc(r.type)}</td><td class="small">${esc(r.reason)}</td><td class="mono tiny">${esc(r.ref)}</td><td class="tiny muted">${fmtTime(r.at)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="tiny muted">No refunds recorded.</div>'}
+    <div class="row wrap" style="align-items:flex-end">
+      <label class="f" style="width:120px">Amount £<input type="number" step="0.01" id="refAmt"></label>
+      <label class="f" style="width:170px">Type<select id="refType">${['Full refund','Partial refund','Item-level refund','Procurement-fee refund','Cargo-payment refund','Customer credit'].map(x=>`<option>${x}</option>`).join('')}</select></label>
+      <label class="f grow" style="min-width:170px">Reason<input type="text" id="refReason" placeholder="Item out of stock, customer chose refund"></label>
+      <button class="btn btn-s btn-danger" data-act="addRefund" data-ref="${o.ref}">${icon('refresh',15)}Record refund</button>
+    </div>
+   </div>
+  </div>
+ </div>`;
+}
+/* ---- purchase ---- */
+function panePurchase(o){
+ const t=payTotals(o), st=S.settings;
+ if(!t.initialPaid)return `<div style="padding-top:16px">${note('<b>Not paid yet.</b> Orders do not enter the purchasing queue until the initial payment is completed. Nothing should be bought before then.','warn','lock')}</div>`;
+ return `<div class="stack" style="padding-top:16px">
+  ${o.payments.some(p=>p.status==='Payment held')?note('Payment is completed but <b>held by the provider</b>. Buying now uses the business float. Manual decision, recorded in the audit log.','warn','pound'):''}
+  ${activeItems(o).map(it=>{
+   const p=it.purchase;
+   const diff=p&&p.actualCost!=null?round2(Number(p.actualCost)-itemLine(it)):0;
+   return `<div class="item-card">
+    <div class="item-head">${thumb(it)}
+     <div class="grow stack-s">
+       <div class="row wrap" style="gap:6px">${pill(it.retailerName,'accent')}${pill(it.itemStatus,statusTone(it.itemStatus))}${it.soldBy==='Marketplace seller'?pill('Marketplace seller','warn'):''}</div>
+       <b class="small">${esc(it.name)}</b>
+       <div class="tiny muted">Qty ${it.qty} · approved at ${money(itemPrice(it))} each · total ${money(itemLine(it))}</div>
+       <div class="tiny muted">${[it.size,it.colour,it.shade,it.scent,it.variant].filter(Boolean).map(esc).join(' · ')||'no variant specified'}</div>
+       <div class="tiny" style="color:var(--info)">${it.subsAllowed==='yes'?'Substitutes allowed'+(it.subsNotes?': '+esc(it.subsNotes):''):it.subsAllowed==='cancel'?'Cancel and refund if unavailable':'Do not substitute, ask the customer first'}</div>
+       <a class="link tiny" href="${esc(it.url)}" target="_blank" rel="noopener">Open retailer page ${icon('ext',10)}</a>
+     </div>
+     <span class="tiny muted nowrap">${p?'Purchased '+fmtDate(p.date):'Not purchased'}</span>
+    </div>
+    <div style="padding:0 13px 13px" class="stack">
+     <div class="field-grid">
+       <label class="f">Retailer order number<input type="text" data-pur="${it.id}" data-k="orderNumber" value="${esc(p&&p.orderNumber||'')}" placeholder="BOO-77341902"></label>
+       <label class="f">Actual product cost £<input type="number" step="0.01" data-pur="${it.id}" data-k="actualCost" value="${p&&p.actualCost!=null?p.actualCost:''}" placeholder="${itemLine(it)}"></label>
+       <label class="f">Actual UK delivery £<input type="number" step="0.01" data-pur="${it.id}" data-k="actualDelivery" value="${p&&p.actualDelivery!=null?p.actualDelivery:''}"></label>
+       <label class="f">Courier<input type="text" data-pur="${it.id}" data-k="courier" value="${esc(p&&p.courier||'')}"></label>
+       <label class="f">Tracking number<input type="text" data-pur="${it.id}" data-k="tracking" value="${esc(p&&p.tracking||'')}"></label>
+       <label class="f">Expected UK delivery<input type="date" data-pur="${it.id}" data-k="etaDate" value="${p&&p.eta?new Date(p.eta).toISOString().slice(0,10):''}"></label>
+       <label class="f">Confirmation email ref<input type="text" data-pur="${it.id}" data-k="emailRef" value="${esc(p&&p.emailRef||'')}"></label>
+       <label class="f">Attachments <span class="hint">invoice, receipt, screenshot</span><input type="text" data-pur="${it.id}" data-k="files" value="${esc(p&&p.files||'')}" placeholder="boots-invoice.pdf"></label>
+     </div>
+     <label class="f">Notes<input type="text" data-pur="${it.id}" data-k="notes" value="${esc(p&&p.notes||'')}"></label>
+     ${p&&p.actualCost!=null&&Math.abs(diff)>0.001?`<div class="note n-${Math.abs(diff)<=st.absorbIncrease?'accent':diff>0?'danger':'info'}">${icon('pound',15)}<div>
+        Price ${diff>0?'increased':'decreased'} by <b>${money(Math.abs(diff))}</b> against the quote.
+        ${diff>0?(Math.abs(diff)<=st.absorbIncrease?`Within the ${money(st.absorbIncrease)} we absorb, no customer action needed.`:`Above the ${money(st.absorbIncrease)} absorb limit. Ask the customer to decide.`)
+                :(st.priceDropPolicy==='credit'?'Policy: apply as customer credit.':st.priceDropPolicy==='refund'?'Policy: refund the difference.':`Policy: retain differences under ${money(st.priceDropThreshold)}.`)}
+     </div></div>`:''}
+     <div class="row wrap">
+       <button class="btn btn-s btn-primary" data-act="savePurchase" data-ref="${o.ref}" data-id="${it.id}">${icon('check',15)}Record purchase</button>
+       <button class="btn btn-s" data-act="oos" data-ref="${o.ref}" data-id="${it.id}">${icon('alert',15)}Mark unavailable</button>
+       <button class="btn btn-s" data-act="askMore" data-ref="${o.ref}" data-id="${it.id}">${icon('pound',15)}Request extra payment</button>
+       <button class="btn btn-s btn-danger" data-act="cancelItem" data-ref="${o.ref}" data-id="${it.id}">${icon('x',15)}Cancel and refund item</button>
+     </div>
+    </div>
+   </div>`}).join('')}
+ </div>`;
+}
+
+/* ---- receiving ---- */
+function paneReceiving(o){
+ const purchased=activeItems(o).filter(i=>i.purchase);
+ if(!purchased.length)return `<div style="padding-top:16px">${note('Nothing purchased yet, so there is nothing to receive.','info','box')}</div>`;
+ return `<div class="stack" style="padding-top:16px">
+  ${purchased.map(it=>{const r=it.received;
+   return `<div class="item-card">
+    <div class="item-head">${thumb(it)}
+     <div class="grow stack-s">
+       <b class="small">${esc(it.name)}</b>
+       <div class="tiny muted">${esc(it.retailerName)} · order ${esc(it.purchase.orderNumber||'—')} · qty ${it.qty}</div>
+       <div class="tiny muted mono">${esc(it.purchase.courier||'')} ${esc(it.purchase.tracking||'')}${it.purchase.eta?' · due '+fmtDate(it.purchase.eta):''}</div>
+     </div>
+     ${r?pill('Checked in '+fmtDate(r.at),'accent'):it.purchase.eta&&it.purchase.eta<Date.now()?pill('Overdue','danger'):pill('Expected','warn')}
+    </div>
+    <div style="padding:0 13px 13px" class="stack">
+     <div class="field-grid">
+       <label class="f">Quantity received<input type="number" data-rec="${it.id}" data-k="qtyReceived" value="${r&&r.qtyReceived!=null?r.qtyReceived:it.qty}"></label>
+       <label class="f">Condition<select data-rec="${it.id}" data-k="condition">${['Good','Minor packaging damage','Damaged','Leaking','Opened packaging'].map(c=>`<option ${r&&r.condition===c?'selected':''}>${c}</option>`).join('')}</select></label>
+       <label class="f">Variant matches?<select data-rec="${it.id}" data-k="variantOk">${['Yes','No'].map(c=>`<option ${r&&r.variantOk===(c==='Yes')?'selected':''}>${c}</option>`).join('')}</select></label>
+       <label class="f">Photographs <span class="hint">file names</span><input type="text" data-rec="${it.id}" data-k="photos" value="${esc(r&&(r.photos||[]).join(', ')||'')}" placeholder="front.jpg, batch.jpg"></label>
+     </div>
+     <label class="f">Check-in notes<input type="text" data-rec="${it.id}" data-k="notes" value="${esc(r&&r.notes||'')}"></label>
+     <div class="row wrap">
+       <button class="btn btn-s btn-primary" data-act="receive" data-ref="${o.ref}" data-id="${it.id}">${icon('check',15)}Confirm received and checked</button>
+       <select data-act="raiseIssue" data-ref="${o.ref}" data-id="${it.id}" style="width:auto">
+         <option value="">Log a receiving issue…</option>
+         ${['Wrong product received','Wrong variant received','Missing item','Damaged item','Leaking item','Opened packaging','Retailer parcel missing','Partial retailer delivery'].map(x=>`<option>${x}</option>`).join('')}
+       </select>
+     </div>
+     ${(it.issues||[]).length?`<div class="stack-s">${it.issues.map(is=>`<div class="note n-danger">${icon('alert',15)}<div><b>${esc(is.type)}</b> · logged ${fmtTime(is.at)}${is.notes?'<br>'+esc(is.notes):''}<br><span class="tiny">Item is on hold until this is resolved.</span></div></div>`).join('')}</div>`:''}
+    </div>
+   </div>`}).join('')}
+ </div>`;
+}
+
+/* ---- cargo ---- */
+function paneCargo(o){
+ const c=o.cargo||{}, calc=cargoCalc(o), t=payTotals(o), est=estimateCargo(o);
+ const allIn=activeItems(o).length>0&&activeItems(o).every(i=>i.received);
+ return `<div class="stack" style="padding-top:16px">
+  ${!allIn?note('Not everything has been checked in yet. You can still record a weight, but consolidation is incomplete.','warn','box'):''}
+  <div class="card">
+   <div class="card-h"><b>Weight and cargo charges</b><span class="eyebrow">Estimated at quote: ${money(est.low)} to ${money(est.high)}</span></div>
+   <div class="card-b stack">
+    <div class="field-grid">
+      <label class="f">Actual weight (kg)<input type="number" step="0.01" data-cargo="actualWeight" value="${c.actualWeight||''}"></label>
+      <label class="f">Packaging (kg)<input type="number" step="0.01" data-cargo="packaging" value="${c.packaging!=null?c.packaging:S.settings.packagingKg}"></label>
+      <label class="f">Length (cm)<input type="number" data-cargo="l" value="${c.l||''}"></label>
+      <label class="f">Width (cm)<input type="number" data-cargo="w" value="${c.w||''}"></label>
+      <label class="f">Height (cm)<input type="number" data-cargo="h" value="${c.h||''}"></label>
+      <label class="f">Rate £ per kg<input type="number" step="0.01" data-cargo="rate" value="${c.rate!=null?c.rate:S.settings.cargoRate}"></label>
+      <label class="f">Clearance £<input type="number" step="0.01" data-cargo="clearance" value="${c.clearance!=null?c.clearance:S.settings.clearance}"></label>
+      <label class="f">Local delivery £<input type="number" step="0.01" data-cargo="localDelivery" value="${c.localDelivery!=null?c.localDelivery:S.settings.localDelivery}"></label>
+      <label class="f">Other charges £<input type="number" step="0.01" data-cargo="other" value="${c.other||''}"></label>
+    </div>
+    <div class="sum">
+      <div class="l"><span>Volumetric weight <span class="tiny muted">divisor ${S.settings.volDivisor}</span></span><span class="v">${calc.vol||0} kg</span></div>
+      <div class="l"><span>Chargeable weight</span><span class="v">${calc.chargeable} kg</span></div>
+      <div class="l"><span>Freight <span class="tiny muted">min ${money(S.settings.cargoMin)}</span></span><span class="v">${money(calc.freight)}</span></div>
+      <div class="l"><span>Clearance and local delivery</span><span class="v">${money(round2(calc.clearance+calc.local))}</span></div>
+      ${calc.other?`<div class="l"><span>Other</span><span class="v">${money(calc.other)}</span></div>`:''}
+      <div class="l total"><span>Zimbabwe shipping payable</span><span class="v">${money(calc.total)}</span></div>
+    </div>
+    ${c.actualWeight&&calc.total>est.high?note(`Confirmed charge is <b>${money(round2(calc.total-est.high))}</b> above the top of the estimate the customer saw. Tell them before shipping.`,'warn','alert'):''}
+    <div class="row wrap">
+      <button class="btn btn-s btn-primary" data-act="saveCargo" data-ref="${o.ref}">${icon('scale',15)}Save weight and charges</button>
+      <button class="btn btn-s" data-act="mkPay" data-ref="${o.ref}" data-kind="cargo" ${c.actualWeight?'':'disabled'}>${icon('mail',15)}Request cargo payment</button>
+      ${t.cargoPaid?pill('Cargo paid '+money(t.cargoPaid),'accent'):''}
+    </div>
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-h"><b>Shipment</b>${o.batchId?pill(o.batchId,'ochre'):pill('Not assigned','mute')}</div>
+   <div class="card-b stack">
+    <div class="field-grid">
+      <label class="f">Cargo batch<select data-cargo2="batchId">
+        <option value="">Not assigned</option>
+        ${S.batches.map(b=>`<option value="${esc(b.id)}" ${o.batchId===b.id?'selected':''}>${esc(b.id)} · ${esc(b.company)} · ${fmtDate(b.shipDate)}</option>`).join('')}
+      </select></label>
+      <label class="f">Cargo company<input type="text" data-cargo="company" value="${esc(c.company||'')}"></label>
+      <label class="f">Shipment reference<input type="text" data-cargo="shipRef" value="${esc(c.shipRef||'')}"></label>
+      <label class="f">Cargo tracking<input type="text" data-cargo="tracking" value="${esc(c.tracking||'')}"></label>
+      <label class="f">Expected arrival<input type="date" data-cargo="etaDate" value="${c.eta?new Date(c.eta).toISOString().slice(0,10):''}"></label>
+      <label class="f">Collection or delivery<input type="text" data-cargo="dropoff" value="${esc(c.dropoff||o.recipient.collection||o.recipient.address||'')}"></label>
+    </div>
+    <div class="row wrap">
+      <button class="btn btn-s btn-primary" data-act="saveCargo" data-ref="${o.ref}">${icon('check',15)}Save shipment details</button>
+      <button class="btn btn-s" data-act="handOver" data-ref="${o.ref}" ${t.cargoPaid?'':'disabled'}>${icon('truck',15)}Mark handed to cargo company</button>
+    </div>
+    ${!t.cargoPaid?`<div class="tiny muted">Cargo payment must be received before hand over.</div>`:''}
+   </div>
+  </div>
+ </div>`;
+}
+
+/* ---- comms + history ---- */
+const TEMPLATES=['Request received','More information required','Quote ready','Quote expiring','Payment received','Retailer purchase completed','Product unavailable','Substitute approval required','Retailer dispatched','Goods received in the UK','Goods issue identified','Cargo payment required','Cargo payment reminder','Cargo payment received','Handed to cargo company','Arrived in Zimbabwe','Ready for collection','Out for delivery','Delivered','Refund issued'];
+function paneComms(o){
+ const msgs=S.messages.filter(m=>m.ref===o.ref);
+ return `<div class="stack" style="padding-top:16px">
+  <div class="card">
+   <div class="card-h"><b>Send a message</b><span class="eyebrow">Stored against the order</span></div>
+   <div class="card-b row wrap" style="align-items:flex-end">
+     <label class="f grow" style="min-width:200px">Template<select id="tplSel">${TEMPLATES.map(t=>`<option>${t}</option>`).join('')}</select></label>
+     <label class="f" style="width:150px">Channel<select id="tplChan"><option>Email</option><option>WhatsApp</option><option>SMS</option></select></label>
+     <button class="btn btn-s btn-primary" data-act="sendMsg" data-ref="${o.ref}">${icon('mail',15)}Send</button>
+   </div>
+  </div>
+  <div class="card">
+   <div class="card-h"><b>Message history</b><span class="tiny muted">${msgs.length}</span></div>
+   ${msgs.length?`<div class="scroll-x"><table class="t">
+    <thead><tr><th>When</th><th>Type</th><th>Channel</th><th>To</th><th>Content</th><th>Delivery</th></tr></thead>
+    <tbody>${msgs.map(m=>`<tr><td class="tiny muted nowrap">${fmtTime(m.at)}</td><td class="small">${esc(m.type)}</td><td class="tiny">${esc(m.channel)}</td><td class="tiny mono">${esc(m.to)}</td><td class="small">${esc(m.body)}</td><td>${pill(m.status,'accent')}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No messages sent yet.</div>'}
+  </div>
+ </div>`;
+}
+function paneHistory(o){
+ const rows=S.audit.filter(a=>a.ref===o.ref);
+ return `<div class="stack" style="padding-top:16px">
+  <div class="card">
+   <div class="card-h"><b>Status timeline</b></div>
+   <div class="card-b"><div class="tl">${o.timeline.slice().reverse().map((e,i)=>`<div class="tl-row ${i===0?'now':'done'} ${ZW_STATUSES.has(e.status)?'zw':''}">
+     <div class="tl-dot">${i===0?'':icon('check',12)}</div>
+     <div class="stack-s" style="gap:1px"><div class="tl-t">${esc(e.status)}</div><div class="tiny muted mono">${fmtFull(e.at)} · ${esc(e.actor||'System')}</div>${e.note?`<div class="tiny">${esc(e.note)}</div>`:''}</div>
+   </div>`).join('')}</div></div>
+  </div>
+  <div class="card">
+   <div class="card-h"><b>Audit trail</b><span class="tiny muted">${rows.length} entries</span></div>
+   ${rows.length?`<div class="scroll-x"><table class="t"><thead><tr><th>When</th><th>Action</th><th>Before</th><th>After</th><th>Reason</th><th>By</th></tr></thead>
+    <tbody>${rows.map(a=>`<tr><td class="tiny muted nowrap">${fmtTime(a.at)}</td><td class="small">${esc(a.action)}</td><td class="tiny muted">${esc(a.before||'—')}</td><td class="tiny"><b>${esc(a.after||'—')}</b></td><td class="tiny muted">${esc(a.reason||'')}</td><td class="tiny muted">${esc(a.actor)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No audit entries.</div>'}
+  </div>
+ </div>`;
+}
+/* ---- retailers ---- */
+function adminRetailers(){
+ return `<div class="stack">
+  <div class="spread wrap"><div class="stack-s"><div class="eyebrow">Configuration</div><h2 style="font-size:22px">Approved retailers</h2></div>
+   <button class="btn btn-s" data-act="addRetailer">${icon('plus',15)}Add retailer</button></div>
+  ${note('Links from retailers that are not approved never proceed to a quote automatically. The customer is told the retailer is not approved and the link is queued for manual review.','info','shield')}
+  <div class="card"><div class="scroll-x"><table class="t">
+   <thead><tr><th>Retailer</th><th>Domains</th><th>Status</th><th>Delivery</th><th>Free over</th><th>Auto read</th><th>Known rules</th></tr></thead>
+   <tbody>${S.retailers.map(r=>`<tr>
+     <td><b class="small">${esc(r.name)}</b></td>
+     <td class="tiny mono muted">${r.domains.map(esc).join('<br>')}</td>
+     <td><select data-ret="${r.id}" data-k="status" style="width:auto;font-size:12px;padding:3px 6px">
+       ${[['approved','Approved'],['manual','Manual review'],['disabled','Disabled']].map(([v,l])=>`<option value="${v}" ${r.status===v?'selected':''}>${l}</option>`).join('')}
+     </select></td>
+     <td><input type="number" step="0.01" data-ret="${r.id}" data-k="delivery" value="${r.delivery}" style="width:80px;padding:3px 6px;font-size:12px"></td>
+     <td><input type="number" step="0.01" data-ret="${r.id}" data-k="freeOver" value="${r.freeOver}" style="width:80px;padding:3px 6px;font-size:12px"></td>
+     <td class="center"><input type="checkbox" data-ret="${r.id}" data-k="autoExtract" ${r.autoExtract?'checked':''} style="accent-color:var(--accent)"></td>
+     <td><input type="text" data-ret="${r.id}" data-k="notes" value="${esc(r.notes)}" style="min-width:220px;padding:3px 6px;font-size:12px"></td>
+   </tr>`).join('')}</tbody></table></div></div>
+
+  <div class="card">
+   <div class="card-h"><b>Restricted keywords</b><span class="eyebrow">${S.restricted.length} terms</span></div>
+   <div class="card-b stack">
+     <div class="tiny muted">Checked against the product name, the customer notes and the link itself. A hit sets the order to <b>Restricted-product review</b> and blocks quoting until cleared.</div>
+     <div class="row wrap" style="gap:6px">${S.restricted.map((k,i)=>`<span class="pill p-danger">${esc(k)}<button class="btn btn-xs btn-ghost" data-act="delKw" data-i="${i}" style="padding:0 2px;border:0">${icon('x',11)}</button></span>`).join('')}</div>
+     <div class="row"><input type="text" id="kwNew" placeholder="Add a keyword"><button class="btn btn-s" data-act="addKw">${icon('plus',15)}Add</button></div>
+   </div>
+  </div>
+ </div>`;
+}
+
+/* ---- settings ---- */
+function adminSettings(){
+ const s=S.settings;
+ const f=(k,label,hint,step)=>`<label class="f">${label}${hint?`<span class="hint">${hint}</span>`:''}<input type="number" step="${step||'0.01'}" data-set="${k}" value="${s[k]}"></label>`;
+ return `<div class="stack">
+  <div class="stack-s"><div class="eyebrow">Configuration</div><h2 style="font-size:22px">Business rules</h2></div>
+  <div class="card"><div class="card-h"><b>Pricing</b></div><div class="card-b field-grid">
+    ${f('minSpend','Minimum product spend £','Per submitted order')}
+    ${f('procurementPct','Procurement fee %','Of product value','1')}
+    ${f('procurementMin','Procurement fee minimum £')}
+    <label class="f">Fee basis<span class="hint">MVP default is combined</span><select data-set="feeBasis">
+      <option value="combined" ${s.feeBasis==='combined'?'selected':''}>Combined product value</option>
+      <option value="per-retailer" ${s.feeBasis==='per-retailer'?'selected':''}>Per retailer basket</option>
+    </select></label>
+  </div></div>
+  <div class="card"><div class="card-h"><b>Quotes and response</b></div><div class="card-b field-grid">
+    ${f('quoteExpiryMins','Quote expiry, minutes','Default on new quotes','5')}
+    ${f('responseHours','Promised response, hours','Shown to the customer','1')}
+  </div></div>
+  <div class="card"><div class="card-h"><b>Price changes at purchase</b></div><div class="card-b field-grid">
+    ${f('absorbIncrease','Increase we absorb £','Above this, ask the customer')}
+    <label class="f">If the price drops<select data-set="priceDropPolicy">
+      <option value="credit" ${s.priceDropPolicy==='credit'?'selected':''}>Apply as customer credit</option>
+      <option value="refund" ${s.priceDropPolicy==='refund'?'selected':''}>Refund the difference</option>
+      <option value="threshold" ${s.priceDropPolicy==='threshold'?'selected':''}>Refund only above a threshold</option>
+      <option value="retain" ${s.priceDropPolicy==='retain'?'selected':''}>Retain to cover volatility</option>
+    </select></label>
+    ${f('priceDropThreshold','Refund threshold £','Used by the threshold policy')}
+  </div></div>
+  <div class="card"><div class="card-h"><b>Zimbabwe cargo</b></div><div class="card-b field-grid">
+    ${f('cargoRate','Rate £ per kg')}
+    ${f('cargoMin','Minimum cargo charge £')}
+    ${f('clearance','Customs and clearance £')}
+    ${f('localDelivery','Zimbabwe local delivery £')}
+    ${f('volDivisor','Volumetric divisor','Length x width x height / divisor','100')}
+    ${f('packagingKg','Packaging weight kg','Added to actual weight','0.05')}
+  </div></div>
+  <div class="row"><button class="btn btn-primary" data-act="saveSettings">${icon('check',16)}Save settings</button></div>
+ </div>`;
+}
+
+/* ---- batches ---- */
+function adminBatches(){
+ const ready=S.orders.filter(QMAP.tobatch.fn);
+ return `<div class="stack">
+  <div class="spread wrap"><div class="stack-s"><div class="eyebrow">Cargo</div><h2 style="font-size:22px">Shipment batches</h2></div>
+   <button class="btn btn-s" data-act="addBatch">${icon('plus',15)}New batch</button></div>
+  ${ready.length?note(`<b>${ready.length} order${ready.length>1?'s are':' is'} paid and ready for a batch.</b> ${ready.map(o=>`<a class="link mono" href="#/admin/order/${o.ref}">${o.ref}</a>`).join(', ')}`,'ochre','box'):''}
+  ${S.batches.length?S.batches.map(b=>`<div class="card">
+    <div class="card-h"><div class="row"><b class="mono">${esc(b.id)}</b>${pill(b.status,'ochre')}</div><span class="tiny muted">${esc(b.company)}</span></div>
+    <div class="card-b stack">
+     <div class="field-grid">
+       <label class="f">Cargo company<input type="text" data-batch="${b.id}" data-k="company" value="${esc(b.company)}"></label>
+       <label class="f">Shipment reference<input type="text" data-batch="${b.id}" data-k="ref" value="${esc(b.ref||'')}"></label>
+       <label class="f">Shipment date<input type="date" data-batch="${b.id}" data-k="shipDate" value="${b.shipDate?new Date(b.shipDate).toISOString().slice(0,10):''}"></label>
+       <label class="f">Expected arrival<input type="date" data-batch="${b.id}" data-k="eta" value="${b.eta?new Date(b.eta).toISOString().slice(0,10):''}"></label>
+       <label class="f">Manifest file<input type="text" data-batch="${b.id}" data-k="manifest" value="${esc(b.manifest||'')}" placeholder="manifest.pdf"></label>
+       <label class="f">Status<select data-batch="${b.id}" data-k="status">${['Packed for Zimbabwe','Handed to cargo company','In transit to Zimbabwe','Customs clearance','Arrived in Zimbabwe','Ready for collection','Out for delivery','Delivered'].map(x=>`<option ${b.status===x?'selected':''}>${x}</option>`).join('')}</select></label>
+     </div>
+     <div class="stack-s">
+       <div class="eyebrow">Orders in this batch (${b.orders.length})</div>
+       ${b.orders.length?b.orders.map(r=>{const o=getOrder(r);return `<div class="spread small" style="padding:5px 0;border-bottom:1px solid var(--line)"><a class="link mono" href="#/admin/order/${r}">${r}</a><span class="muted">${o?esc(o.recipient.name)+' · '+esc(o.recipient.town):''}</span><span class="mono">${o&&o.cargo?money(cargoCalc(o).total):''}</span></div>`}).join(''):'<div class="tiny muted">Empty.</div>'}
+       ${ready.length?`<div class="row" style="margin-top:6px"><select data-act="assignBatch" data-batch="${b.id}" style="width:auto"><option value="">Add a paid order…</option>${ready.map(o=>`<option value="${o.ref}">${o.ref} · ${esc(o.recipient.town)}</option>`).join('')}</select></div>`:''}
+     </div>
+     <div class="row"><button class="btn btn-s btn-primary" data-act="saveBatch" data-batch="${b.id}">${icon('check',15)}Save batch</button>
+      <button class="btn btn-s" data-act="pushBatchStatus" data-batch="${b.id}">${icon('truck',15)}Apply status to all orders in batch</button></div>
+    </div>
+   </div>`).join(''):`<div class="empty">No batches yet.</div>`}
+ </div>`;
+}
+
+/* ---- finance ---- */
+function adminFinance(){
+ const rows=S.orders.filter(o=>o.payments.length).sort((a,b)=>b.createdAt-a.createdAt);
+ const tot=rows.reduce((a,o)=>{const t=payTotals(o);a.init+=t.initialPaid;a.cargo+=t.cargoPaid;a.ref+=t.refunded;a.margin+=margin(o);
+   const q=quoteCalc(o);if(t.initialPaid)a.fee+=q.fee;return a},{init:0,cargo:0,ref:0,margin:0,fee:0});
+ const holds=S.orders.flatMap(o=>o.payments.filter(p=>p.status==='Payment held').map(p=>({o,p})));
+ const disputes=S.orders.flatMap(o=>o.payments.filter(p=>/dispute|reversed/i.test(p.status)).map(p=>({o,p})));
+ return `<div class="stack">
+  <div class="stack-s"><div class="eyebrow">Finance</div><h2 style="font-size:22px">Money in and out</h2></div>
+  <div class="kpis">
+   <div class="kpi stripe-a"><span class="v num">${money(tot.init)}</span><span class="l">Initial payments</span></div>
+   <div class="kpi stripe-o"><span class="v num">${money(tot.cargo)}</span><span class="l">Cargo payments</span></div>
+   <div class="kpi stripe-d"><span class="v num">${money(tot.ref)}</span><span class="l">Refunds</span></div>
+   <div class="kpi"><span class="v num">${money(tot.fee)}</span><span class="l">Procurement revenue</span></div>
+   <div class="kpi stripe-w"><span class="v num">${holds.length}</span><span class="l">Payments on hold</span></div>
+   <div class="kpi"><span class="v num">${money(tot.margin)}</span><span class="l">Gross margin</span></div>
+  </div>
+  ${holds.length?`<div class="card"><div class="card-h"><b>Held by the provider</b><span class="eyebrow">Float decision needed</span></div>
+   <div class="scroll-x"><table class="t"><thead><tr><th>Ref</th><th>Provider</th><th>Amount</th><th>Since</th><th></th></tr></thead><tbody>
+   ${holds.map(({o,p})=>`<tr><td><a class="link mono" href="#/admin/order/${o.ref}">${o.ref}</a></td><td class="small">${esc(p.provider)}</td><td class="mono">${money(p.amount)}</td><td class="tiny muted">${ago(p.paidAt||p.createdAt)}</td>
+     <td><button class="btn btn-xs" data-act="releaseHold" data-ref="${o.ref}" data-id="${p.id}">Mark available</button></td></tr>`).join('')}
+   </tbody></table></div></div>`:''}
+  ${disputes.length?note(`<b>${disputes.length} payment${disputes.length>1?'s':''} in dispute or reversed.</b> ${disputes.map(d=>`<a class="link mono" href="#/admin/order/${d.o.ref}">${d.o.ref}</a>`).join(', ')}`,'danger','alert'):''}
+  <div class="card">
+   <div class="card-h"><b>Per order</b></div>
+   <div class="scroll-x"><table class="t">
+    <thead><tr><th>Ref</th><th>Customer</th><th>Product</th><th>UK delivery</th><th>Fee</th><th>Initial paid</th><th>Cargo paid</th><th>Refunds</th><th>Margin</th></tr></thead>
+    <tbody>${rows.map(o=>{const q=quoteCalc(o),t=payTotals(o);
+     return `<tr class="clickable" data-act="openOrder" data-ref="${o.ref}"><td class="mono">${o.ref}</td><td class="small">${esc(o.customer.name)}</td>
+      <td class="mono">${money(q.productTotal)}</td><td class="mono">${money(q.deliveryTotal)}</td><td class="mono">${money(q.fee)}</td>
+      <td class="mono">${money(t.initialPaid)}</td><td class="mono">${money(t.cargoPaid)}</td>
+      <td class="mono" style="${t.refunded?'color:var(--danger)':''}">${t.refunded?money(t.refunded):'—'}</td>
+      <td class="mono"><b>${money(margin(o))}</b></td></tr>`}).join('')}</tbody></table></div>
+  </div>
+ </div>`;
+}
+
+/* ---- reports ---- */
+function adminReports(){
+ const os=S.orders, n=os.length;
+ const quoted=os.filter(o=>o.quote&&o.quote.sentAt).length;
+ const paid=os.filter(o=>payTotals(o).initialPaid>0).length;
+ const delivered=os.filter(o=>o.status==='Delivered');
+ const avgVal=n?round2(os.reduce((a,o)=>a+quoteCalc(o).productTotal,0)/n):0;
+ const avgFee=quoted?round2(os.filter(o=>o.quote&&o.quote.sentAt).reduce((a,o)=>a+quoteCalc(o).fee,0)/quoted):0;
+ const avgDel=quoted?round2(os.filter(o=>o.quote&&o.quote.sentAt).reduce((a,o)=>a+quoteCalc(o).deliveryTotal,0)/quoted):0;
+ const cargoOs=os.filter(o=>o.cargo&&o.cargo.actualWeight);
+ const avgCargo=cargoOs.length?round2(cargoOs.reduce((a,o)=>a+cargoCalc(o).total,0)/cargoOs.length):0;
+ const avgDays=delivered.length?round2(delivered.reduce((a,o)=>a+(o.timeline[o.timeline.length-1].at-o.createdAt)/86400e3,0)/delivered.length):0;
+ const byRetailer={};os.forEach(o=>o.items.forEach(i=>{const k=i.retailerName||'Unknown';byRetailer[k]=(byRetailer[k]||0)+1}));
+ const byTown={};os.forEach(o=>{const k=o.recipient.town||'Unknown';byTown[k]=(byTown[k]||0)+1});
+ const byProduct={};os.forEach(o=>o.items.forEach(i=>{const k=(i.name||'').split(' ').slice(0,3).join(' ');if(k)byProduct[k]=(byProduct[k]||0)+i.qty}));
+ const emails={};os.forEach(o=>{emails[o.customer.email]=(emails[o.customer.email]||0)+1});
+ const repeat=Object.values(emails).filter(c=>c>1).length;
+ const refunds=os.filter(o=>(o.refunds||[]).length).length;
+ const oos=os.filter(o=>/out of stock|unavailable/i.test(o.status)).length;
+ const restricted=os.filter(o=>o.items.some(i=>i.restricted.length)).length;
+ const bar=(obj)=>{const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,6);const max=Math.max(1,...e.map(x=>x[1]));
+   return e.map(([k,v])=>`<div class="stack-s" style="gap:3px"><div class="spread small"><span>${esc(k)}</span><b class="mono">${v}</b></div>
+   <div style="height:6px;background:var(--surface-2);border-radius:100px;overflow:hidden"><i style="display:block;height:100%;width:${v/max*100}%;background:var(--accent)"></i></div></div>`).join('')||'<div class="tiny muted">No data.</div>'};
+ return `<div class="stack">
+  <div class="stack-s"><div class="eyebrow">Reporting</div><h2 style="font-size:22px">How the business is running</h2></div>
+  <div class="kpis">
+    <div class="kpi"><span class="v num">${n}</span><span class="l">Requests submitted</span></div>
+    <div class="kpi"><span class="v num">${n?Math.round(quoted/n*100):0}%</span><span class="l">Quote approval rate</span></div>
+    <div class="kpi stripe-a"><span class="v num">${quoted?Math.round(paid/quoted*100):0}%</span><span class="l">Quote to payment conversion</span></div>
+    <div class="kpi"><span class="v num">${money(avgVal)}</span><span class="l">Average product value</span></div>
+    <div class="kpi"><span class="v num">${money(avgFee)}</span><span class="l">Average procurement fee</span></div>
+    <div class="kpi"><span class="v num">${money(avgDel)}</span><span class="l">Average UK delivery</span></div>
+    <div class="kpi stripe-o"><span class="v num">${money(avgCargo)}</span><span class="l">Average cargo charge</span></div>
+    <div class="kpi"><span class="v num">${avgDays||'—'}</span><span class="l">Days, request to delivered</span></div>
+    <div class="kpi"><span class="v num">${repeat}</span><span class="l">Repeat customers</span></div>
+    <div class="kpi stripe-d"><span class="v num">${refunds}</span><span class="l">Orders with refunds</span></div>
+    <div class="kpi stripe-w"><span class="v num">${oos}</span><span class="l">Out of stock events</span></div>
+    <div class="kpi stripe-d"><span class="v num">${restricted}</span><span class="l">Restricted product flags</span></div>
+  </div>
+  <div class="field-grid two">
+    <div class="card"><div class="card-h"><b>Orders by retailer</b></div><div class="card-b stack-s">${bar(byRetailer)}</div></div>
+    <div class="card"><div class="card-h"><b>Orders by Zimbabwe destination</b></div><div class="card-b stack-s">${bar(byTown)}</div></div>
+  </div>
+  <div class="card"><div class="card-h"><b>Most requested products</b><span class="eyebrow">Candidates for local stock</span></div><div class="card-b stack-s">${bar(byProduct)}</div></div>
+ </div>`;
+}
+
+/* ---- audit ---- */
+function adminAudit(){
+ return `<div class="stack">
+  <div class="stack-s"><div class="eyebrow">Compliance</div><h2 style="font-size:22px">Audit log</h2></div>
+  <div class="card"><div class="scroll-x"><table class="t">
+   <thead><tr><th>When</th><th>Order</th><th>Action</th><th>Before</th><th>After</th><th>Reason</th><th>By</th></tr></thead>
+   <tbody>${S.audit.map(a=>`<tr><td class="tiny muted nowrap">${fmtFull(a.at)}</td>
+     <td>${a.ref?`<a class="link mono tiny" href="#/admin/order/${a.ref}">${a.ref}</a>`:'<span class="tiny muted">—</span>'}</td>
+     <td class="small">${esc(a.action)}</td><td class="tiny muted">${esc(a.before||'—')}</td><td class="tiny"><b>${esc(a.after||'—')}</b></td>
+     <td class="tiny muted">${esc(a.reason||'')}</td><td class="tiny muted">${esc(a.actor)}</td></tr>`).join('')||'<tr><td class="empty">Empty.</td></tr>'}
+  </tbody></table></div></div>
+ </div>`;
+}
+/* ================================================================
+   EVENTS
+   ================================================================ */
+function curRef(){const p=route().parts;return (p[0]==='admin'&&p[1]==='order')?p[2]:null}
+function curOrder(){const r=curRef();return r?getOrder(r):null}
+function val(id){const el=document.getElementById(id);return el?el.value.trim():''}
+function rerender(keep){VIEW.keepScroll=!!keep;render()}
+const RECALC=new Set(['confirmedPrice','qty','displayedPrice','estKg','actualWeight','packaging','l','w','h','rate','clearance','localDelivery','other']);
+
+/* --- generic binding --- */
+document.addEventListener('input',e=>{
+ const el=e.target; if(!el.dataset)return;
+ const v=el.type==='checkbox'?el.checked:el.value;
+ const d=el.dataset;
+ if(d.bind){const [a,b]=d.bind.split('.');const dr=draft();if(b)dr[a][b]=v;else dr[a]=v;save();return}
+ const o=curOrder();
+ if(d.item&&o){const it=o.items.find(i=>i.id===d.item);if(it){it[d.k]=(d.k==='qty'||d.k==='confirmedPrice'||d.k==='displayedPrice'||d.k==='estKg')?(v===''?(d.k==='confirmedPrice'?null:0):Number(v)):v;save()}return}
+ if(d.pur&&o){const it=o.items.find(i=>i.id===d.pur);if(it){it.purchase=it.purchase||{};it.purchase[d.k]=v;save()}return}
+ if(d.rec&&o){const it=o.items.find(i=>i.id===d.rec);if(it){it.recDraft=it.recDraft||{};it.recDraft[d.k]=v;save()}return}
+ if(d.cargo&&o){o.cargo=o.cargo||{};o.cargo[d.cargo]=(v===''?'':(['company','shipRef','tracking','etaDate','dropoff'].includes(d.cargo)?v:Number(v)));save();return}
+ if(d.ret){const r=retailerById(d.ret);if(r){r[d.k]=(d.k==='delivery'||d.k==='freeOver')?Number(v||0):v;save()}return}
+ if(d.set){S.settings[d.set]=(typeof DEFAULT_SETTINGS[d.set]==='number')?Number(v||0):v;save();return}
+ if(d.batch&&d.k){const b=S.batches.find(x=>x.id===d.batch);if(b){b[d.k]=v;save()}return}
+});
+document.addEventListener('change',e=>{
+ const el=e.target,d=el.dataset||{};
+ if(d.act)return; // handled below
+ if(RECALC.has(d.k)||RECALC.has(d.cargo)||d.item||d.cargo)rerender(true);
+});
+
+/* --- select-driven actions --- */
+document.addEventListener('change',e=>{
+ const el=e.target,d=el.dataset||{};const act=d.act;if(!act)return;
+ const o=d.ref?getOrder(d.ref):curOrder();
+ if(act==='forceStatus'&&el.value){setStatus(o,el.value,'Set manually by administrator');save();rerender(true)}
+ else if(act==='delOverride'){o.quote=o.quote||{deliveryOverrides:{},adjustments:[]};o.quote.deliveryOverrides=o.quote.deliveryOverrides||{};
+   o.quote.deliveryOverrides[d.key]=el.value===''?null:Number(el.value);logAudit(o.ref,'UK delivery set for '+d.key,'',money(Number(el.value)||0));save();rerender(true)}
+ else if(act==='payStatus'&&el.value){
+   const p=o.payments.find(x=>x.id===d.id);const before=p.status;p.status=el.value;
+   if(/completed|available/i.test(p.status)){p.paidAt=p.paidAt||Date.now();p.held=p.status==='Payment held'}
+   if(p.status==='Payment held')p.held=true; else if(p.status==='Payment available')p.held=false;
+   logAudit(o.ref,'Payment status changed',before,p.status);
+   applyPaymentEffects(o,p);save();rerender(true)}
+ else if(act==='raiseIssue'&&el.value){
+   const it=o.items.find(i=>i.id===d.id);it.issues=it.issues||[];
+   it.issues.push({type:el.value,at:Date.now(),notes:(it.recDraft&&it.recDraft.notes)||'',photos:[]});
+   it.itemStatus='On hold';setStatus(o,'Receiving issue identified','Item: '+it.name+' — '+el.value);
+   logAudit(o.ref,'Receiving issue logged','',el.value,it.name);
+   logMsg(o.ref,'Goods issue identified','Email',o.customer.email,'We found an issue with one of your items ('+el.value+'). We are resolving it with the retailer and will update you.');
+   save();rerender(true)}
+ else if(act==='assignBatch'&&el.value){
+   const b=S.batches.find(x=>x.id===d.batch);const ord=getOrder(el.value);
+   if(b&&ord&&!b.orders.includes(ord.ref)){b.orders.push(ord.ref);ord.batchId=b.id;ord.cargo=ord.cargo||{};ord.cargo.company=b.company;ord.cargo.shipRef=b.ref;
+     setStatus(ord,'Assigned to cargo batch',b.id);logAudit(ord.ref,'Assigned to cargo batch','',b.id);save();rerender(true);toast(ord.ref+' added to '+b.id)}}
+});
+
+/* --- clicks --- */
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]'); if(!el)return;
+ const d=el.dataset, act=d.act;
+ if(el.tagName==='SELECT')return;
+ const o=d.ref?getOrder(d.ref):curOrder();
+ const A={
+  role(){ location.hash = d.v==='admin' ? '#/admin' : '#/'; },
+  reset(){ if(confirm('Clear all demo data and start again with the seeded example orders?')){localStorage.removeItem(KEY);fresh();location.hash='#/';render();toast('Demo reset')} },
+  tab(){ VIEW.adminTab=d.v; rerender(true); },
+  openOrder(){ VIEW.adminTab='review'; go('#/admin/order/'+d.ref); },
+  search(){ VIEW.search=val('adminSearch'); rerender(true); },
+
+  /* customer request */
+  fetch(){
+    const url=val('linkInput'); const dr=draft(); dr.pendingUrl=url;
+    if(!url){toast('Paste a product link first');return}
+    const r=extract(url);
+    if(!r.ok&&!['unapproved','disabled'].includes(r.reason)){dr.pending={reason:'badurl',msg:r.reason==='' ?'':r.reason};}
+    else dr.pending=r;
+    save();rerender(true);
+  },
+  clearPending(){ const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true) },
+  addItem(){
+    const dr=draft(),p=dr.pending;if(!p)return;
+    const name=val('pName');
+    if(!name){toast('Please give the product a name so we buy the right thing');return}
+    const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
+      size:val('pSize'),colour:val('pColour'),shade:val('pShade'),scent:val('pScent'),variant:val('pVariant'),
+      qty:Math.max(1,Number(val('pQty'))||1),displayedPrice:p.price,wasPrice:p.wasPrice,availability:p.availability,
+      extractOk:!!p.price,subsAllowed:val('pSubs')||'no',subsNotes:val('pSubsNotes'),customerNotes:val('pNotes'),
+      cancelIfUnavailable:val('pSubs')==='cancel'});
+    it.restricted=restrictedHits([name,it.url,it.customerNotes].join(' '));
+    dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);
+    toast(it.restricted.length?'Added. This item needs a manual check before we can quote.':'Added to your request');
+  },
+  addManual(){
+    const dr=draft(),p=dr.pending;
+    const it=newItem({url:p.url,retailerId:null,retailerName:p.retailerName,name:'',availability:'Needs manual check',itemStatus:'Manual review required'});
+    it.restricted=restrictedHits(p.url);
+    dr.items.push(it);dr.pending=null;dr.pendingUrl='';save();rerender(true);toast('Submitted for manual review');
+  },
+  delDraft(){ const dr=draft();dr.items.splice(Number(d.ix),1);save();rerender(true) },
+  submitRequest(){
+    const dr=draft();
+    const miss=[];
+    if(!dr.customer.name)miss.push('your name');if(!dr.customer.email)miss.push('your email');if(!dr.customer.whatsapp)miss.push('your WhatsApp number');
+    if(!dr.recipient.name)miss.push('the recipient name');if(!dr.recipient.phone)miss.push('the recipient phone');if(!dr.recipient.town)miss.push('the town in Zimbabwe');
+    if(miss.length){toast('Please add '+miss.join(', '));return}
+    const o=newOrder({});
+    Object.assign(o.customer,dr.customer);Object.assign(o.recipient,dr.recipient);
+    o.items=dr.items;o.partOfLargerOrder=dr.partOfLargerOrder;o.customerNotes=dr.notes;
+    S.orders.push(o);
+    setStatus(o,'Product information captured');
+    const flagged=o.items.some(i=>i.restricted.length);
+    const unapproved=o.items.some(i=>!i.retailerId||(retailerById(i.retailerId)||{}).status!=='approved');
+    if(flagged)setStatus(o,'Restricted-product review','Keywords: '+[...new Set(o.items.flatMap(i=>i.restricted))].join(', '));
+    else if(unapproved)setStatus(o,'Manual review required','Retailer not on the approved list');
+    else setStatus(o,'Awaiting price confirmation');
+    logAudit(o.ref,'Request submitted','',o.items.length+' items','');
+    logMsg(o.ref,'Request received','Email',o.customer.email,'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.');
+    S.draft=null;save();go('#/submitted/'+o.ref);
+  },
+  lookup(){
+    const r=val('lookupRef').toUpperCase();
+    const o=S.orders.find(x=>x.ref.toUpperCase()===r);
+    const box=document.getElementById('lookupMsg');
+    if(o)go('#/track/'+o.ref+'/'+o.token);
+    else if(box)box.innerHTML=note('We cannot find that reference. Check the email we sent you.','danger','alert');
+  },
+
+  /* customer payment */
+  pay(){
+    const boxes=[...document.querySelectorAll('.qc')];
+    if(boxes.some(b=>!b.checked)){toast('Please tick all the confirmations first');return}
+    const q=quoteCalc(o);
+    let p=o.payments.filter(x=>x.type==='initial').slice(-1)[0];
+    if(!p||['Payment failed','Payment cancelled'].includes(p.status)){p={id:uid('p'),type:'initial',provider:d.provider,amount:q.total,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false};o.payments.push(p)}
+    p.provider=d.provider;p.amount=q.total;save();
+    go('#/pay/'+o.ref+'/'+o.token+'/initial');
+  },
+  payNow(){
+    const kind=d.kind||'initial';
+    let p=o.payments.filter(x=>x.type===kind).slice(-1)[0];
+    if(!p)return;
+    p.provider=d.provider;p.status=(d.provider==='PayPal'&&kind==='initial')?'Payment held':'Payment completed';
+    p.held=p.status==='Payment held';p.paidAt=Date.now();
+    p.ref=(d.provider==='PayPal'?'PP-':'ch_')+hash(o.ref+p.id).toString(36).toUpperCase().slice(0,8);
+    logAudit(o.ref,'Payment recorded','',p.status+' '+money(p.amount),d.provider);
+    applyPaymentEffects(o,p);
+    save();go('#/track/'+o.ref+'/'+o.token);
+    toast(p.status==='Payment held'?'Payment received, funds held by PayPal':'Payment received');
+  },
+  requestNewQuote(){
+    setStatus(o,'Awaiting price confirmation','Customer asked for an updated quote');
+    o.quote.sentAt=null;o.quote.status='Recheck requested';
+    logAudit(o.ref,'Updated quote requested','Quote expired','Awaiting price confirmation');
+    logMsg(o.ref,'More information required','Email',o.customer.email,'We are rechecking prices and will send you an updated quote shortly.');
+    save();rerender();toast('We will recheck and resend');
+  },
+
+  /* admin: review */
+  approveItem(){ const it=o.items.find(i=>i.id===d.id);
+    if(it.restricted.length&&!it.restrictedCleared){toast('Clear the restriction first');return}
+    if(it.confirmedPrice==null||it.confirmedPrice===''){toast('Enter the confirmed unit price');return}
+    it.itemStatus='Approved';logAudit(o.ref,'Item approved','',it.name,'Confirmed at '+money(it.confirmedPrice));save();rerender(true);toast('Item approved') },
+  clearRestricted(){ const it=o.items.find(i=>i.id===d.id);const why=prompt('Why is this acceptable? Recorded in the audit log.','Not pressurised, cargo company confirmed acceptable');
+    if(why===null)return;it.restrictedCleared=true;logAudit(o.ref,'Restriction cleared',it.restricted.join(', '),'Cleared',why);
+    if(!o.items.some(i=>i.restricted.length&&!i.restrictedCleared))setStatus(o,'Awaiting price confirmation');save();rerender(true) },
+  rejectItem(){ const it=o.items.find(i=>i.id===d.id);const why=prompt('Reason for rejecting this item?','Restricted by cargo rules');
+    if(why===null)return;it.itemStatus='Removed';logAudit(o.ref,'Item rejected',it.name,'Removed',why);
+    logMsg(o.ref,'Product unavailable','Email',o.customer.email,'We cannot buy "'+it.name+'". Reason: '+why+'. It has been removed from your request.');
+    save();rerender(true);toast('Item rejected and removed') },
+  buildQuote(){
+    const q=quoteCalc(o);
+    if(activeItems(o).some(i=>i.confirmedPrice==null)){toast('Confirm a price on every item first');return}
+    if(o.items.some(i=>i.restricted.length&&!i.restrictedCleared)){toast('Restricted items must be cleared or rejected first');return}
+    if(!q.meetsMin&&!confirm('Product value is '+money(q.productTotal)+', below the '+money(S.settings.minSpend)+' minimum. Build the quote anyway?'))return;
+    o.quote=Object.assign({id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:null,expiresAt:null,expiryMins:S.settings.quoteExpiryMins,status:'Draft'},o.quote||{});
+    o.quote.sentAt=null;
+    setStatus(o,'Quote ready');logAudit(o.ref,'Quote built','',money(quoteCalc(o).total));
+    save();VIEW.adminTab='quote';rerender();toast('Quote built, review the delivery charges')
+  },
+  addAdj(){ const amt=Number(val('adjAmt'));const why=val('adjReason');
+    if(!amt||!why){toast('Enter both an amount and a reason');return}
+    const before=quoteCalc(o).total;
+    o.quote.adjustments=o.quote.adjustments||[];
+    o.quote.adjustments.push({delta:round2(amt),reason:why,by:'Admin (demo)',at:Date.now()});
+    logAudit(o.ref,'Manual quote adjustment',money(before),money(quoteCalc(o).total),why);
+    save();rerender(true);toast('Adjustment recorded') },
+  delAdj(){ const before=quoteCalc(o).total;const a=o.quote.adjustments.splice(Number(d.i),1)[0];
+    logAudit(o.ref,'Adjustment removed',money(before),money(quoteCalc(o).total),a.reason);save();rerender(true) },
+  sendQuote(){
+    const mins=Number(val('expMins'))||S.settings.quoteExpiryMins;
+    const q=quoteCalc(o);
+    o.quote.expiryMins=mins;o.quote.sentAt=Date.now();o.quote.expiresAt=Date.now()+mins*60e3;o.quote.status='Sent';o.quote.total=q.total;
+    let p=o.payments.filter(x=>x.type==='initial').slice(-1)[0];
+    if(!p){p={id:uid('p'),type:'initial',provider:'PayPal',amount:q.total,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false};o.payments.push(p)}
+    else if(!/completed|available|held/i.test(p.status))p.amount=q.total;
+    setStatus(o,'Quote sent');setStatus(o,'Awaiting initial payment');
+    logAudit(o.ref,'Quote sent','',money(q.total),'Expires in '+mins+' minutes');
+    logMsg(o.ref,'Quote ready','Email',o.customer.email,'Your quote for '+o.ref+' is '+money(q.total)+'. It expires in '+mins+' minutes.');
+    save();rerender(true);toast('Quote sent to '+o.customer.email)
+  },
+
+  /* admin: payments */
+  mkPay(){
+    const kind=d.kind;
+    const amt=kind==='cargo'?cargoCalc(o).total:quoteCalc(o).total;
+    if(!amt){toast('Nothing to charge');return}
+    o.payments.push({id:uid('p'),type:kind,provider:'PayPal',amount:amt,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false});
+    if(kind==='cargo'){setStatus(o,'Zimbabwe shipping payment required');
+      logMsg(o.ref,'Cargo payment required','WhatsApp',o.customer.whatsapp,'Your parcel weighs '+cargoCalc(o).chargeable+' kg. Zimbabwe shipping is '+money(amt)+'. Pay here to book it onto the next shipment.');}
+    logAudit(o.ref,'Payment request created','',kind+' '+money(amt));
+    save();rerender(true);toast('Payment request created')
+  },
+  mkPayCustom(){
+    const amt=Number(prompt('Additional payment amount in £','0'));if(!amt)return;
+    const why=prompt('Reason shown to the customer','Retailer price increased after your payment')||'';
+    o.payments.push({id:uid('p'),type:'additional',provider:'PayPal',amount:round2(amt),currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false,reason:why});
+    setStatus(o,'Additional payment required',why);
+    logAudit(o.ref,'Additional payment requested','',money(amt),why);
+    logMsg(o.ref,'Additional payment required','WhatsApp',o.customer.whatsapp,why+' We need a further '+money(amt)+' before we can complete the purchase.');
+    save();rerender(true)
+  },
+  addRefund(){
+    const amt=Number(val('refAmt'));if(!amt){toast('Enter an amount');return}
+    o.refunds=o.refunds||[];
+    o.refunds.push({amount:round2(amt),type:val('refType'),reason:val('refReason'),ref:'RF-'+hash(o.ref+Date.now()).toString(36).toUpperCase().slice(0,7),at:Date.now(),by:'Admin (demo)'});
+    logAudit(o.ref,'Refund recorded','',money(amt),val('refReason'));
+    logMsg(o.ref,'Refund issued','Email',o.customer.email,'We have refunded '+money(amt)+'. '+val('refReason'));
+    const t=payTotals(o);setStatus(o,t.refunded>=t.initialPaid+t.cargoPaid?'Fully refunded':'Partially refunded');
+    save();rerender(true);toast('Refund recorded')
+  },
+  releaseHold(){ const p=o.payments.find(x=>x.id===d.id);p.status='Payment available';p.held=false;
+    logAudit(o.ref,'Payment released','Payment held','Payment available');applyPaymentEffects(o,p);save();rerender(true);toast('Marked available') },
+
+  /* admin: purchase */
+  savePurchase(){
+    const it=o.items.find(i=>i.id===d.id);const p=it.purchase||{};
+    if(!p.orderNumber){toast('Record the retailer order number');return}
+    p.date=p.date||Date.now();p.by='Admin (demo)';
+    if(p.etaDate)p.eta=new Date(p.etaDate).getTime();
+    if(p.actualCost!=null&&p.actualCost!=='')p.actualCost=Number(p.actualCost);
+    if(p.actualDelivery!=null&&p.actualDelivery!=='')p.actualDelivery=Number(p.actualDelivery);
+    it.purchase=p;it.itemStatus='Purchased';
+    const diff=p.actualCost!=null?round2(Number(p.actualCost)-itemLine(it)):0;
+    logAudit(o.ref,'Retailer purchase recorded','',it.retailerName+' '+p.orderNumber, diff?('Price difference '+money(diff)):'');
+    if(activeItems(o).every(i=>i.purchase)){setStatus(o,'Purchased from retailer');
+      logMsg(o.ref,'Retailer purchase completed','Email',o.customer.email,'We have placed your order with the retailer. Order number '+p.orderNumber+'.');}
+    else setStatus(o,'Retailer order partially placed');
+    if(diff>S.settings.absorbIncrease)setStatus(o,'Additional payment required','Retailer price rose by '+money(diff));
+    save();rerender(true);toast('Purchase recorded')
+  },
+  oos(){
+    const it=o.items.find(i=>i.id===d.id);
+    const kind=prompt('Type: temporarily out of stock, permanently unavailable, variant unavailable, quantity unavailable, or listing removed','temporarily out of stock');
+    if(kind===null)return;
+    it.itemStatus='Out of stock';
+    if(it.subsAllowed==='yes'){setStatus(o,'Substitute approval required','Suggest an alternative for '+it.name);
+      logMsg(o.ref,'Substitute approval required','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. You said substitutes are acceptable ('+(it.subsNotes||'no detail given')+'). Please confirm the alternative we have suggested before we buy.');}
+    else if(it.subsAllowed==='cancel'){setStatus(o,'Product out of stock','Customer asked to cancel and refund');
+      logMsg(o.ref,'Product unavailable','Email',o.customer.email,it.name+' is '+kind+'. As instructed we will cancel this item and refund it.');}
+    else {setStatus(o,'Customer decision required',it.name+' is '+kind);
+      logMsg(o.ref,'Product unavailable','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. Options: wait for restock, accept a substitute, choose something else, reduce the quantity, refund this item, or cancel the order.');}
+    logAudit(o.ref,'Item marked unavailable',it.name,kind);
+    save();rerender(true)
+  },
+  askMore(){ A.mkPayCustom() },
+  cancelItem(){
+    const it=o.items.find(i=>i.id===d.id);
+    if(!confirm('Cancel "'+it.name+'" and record a refund of '+money(itemLine(it))+'?'))return;
+    o.refunds=o.refunds||[];
+    o.refunds.push({amount:itemLine(it),type:'Item-level refund',reason:'Item cancelled: '+it.name,ref:'RF-'+hash(it.id).toString(36).toUpperCase().slice(0,7),at:Date.now(),by:'Admin (demo)'});
+    it.itemStatus='Refunded';
+    logAudit(o.ref,'Item cancelled and refunded',it.name,money(itemLine(it)));
+    logMsg(o.ref,'Refund issued','Email',o.customer.email,'We have cancelled "'+it.name+'" and refunded '+money(itemLine(it))+'.');
+    setStatus(o,activeItems(o).length?'Partially refunded':'Fully refunded');
+    save();rerender(true)
+  },
+
+  /* admin: receiving */
+  receive(){
+    const it=o.items.find(i=>i.id===d.id);const rd=it.recDraft||{};
+    it.received={at:Date.now(),qtyReceived:Number(rd.qtyReceived||it.qty),condition:rd.condition||'Good',
+      variantOk:(rd.variantOk||'Yes')==='Yes',photos:String(rd.photos||'').split(',').map(s=>s.trim()).filter(Boolean),notes:rd.notes||'',by:'Admin (demo)'};
+    it.itemStatus='Received';delete it.recDraft;
+    logAudit(o.ref,'Goods checked in',it.name,it.received.condition,'Qty '+it.received.qtyReceived);
+    if(activeItems(o).every(i=>i.received)){setStatus(o,'Received and checked');setStatus(o,'Awaiting final weight');
+      logMsg(o.ref,'Goods received in the UK','Email',o.customer.email,'Everything has arrived at our UK address and passed inspection. Next we weigh the parcel and confirm the Zimbabwe shipping charge.');}
+    else setStatus(o,'Partially received');
+    save();rerender(true);toast('Checked in')
+  },
+
+  /* admin: cargo */
+  saveCargo(){
+    o.cargo=o.cargo||{};
+    if(o.cargo.etaDate)o.cargo.eta=new Date(o.cargo.etaDate).getTime();
+    const sel=document.querySelector('[data-cargo2="batchId"]');
+    if(sel){const bid=sel.value||null;
+      if(bid!==o.batchId){
+        S.batches.forEach(b=>{b.orders=b.orders.filter(r=>r!==o.ref)});
+        if(bid){const b=S.batches.find(x=>x.id===bid);b.orders.push(o.ref);o.cargo.company=o.cargo.company||b.company;setStatus(o,'Assigned to cargo batch',bid)}
+        o.batchId=bid;logAudit(o.ref,'Cargo batch changed','',bid||'none');
+      }}
+    const c=cargoCalc(o);
+    logAudit(o.ref,'Cargo details saved','',c.chargeable+' kg, '+money(c.total));
+    if(o.cargo.actualWeight&&!payTotals(o).cargoPaid)setStatus(o,'Awaiting final weight');
+    save();rerender(true);toast('Cargo details saved')
+  },
+  handOver(){
+    setStatus(o,'Packed for Zimbabwe');setStatus(o,'Handed to cargo company');
+    logAudit(o.ref,'Handed to cargo company','',o.cargo.company||'cargo partner');
+    logMsg(o.ref,'Handed to cargo company','WhatsApp',o.customer.whatsapp,'Your parcel has been handed to '+(o.cargo.company||'the cargo company')+'. Reference '+(o.cargo.shipRef||'to follow')+'.');
+    save();rerender(true);toast('Handed over')
+  },
+
+  /* admin: comms */
+  sendMsg(){
+    const t=val('tplSel'),ch=val('tplChan');
+    const to=ch==='Email'?o.customer.email:o.customer.whatsapp;
+    logMsg(o.ref,t,ch,to,TEMPLATE_BODY(t,o));
+    logAudit(o.ref,'Message sent','',t+' via '+ch);
+    save();rerender(true);toast(t+' sent via '+ch)
+  },
+
+  /* config */
+  addRetailer(){
+    const name=prompt('Retailer name');if(!name)return;
+    const dom=prompt('Domain, for example example.co.uk');if(!dom)return;
+    S.retailers.push({id:uid('r'),name,domains:[dom.replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]],status:'manual',delivery:3.99,freeOver:0,autoExtract:false,notes:'New retailer, manual review until trusted.'});
+    logAudit('','Retailer added','',name);save();rerender(true)
+  },
+  addKw(){ const k=val('kwNew').toLowerCase();if(!k)return;if(!S.restricted.includes(k))S.restricted.push(k);logAudit('','Restricted keyword added','',k);save();rerender(true) },
+  delKw(){ const k=S.restricted.splice(Number(d.i),1)[0];logAudit('','Restricted keyword removed',k,'');save();rerender(true) },
+  saveSettings(){ logAudit('','Business rules updated','',JSON.stringify(S.settings).slice(0,90)+'…');save();rerender(true);toast('Settings saved') },
+  addBatch(){
+    const company=prompt('Cargo company','Swift Cargo Zimbabwe');if(!company)return;
+    const id='BATCH-'+String(S.batches.length+1).padStart(4,'0');
+    S.batches.push({id,company,shipDate:Date.now(),eta:Date.now()+10*86400e3,ref:'',manifest:'',status:'Packed for Zimbabwe',orders:[]});
+    logAudit('','Cargo batch created','',id);save();rerender(true)
+  },
+  saveBatch(){ const b=S.batches.find(x=>x.id===d.batch);
+    if(b.shipDate&&typeof b.shipDate==='string')b.shipDate=new Date(b.shipDate).getTime();
+    if(b.eta&&typeof b.eta==='string')b.eta=new Date(b.eta).getTime();
+    logAudit('','Cargo batch saved','',b.id);save();rerender(true);toast('Batch saved') },
+  pushBatchStatus(){ const b=S.batches.find(x=>x.id===d.batch);
+    b.orders.forEach(r=>{const ord=getOrder(r);if(ord){setStatus(ord,b.status,'Batch '+b.id);
+      logMsg(r,b.status,'WhatsApp',ord.customer.whatsapp,'Update on '+r+': '+b.status+'.')}});
+    logAudit('','Batch status applied','',b.status+' to '+b.orders.length+' orders');save();rerender(true);toast('Applied to '+b.orders.length+' orders') }
+ };
+ if(A[act]){e.preventDefault();A[act]()}
+});
+
+function TEMPLATE_BODY(t,o){
+ const q=o.quote?quoteCalc(o):null, c=o.cargo&&o.cargo.actualWeight?cargoCalc(o):null;
+ const M={
+  'Request received':'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.',
+  'Quote ready':'Your quote for '+o.ref+' is '+(q?money(q.total):'')+'. It expires in '+(o.quote&&o.quote.expiryMins||60)+' minutes.',
+  'Quote expiring':'Your quote for '+o.ref+' expires shortly. Prices move, so we will need to recheck if it lapses.',
+  'Payment received':'We have received your payment for '+o.ref+'. We will now place the retailer order. Zimbabwe shipping is charged separately.',
+  'Cargo payment required':'Your parcel has been weighed'+(c?' at '+c.chargeable+' kg':'')+'. Zimbabwe shipping is '+(c?money(c.total):'')+'.',
+  'Ready for collection':'Your parcel has arrived and is ready for collection'+(o.recipient.collection?' at '+o.recipient.collection:'')+'. Bring ID.',
+  'Delivered':'Your order '+o.ref+' has been delivered. Thank you for using Tenga.'
+ };
+ return M[t]||(t+' update for order '+o.ref+'.');
+}
+
+function applyPaymentEffects(o,p){
+ if(!/completed|available|held/i.test(p.status))return;
+ if(p.type==='initial'){
+   setStatus(o,p.status==='Payment held'?'Initial payment held':'Initial payment completed');
+   setStatus(o,'Paid — awaiting retailer purchase');
+   if(o.quote)o.quote.status='Accepted';
+   logMsg(o.ref,'Payment received','Email',o.customer.email,'We have received '+money(p.amount)+' for '+o.ref+'. The retailer purchase will now be placed. Zimbabwe shipping will be charged separately once the parcel is weighed.');
+ } else if(p.type==='cargo'){
+   setStatus(o,'Cargo payment received');setStatus(o,'Ready for cargo');
+   logMsg(o.ref,'Cargo payment received','Email',o.customer.email,'Thank you, your Zimbabwe shipping payment of '+money(p.amount)+' has been received. Your parcel will go on the next shipment.');
+ } else {
+   setStatus(o,'Purchase in progress','Additional payment received');
+ }
+}
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+if(!load())fresh();
+if(!S.batches)S.batches=[];
+render();
+</script>

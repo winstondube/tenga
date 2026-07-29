@@ -82,18 +82,31 @@ const PAGE_CSS = `
 .site-nav{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}
 .site-nav a{font-size:13.5px;color:var(--ink-2);text-decoration:none}
 .site-nav a:hover{color:var(--ink);text-decoration:underline}
-.page{max-width:820px;margin:0 auto;padding:clamp(28px,4vw,52px) 24px 72px}
+.page{width:100%;max-width:820px;margin:0 auto;padding:clamp(28px,4vw,52px) 24px 72px}
 .page h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4.6vw,3.1rem);line-height:1.08;letter-spacing:-.02em;margin-bottom:14px}
 .page h2{font-size:clamp(19px,2.2vw,23px);margin:38px 0 12px;letter-spacing:-.01em}
 .page p{margin:0 0 14px;line-height:1.65;max-width:68ch;text-wrap:pretty}
 .page .lede{font-size:clamp(16px,1.8vw,18.5px);color:var(--ink-2);max-width:60ch;margin-bottom:26px}
 .page ul{line-height:1.65;padding-left:20px;max-width:68ch}
-.page .card,.page .steps,.page table.t{margin:16px 0}
+.page .card,.page .steps,.page .tablewrap{margin:16px 0}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tablewrap table.t{margin:0;min-width:100%}
 .page table.t{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
 .page table.t th,.page table.t td{padding:10px 13px}
 .cols-3{grid-template-columns:repeat(3,1fr)}
 @media (max-width:820px){.cols-3{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.cols-3{grid-template-columns:1fr}}
+@media (max-width:600px){
+  .site-head-in{padding:10px 16px;gap:10px;flex-wrap:nowrap}
+  .site-nav{flex-wrap:nowrap;overflow-x:auto;gap:14px;margin-left:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .site-nav::-webkit-scrollbar{display:none}
+  .site-nav a{white-space:nowrap}
+  .page{padding:22px 16px 60px}
+  .page h2{margin:28px 0 10px}
+  .site-foot-in{padding:24px 16px 30px;gap:18px}
+  .site-legal{padding:0 16px 28px}
+  .page table.t th,.page table.t td{padding:8px 10px}
+}
 .crumbs{font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
 .crumbs a{color:var(--ink-3)}
 .faq{margin-top:44px;border-top:1px solid var(--line);padding-top:8px}
@@ -110,6 +123,8 @@ const PAGE_CSS = `
 .site-foot a:hover{text-decoration:underline}
 .site-legal{max-width:1180px;margin:0 auto;padding:0 24px 34px;font-size:12.5px;color:var(--ink-3)}
 body{display:flex;flex-direction:column}
+body > *{min-width:0}
+.page{min-width:0}
 `;
 
 function head({ title, description, canonical, jsonld }) {
@@ -209,7 +224,7 @@ ${head({
 #themeSwitch{position:fixed;left:14px;bottom:14px;z-index:150;width:34px;height:34px;display:grid;place-items:center;
  border-radius:50%;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);box-shadow:0 2px 10px rgba(0,0,0,.10)}
 #themeSwitch:hover{background:var(--surface-2)}
-@media (max-width:600px){#themeSwitch{width:30px;height:30px;left:10px;bottom:10px}}
+@media (max-width:600px){#themeSwitch{display:none}}
 </style>
 </head>
 <body>
@@ -261,7 +276,7 @@ ${chrome(`<main class="page">
 </body>
 </html>
 `;
-  write(p.path, html);
+  write(p.path, html.replace(/<table class="?t"?>/g,'<div class="tablewrap"><table class="t">').split('</table>').join('</table></div>'));
 });
 
 /* 3. crawler files */

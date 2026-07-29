@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 *.log
 _narrowtest.html
+_phone*.html
+_m*.html

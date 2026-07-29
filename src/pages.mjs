@@ -212,13 +212,13 @@ export function buildPages(api) {
       ${api.note('<b>Collection only, for now.</b> We do not run a delivery leg inside Zimbabwe yet, so every order is collected in Harare. If you are outside Harare you are welcome to order and arrange your own onward transport, and we will say so plainly rather than promise a delivery we cannot make.', 'warn', 'pin')}
 
       <h2>How long it takes</h2>
-      <table class=t>
+      <table class="t">
         <tbody>
-          <tr><td>You send the link</td><td class=mono>day 0</td></tr>
-          <tr><td>We confirm the price and you pay</td><td class=mono>within ${s.responseHours} hours</td></tr>
-          <tr><td>Shop delivers to our UK address</td><td class=mono>2 to 5 days</td></tr>
-          <tr><td>Checked, packed and flown out</td><td class=mono>next shipment</td></tr>
-          <tr><td>Clearance, then ready to collect</td><td class=mono>2 to 4 days</td></tr>
+          <tr><td>You send the link</td><td class="mono">day 0</td></tr>
+          <tr><td>We confirm the price and you pay</td><td class="mono">within ${s.responseHours} hours</td></tr>
+          <tr><td>Shop delivers to our UK address</td><td class="mono">2 to 5 days</td></tr>
+          <tr><td>Checked, packed and flown out</td><td class="mono">next shipment</td></tr>
+          <tr><td>Clearance, then ready to collect</td><td class="mono">2 to 4 days</td></tr>
         </tbody>
       </table>
       ${shipTable(api)}

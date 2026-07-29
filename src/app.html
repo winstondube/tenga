@@ -176,6 +176,7 @@ details[open] > summary{border-bottom:1px solid var(--line)}
 
 /* ---------- admin shell ---------- */
 .admin{display:grid;grid-template-columns:232px minmax(0,1fr);gap:22px;align-items:start}
+.admin > *{min-width:0}
 .rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px}
 .rail-grp{display:flex;flex-direction:column;gap:1px}
 .rail-grp > .eyebrow{padding:0 8px 6px}
@@ -401,22 +402,75 @@ body:has(.paybar) #themeSwitch{bottom:80px}
   .hero-art{aspect-ratio:1/1}
   .tag{right:-8px}
 }
-@media (max-width:420px){
-  .hero-field{flex-direction:column;padding:8px}
-  .hero-go{padding:11px 18px}
-  .shelf{--tw:84px}
-  .shelf-pick{width:128px;height:128px;margin:-64px 0 0 -64px}
-  .shelf-ptag{top:calc(50% + 74px)}
-  .tag{position:static;width:100%;margin-top:16px;box-shadow:none;border:1px solid rgba(255,255,255,.14)}
+/* ---------- phones ----------
+   The primary user is on a phone on metered data. Horizontal space is the
+   scarce resource, so gutters tighten, the shelf goes edge to edge instead
+   of sitting in a 340px box, and anything that was two rows of chrome
+   becomes one. */
+@media (max-width:600px){
+  .banner{font-size:11.5px;padding:5px 14px}
+  .topbar-in{padding:7px 14px;gap:8px;flex-wrap:nowrap}
+  .topbar-in .lbl{display:none}
+  .topbar-in [data-act="reset"]{display:none}
+  .seg button{padding:5px 10px;font-size:12px}
+  .brand{font-size:13px}
+
+  .hero-in{padding:24px 18px 28px;gap:22px}
+  .hero h1{font-size:clamp(1.95rem,8.6vw,2.8rem);letter-spacing:-.02em}
+  .hero-sub{margin-top:12px;font-size:15px}
+  .hero-form{margin-top:20px}
+  .hero-field{flex-direction:column;padding:7px;gap:7px}
+  .hero-go{padding:12px 18px;width:100%}
+  .hero-trust{margin-top:22px;gap:9px;font-size:13px}
+
+  /* edge to edge: the shelf earns more from width than from a neat margin */
+  .hero-art{order:2;max-width:none;width:calc(100% + 36px);margin:2px -18px 0;
+    border-radius:0;aspect-ratio:1/0.78}
+  .shelf{--tw:88px;--gap:8px}
+  .shelf-pick{width:132px;height:132px;margin:-66px 0 0 -66px}
+  .shelf-ptag{top:calc(50% + 76px);font-size:11.5px;padding:6px 10px}
+  .shelf-dest{right:10px;top:10px;font-size:9.5px;padding:3px 8px}
+
+  .home-in{padding:26px 18px 70px}
+  .narrow{padding:22px 16px 70px}
+  .narrow-s{padding:22px 16px 70px}
+  .card-b,.card-p{padding:14px}
+  .card-h{padding:11px 14px}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:12px 10px}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .ship-in{padding:15px 18px;gap:14px}
+  .ship-num{font-size:38px}
+  .faq-list summary{font-size:14.5px;padding:13px 2px}
+  .paybar-in{padding:9px 14px;gap:10px}
+}
+@media (max-width:336px){
+  .steps{grid-template-columns:1fr}
+}
+@media (max-width:380px){
+  .topbar-in{padding:7px 10px;gap:6px}
+  .seg button{padding:4px 8px;font-size:11.5px}
+  .hero-in{padding:22px 14px 26px}
+  .hero-art{width:calc(100% + 28px);margin:2px -14px 0}
+  .home-in{padding:22px 14px 64px}
+  .hero h1{font-size:1.85rem}
+  .shelf{--tw:78px}
 }
 
-@media (max-width:880px){
+@media (min-width:601px) and (max-width:880px){
   .admin{grid-template-columns:1fr}
   .rail{position:static;flex-direction:row;overflow-x:auto;gap:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
   .rail-grp{flex-direction:row;gap:2px;flex:none}
   .rail-grp > .eyebrow{display:none}
   .rail a{white-space:nowrap}
   .topbar-in{flex-wrap:wrap;gap:10px}
+}
+@media (max-width:600px){
+  .admin{grid-template-columns:1fr}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .rail-grp{flex-direction:row;gap:2px;flex:none}
+  .rail-grp > .eyebrow{display:none}
+  .rail a{white-space:nowrap}
+  .shell{padding:16px 14px 70px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -1209,7 +1263,7 @@ function render(){
 }
 function shell(body,isAdmin){
  return `
- <div class="banner">Prototype build · demo data only · <b>no real payments are taken</b></div>
+ <div class="banner">Prototype · <b>no real payments</b></div>
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
      <span class="mark">${icon('plane',14)}</span>
@@ -1220,16 +1274,16 @@ function shell(body,isAdmin){
         <button data-act="role" data-v="customer" class="${isAdmin?'':'on'}">Customer</button>
         <button data-act="role" data-v="admin" class="${isAdmin?'on':''}">Operations</button>
       </div>
-      <button class="btn btn-s btn-ghost" data-act="signout" title="Sign out">${icon('x',15)}<span class="tiny">Sign out</span></button>
-      <button class="btn btn-s btn-ghost" data-act="reset" title="Clear all demo data and start again">${icon('refresh',15)}<span class="tiny">Reset demo</span></button>`
+      <button class="btn btn-s btn-ghost" data-act="signout" title="Sign out" aria-label="Sign out">${icon('x',15)}<span class="tiny lbl">Sign out</span></button>
+      <button class="btn btn-s btn-ghost" data-act="reset" title="Reset demo" aria-label="Reset demo">${icon('refresh',15)}<span class="tiny lbl">Reset demo</span></button>`
     : `<nav class="top-nav">
         <a href="how-it-works/">How it works</a>
         <a href="what-it-costs/">What it costs</a>
         <a href="faqs/">Questions</a>
         <a href="contact/">Contact</a>
       </nav>
-      <a class="btn btn-s btn-ghost" href="#/lookup">${icon('search',15)}Track an order</a>
-      <button class="btn btn-s" data-act="signin">${icon('lock',15)}Sign in</button>`}
+      <a class="btn btn-s btn-ghost" href="#/lookup" aria-label="Track an order">${icon('search',15)}<span class="lbl">Track an order</span></a>
+      <button class="btn btn-s" data-act="signin">${icon('lock',15)}<span class="lbl">Sign in</span></button>`}
  </div></div>
  ${body}
  ${isAdmin?'':`<div class="foot">
@@ -1298,7 +1352,7 @@ function viewHome(){
    <section class="card">
     <div class="card-h"><b>What it costs</b><span class="tiny muted">No hidden lines</span></div>
     <div class="card-b stack">
-      <div class="field-grid">
+      <div class="field-grid stat-grid">
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
@@ -1552,7 +1606,7 @@ function heroSection(dq){
 
       <div class="hero-form rise" style="animation-delay:.25s">
         <div class="hero-field">
-          <input type="url" id="heroLink" placeholder="Paste a Boots, Superdrug or ASOS link" autocomplete="off" spellcheck="false" aria-label="Product page address">
+          <input type="url" id="heroLink" placeholder="Paste a UK product link" autocomplete="off" spellcheck="false" aria-label="Product page address">
           <button class="hero-go" data-act="heroGo">Get my price</button>
         </div>
         <div class="hero-detect" id="heroDetect" aria-live="polite"></div>

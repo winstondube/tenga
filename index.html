@@ -363,15 +363,19 @@ body:has(.paybar) #themeSwitch{bottom:80px}
 }
 
 /* ---------- mobile menu ---------- */
-.burger{display:none;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--r);
-  padding:6px 9px;cursor:pointer;color:var(--ink);align-items:center}
+.burger{display:none;border:0;background:transparent;padding:6px 2px;margin-left:auto;cursor:pointer;
+  color:var(--ink);align-items:center}
+.burger:hover{color:var(--accent)}
 .menu-panel{border-bottom:1px solid var(--line);background:var(--surface)}
 .menu-in{max-width:1400px;margin:0 auto;padding:8px 16px 14px;display:flex;flex-direction:column}
 .menu-in a{padding:11px 2px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:15px;
   display:flex;align-items:center;gap:10px}
 .menu-in a:last-of-type{border-bottom:0}
 .menu-in .btn{margin-top:12px;justify-content:center}
-@media (max-width:760px){ .burger{display:inline-flex} }
+@media (max-width:760px){
+  .burger{display:inline-flex}
+  .topbar-only{display:none}
+}
 @media (min-width:761px){ .menu-panel{display:none} }
 
 /* ---------- CTA that returns once the hero one has gone ---------- */
@@ -601,8 +605,8 @@ body > *{min-width:0}
         <a href="faqs/">Questions</a>
         <a href="contact/">Contact</a>
       </nav>
-      <a class="btn btn-s btn-ghost" href="#/lookup" aria-label="Track an order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><span class="lbl">Track an order</span></a>
-      <button class="btn btn-s" data-act="signin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z"/></svg><span class="lbl">Sign in</span></button>
+      <a class="btn btn-s btn-ghost topbar-only" href="#/lookup" aria-label="Track an order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 20.5 16.2 16.2M18.5 11a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg><span class="lbl">Track an order</span></a>
+      <button class="btn btn-s topbar-only" data-act="signin"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z"/></svg><span class="lbl">Sign in</span></button>
       <button class="burger" data-act="menu" aria-label="Open menu" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -1548,8 +1552,8 @@ function shell(body,isAdmin){
         <a href="faqs/">Questions</a>
         <a href="contact/">Contact</a>
       </nav>
-      <a class="btn btn-s btn-ghost" href="#/lookup" aria-label="Track an order">${icon('search',15)}<span class="lbl">Track an order</span></a>
-      <button class="btn btn-s" data-act="signin">${icon('lock',15)}<span class="lbl">Sign in</span></button>
+      <a class="btn btn-s btn-ghost topbar-only" href="#/lookup" aria-label="Track an order">${icon('search',15)}<span class="lbl">Track an order</span></a>
+      <button class="btn btn-s topbar-only" data-act="signin">${icon('lock',15)}<span class="lbl">Sign in</span></button>
       <button class="burger" data-act="menu" aria-label="${S.menuOpen?'Close menu':'Open menu'}" aria-expanded="${S.menuOpen?'true':'false'}">
         ${S.menuOpen?icon('x',18):icon('menu',18)}
       </button>`}

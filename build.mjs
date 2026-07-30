@@ -62,6 +62,7 @@ const NAV = [
   ['Shops', 'shop/'],
   ['Collection', 'collection/'],
   ['What we cannot send', 'what-we-cannot-send/'],
+  ['Cancelling', 'cancelling/'],
   ['Questions', 'faqs/'],
   ['Contact', 'contact/']
 ];

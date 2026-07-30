@@ -305,6 +305,59 @@ export function buildPages(api) {
     ]
   });
 
+  /* ---- cancelling and refunds ---- */
+  pages.push({
+    path: 'cancelling/',
+    title: 'Cancelling an order and how refunds work',
+    description: 'You can cancel while the goods are still in the UK. What the shop allows decides whether it goes back, and what comes off your refund.',
+    h1: 'Cancelling and refunds',
+    lede: `You can change your mind while your item is still in the UK. Once the shipment leaves, we cannot get it back.`,
+    crumbs: [['Cancelling and refunds', 'cancelling/']],
+    body: `
+      ${api.note(`<b>The deadline is the shipment, not the delivery.</b> Tell us at least ${s.returnNoticeDays} working days before the shipment leaves the UK, and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying the item. Your order page shows the exact date.`, 'accent', 'clock')}
+
+      <h2>Why the window is earlier than you might expect</h2>
+      <p>Your item reaches our UK address within a few days, then waits for the next shipment and spends about ${Math.round(s.transitDays / 7)} weeks crossing. So by the time you are holding it in Harare, the shop's own return window has long closed. The only point at which a return is genuinely possible is while the goods are still sitting with us in the UK, which is also the whole time you have been waiting. Tell us before it leaves and we can act. After that we cannot.</p>
+
+      <h2>Whether it can go back at all is the shop's decision</h2>
+      <p>We are buying from ordinary UK retailers on your behalf, so their returns policy is the one that applies. Plenty of things are not returnable anywhere: fragrance, sealed cosmetics, pierced earrings and underwear are the common ones, and some shops refuse opened items of any kind.</p>
+      <p><b>Check the shop's returns policy before you order.</b> You chose the shop and the product, and their policy is on their own site. We do not assess it for you, and we cannot make a shop take something back that it will not accept.</p>
+
+      <h2>What comes off your refund</h2>
+      <table class="t">
+        <thead><tr><th>Line</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td>The product</td><td>Refunded, at whatever the shop gives back</td></tr>
+          <tr><td>The shop's restocking or return fee</td><td>Deducted, if the shop charges one</td></tr>
+          <tr><td>Our handling charge</td><td>Deducted, ${s.returnAdminPct}% of the item with a ${api.money(s.returnAdminMin)} minimum</td></tr>
+          <tr><td>Our ${s.procurementPct}% fee</td><td>Not refunded. The buying, checking and handling were already done</td></tr>
+          <tr><td>Zimbabwe shipping</td><td>Refunded in full if nothing is left to ship. If other items are still going, your parcel is simply lighter and you get that difference back when it is weighed</td></tr>
+        </tbody>
+      </table>
+      <p class="tiny muted">The handling charge is not a penalty. Returning something means packing it, getting it to a drop-off or a courier, and following the refund through with the shop, which is why there is a floor rather than a flat percentage.</p>
+
+      <h2>A worked example</h2>
+      <p>You cancel a ${api.money(104)} item, it is the only thing on your order, and the shop takes it back without a fee.</p>
+      <div class="card"><div class="card-b sum">
+        <div class="l"><span>Product, refunded by the shop</span><span class="v">${api.money(104)}</span></div>
+        <div class="l"><span>Our handling, ${s.returnAdminPct}% with a ${api.money(s.returnAdminMin)} minimum</span><span class="v">-${api.money(s.returnAdminMin)}</span></div>
+        <div class="l"><span>Zimbabwe shipping, since nothing now ships</span><span class="v">${api.money(22.5)}</span></div>
+        <div class="l total"><span>Back to you</span><span class="v">${api.money(120.5)}</span></div>
+      </div></div>
+
+      <h2>If something is wrong rather than unwanted</h2>
+      <p>That is not a cancellation and this page does not apply. If the shop sends the wrong item, the wrong shade or a damaged one, we photograph it at check-in, hold it before it ships and take it up with the retailer. You are not out of pocket for our mistake or theirs. If a problem only becomes visible after collection in Harare, tell us and we will take it as far as the retailer will let us, but be aware that our leverage after ${Math.round(s.transitDays / 7)} weeks is limited.</p>
+
+      ${api.note('<b>Nothing is bought until you approve a quote.</b> The cheapest cancellation is the one before we spend anything, and up to that point there is no charge of any kind.', 'accent', 'shield')}`,
+    faq: [
+      ['Can I cancel after I have paid?', `Yes, while the goods are still in the UK. Tell us at least ${s.returnNoticeDays} working days before the shipment leaves and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying it. After the shipment leaves the UK we cannot take anything back.`],
+      ['Can I return it once I have collected it in Harare?', `No. The crossing takes about ${Math.round(s.transitDays / 7)} weeks, so the shop's return window has closed well before you receive it. If the item is faulty or not what we were asked to buy, that is a different matter and you should tell us.`],
+      ['Is perfume returnable?', 'Usually not, anywhere. Fragrance and sealed cosmetics are commonly excluded from returns by the shops themselves. Check the policy of the shop you are ordering from before you send us the link.'],
+      ['What do you charge to cancel something?', `${s.returnAdminPct}% of the item with a ${api.money(s.returnAdminMin)} minimum, plus anything the shop keeps as a return fee. Our ${s.procurementPct}% fee is not refunded because the work was already done.`],
+      ['Do I get the Zimbabwe shipping back?', 'If nothing is left on your order, yes, in full. If other items are still shipping, your parcel is just lighter, and that saving comes back to you when it is weighed.']
+    ]
+  });
+
   /* ---- how it works ---- */
   pages.push({
     path: 'how-it-works/',
@@ -379,6 +432,13 @@ export function buildPages(api) {
       ['Can you send perfume?', 'Fragrance contains alcohol and is classed as flammable, so it depends on the route and the packing. Send the link and we will tell you honestly before you pay rather than after.'],
       ['Can you send hair dye?', 'Colour without a peroxide developer is usually fine. The developer itself is not.'],
       ['What happens if I order something restricted by accident?', 'It is flagged automatically, a person reviews it, and we come back to you. You are never asked for money on an item we cannot actually send.']
+    ]],
+    ['Changing your mind', [
+      ['Can I cancel after I have paid?', `Yes, while the goods are still in the UK. Tell us at least ${s.returnNoticeDays} working days before the shipment leaves, and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying it. Once the shipment has left the UK we cannot take anything back. Full detail on our cancelling page.`],
+      ['Can I return something after collecting it in Harare?', `No. The crossing takes about ${Math.round(s.transitDays / 7)} weeks, so the shop's own return window has closed long before the parcel reaches you. Anything faulty or wrong is a separate matter, and you should tell us.`],
+      ['Will the shop definitely take it back?', 'That is the shop\'s decision, not ours, and their policy is the one that applies. Fragrance, sealed cosmetics, pierced earrings and underwear are commonly non-returnable anywhere. Read the returns policy of the shop you are ordering from before you send us the link.'],
+      ['What does cancelling cost?', `${s.returnAdminPct}% of the item with a ${api.money(s.returnAdminMin)} minimum, plus anything the shop keeps as a restocking fee. Our ${s.procurementPct}% fee is not refunded, because the buying and checking were already done.`],
+      ['Do I get the shipping back if I cancel?', 'If nothing is left on your order, yes, all of it. If other items are still going, your parcel is simply lighter and that saving comes back to you when it is weighed.']
     ]],
     ['When something goes wrong', [
       ['What if the item is out of stock when you go to buy it?', 'We contact you before spending anything. Wait for restock, take a backup you nominated when ordering, choose something else, reduce the quantity, or take a refund on that item.'],

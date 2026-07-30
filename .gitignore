@@ -4,3 +4,4 @@ node_modules/
 _narrowtest.html
 _phone*.html
 _m*.html
+tests/check.js

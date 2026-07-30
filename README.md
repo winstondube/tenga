@@ -93,13 +93,25 @@ Seven demo orders are seeded at different stages so the queues are populated on 
 
 | Rule | Value |
 |---|---|
-| Minimum product spend | £40 per request, before fee, UK delivery and cargo |
+| Minimum product spend | £40 per request, before fee, UK delivery and shipping |
 | Procurement fee | 20% of product value, minimum £10 |
 | Fee basis | Combined product value (configurable to per-retailer) |
 | UK retailer delivery | At cost, calculated **separately per retailer** |
 | Quote expiry | 60 minutes, configurable per quote |
 | Price rise absorbed at purchase | Up to £2, above that the customer decides |
-| Zimbabwe cargo | Separate payment, estimated at quote, confirmed on the scales |
+| Zimbabwe shipping | **Inside the single payment**, estimated at quote, reconciled on the scales |
+| Shipping rate shown | £9.50/kg and £15 minimum, **plus a 10% safety margin**, so the quote shows £10.45/kg and £16.50 |
+| Clearance | £6, quoted at cost and **never marked up** |
+| Shipping tolerance | £0.50. Every real difference is refunded or asked for, not absorbed |
+| Departures | Every 6 weeks, pay by 5 days before |
+| Crossing | About 6 weeks, so **6 to 12 weeks total** depending on which shipment you catch |
+| Cancellation deadline | 2 working days before departure, and within 28 days of purchase |
+| Cancellation handling fee | 5% of the item, minimum £6, plus anything the shop withholds |
+
+The 10% margin and the £0.50 tolerance work together deliberately: the quote is
+padded, so the normal outcome after weighing is a small refund to the customer
+rather than a silent gain to us. Raising the tolerance back up would turn that
+padding into retained overcharge, which is what it used to be.
 
 Worked examples from the spec, both verified in the build:
 
@@ -112,7 +124,8 @@ Worked examples from the spec, both verified in the build:
 - A quote cannot be built while any restricted-keyword flag is unresolved.
 - A quote is never sent without an administrator pressing send.
 - An order does not enter the purchasing queue until payment is completed.
-- Links from unapproved retailers never proceed to quotation automatically.
+- An item cannot be cancelled once the shipment has left the UK; the action refuses.
+- Shipping is not refunded on a partial cancellation, because the weigh-in already returns it.
 
 Every price change, manual adjustment, refund, restriction clearance and status move is written to the audit log with before, after, reason, actor and timestamp.
 
@@ -180,6 +193,32 @@ Images are matched on alt text against the product name and need a 70% match, ne
 A typing-saver, not a dependency. The service works entirely without it, which is what the spec prescribes: extracted information is provisional and an administrator confirms every price before a quote goes out.
 
 When there is a backend, one endpoint calling a scraping service with residential proxies and JS rendering would cover the blocked retailers server-side. Around $30 to $50 a month.
+
+---
+
+## Tests
+
+```bash
+node tests/all.mjs           # everything
+node tests/all.mjs refund    # just the refund tests
+```
+
+19 files, run against the current `src/app.html`. They eval the app's own
+`<script>` block against a stubbed DOM, so they exercise the real pricing, the
+real status machine and the real render functions rather than copies. That is
+why they keep finding things: there is nothing to drift out of sync with.
+
+`run.js` is the broad one, walking every route against every admin tab and
+failing on a thrown error, an error view, or an `undefined` leaking into the
+HTML. The rest are narrow and were each written to pin a specific bug found by
+driving the app in a browser.
+
+**Driving it in a real browser found bugs that reading it never did.** Five
+real defects surfaced that way in one session: a shipping-weight field that
+silently did nothing, two footers stacked on every page, the whole Zimbabwe leg
+telling customers their quote was on its way, a hardcoded 10-day crossing that
+was really 6 weeks, and a cancel button that refunded the full line with no
+deductions. Prefer that over code review when checking this project.
 
 ---
 

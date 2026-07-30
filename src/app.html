@@ -644,13 +644,13 @@ const DEFAULT_SETTINGS={
  currency:'GBP'
 };
 const DEFAULT_RETAILERS=[
- {id:'boots',name:'Boots',domains:['boots.com'],status:'approved',delivery:4.5,freeOver:25,autoExtract:true,notes:'Marketplace sellers ship separately. Check the sold-by line.'},
- {id:'superdrug',name:'Superdrug',domains:['superdrug.com'],status:'approved',delivery:3.49,freeOver:25,autoExtract:true,notes:'Health & Beautycard prices do not apply to us.'},
+ {id:'boots',name:'Boots',domains:['boots.com'],status:'approved',delivery:4.5,freeOver:25,autoExtract:false,notes:'Marketplace sellers ship separately. Check the sold-by line.'},
+ {id:'superdrug',name:'Superdrug',domains:['superdrug.com'],status:'approved',delivery:3.49,freeOver:25,autoExtract:false,notes:'Health & Beautycard prices do not apply to us.'},
  {id:'lookfantastic',name:'LookFantastic',domains:['lookfantastic.com'],status:'approved',delivery:3.99,freeOver:40,autoExtract:true,notes:'Frequent site-wide discount codes, always recheck at basket.'},
  {id:'cultbeauty',name:'Cult Beauty',domains:['cultbeauty.co.uk'],status:'approved',delivery:3.95,freeOver:30,autoExtract:true,notes:''},
- {id:'beautybay',name:'Beauty Bay',domains:['beautybay.com'],status:'approved',delivery:3.95,freeOver:20,autoExtract:true,notes:''},
+ {id:'beautybay',name:'Beauty Bay',domains:['beautybay.com'],status:'approved',delivery:3.95,freeOver:20,autoExtract:false,notes:''},
  {id:'spacenk',name:'Space NK',domains:['spacenk.com'],status:'approved',delivery:4.95,freeOver:50,autoExtract:false,notes:'Prices need manual reading, page blocks extraction.'},
- {id:'asos',name:'ASOS',domains:['asos.com'],status:'approved',delivery:4.5,freeOver:35,autoExtract:true,notes:'Fashion and footwear. Check size guide before ordering.'},
+ {id:'asos',name:'ASOS',domains:['asos.com'],status:'approved',delivery:4.5,freeOver:35,autoExtract:false,notes:'Fashion and footwear. Check size guide before ordering.'},
  {id:'next',name:'Next',domains:['next.co.uk'],status:'approved',delivery:3.99,freeOver:0,autoExtract:true,notes:''},
  {id:'afrohair',name:'Afro Hair & Beauty',domains:['afrohairandbeauty.co.uk','hairandbeautyworld.co.uk'],status:'approved',delivery:4.25,freeOver:50,autoExtract:false,notes:'Wigs and extensions. Confirm lace colour and density by phone.'},
  {id:'sephora',name:'Sephora UK',domains:['sephora.co.uk'],status:'manual',delivery:4.99,freeOver:40,autoExtract:false,notes:'New retailer, every order needs manual review until we trust it.'},
@@ -721,8 +721,13 @@ function extract(url){
  if(!r){out.retailerId=null;out.retailerName=host;out.newShop=true}
  else {out.retailerId=r.id;out.retailerName=r.name;if(r.notes)out.retailerNotes=r.notes}
  const segs=u.pathname.split('/').filter(Boolean).map(s=>decodeURIComponent(s));
- let slug=segs.filter(s=>!STOP.has(s.toLowerCase())&&!/^\d+$/.test(s)).pop()||'';
- slug=slug.replace(/\.(html?|aspx|php)$/i,'').replace(/[-_+]/g,' ').replace(/\b\d{4,}\b/g,'').replace(/\s+/g,' ').trim();
+ // Take the wordiest segment, not the last one. LookFantastic and Cult Beauty
+ // put the product id last (/the-ordinary-niacinamide-30ml/11363576.html), so
+ // popping the tail returned a bare number and the customer got no name.
+ const clean=s=>s.replace(/\.(html?|aspx|php)$/i,'').replace(/[-_+]/g,' ').replace(/\b\d{4,}\b/g,'').replace(/\s+/g,' ').trim();
+ const cands=segs.filter(s=>!STOP.has(s.toLowerCase())&&!/^\d+$/.test(s)).map(clean);
+ let slug=cands.reduce((best,s)=>
+   ((s.match(/[a-z]/gi)||[]).length > (best.match(/[a-z]/gi)||[]).length ? s : best), '');
  const letters=(slug.match(/[a-z]/gi)||[]).length;
  if(!slug||slug.length<3||letters<5){out.reason='noname';out.ok=true;out.name='';}
  else {out.ok=true;out.name=titleCase(slug)}
@@ -758,7 +763,7 @@ const PROXIES=[
 async function fetchHTML(url){
  const attempt=mk=>new Promise((resolve,reject)=>{
   const ctl=new AbortController();
-  const timer=setTimeout(()=>{ctl.abort();reject(new Error('timeout'))},7000);
+  const timer=setTimeout(()=>{ctl.abort();reject(new Error('timeout'))},3500);
   fetch(mk(url),{signal:ctl.signal,headers:{'Accept':'text/html,*/*'}})
    .then(res=>{
      clearTimeout(timer);
@@ -1924,7 +1929,7 @@ function importHelper(){
     <span class="row" style="gap:7px">${icon('link',15)}Shops that hide their prices from us, like Boots and Superdrug</span>
   </summary>
   <div style="padding:0 13px 13px" class="stack-s">
-    <div class="tiny muted">Boots, Superdrug, ASOS and Next block us from opening their pages, so we cannot read the price the way we can elsewhere. Your own browser is not blocked. Drag this button to your bookmarks bar once, then press it while you are on any product page and it will send the name, price and photo straight here.</div>
+    <div class="tiny muted">Boots, Superdrug, ASOS and Beauty Bay block us from opening their pages, so we cannot read the price the way we can elsewhere. Your own browser is not blocked. Drag this button to your bookmarks bar once, then press it while you are on any product page and it will send the name, price and photo straight here.</div>
     <div class="row wrap" style="gap:10px;align-items:center">
       <a class="btn btn-s btn-primary" href="${esc(bookmarkletSrc())}" onclick="return false" draggable="true" title="Drag me to your bookmarks bar">${icon('down',15)}Send to Tenga</a>
       <span class="tiny muted">Drag it up to the bookmarks bar. Clicking it here does nothing.</span>
@@ -1963,7 +1968,6 @@ function catFields(p){
 function pendingCard(p){
  const d=draft();
  if(p.reason==='badurl')return note(esc(p.msg||'That does not look like a web address.'),'danger','alert');
- const loading=p.live==='loading';
  return `<div class="card" style="background:var(--surface-2);border-color:var(--line-2)">
   <div class="card-b stack">
    <div class="row" style="align-items:flex-start">
@@ -1971,21 +1975,18 @@ function pendingCard(p){
      <div class="grow stack-s">
        <div class="row wrap" style="gap:6px">
          ${pill(p.retailerName,'accent')}
-         ${loading?`<span class="pill p-mute"><i class="spin" style="width:9px;height:9px;border-width:1.5px"></i>Reading the page</span>`
-          :p.availability==='In stock'?pill('In stock','accent'):p.availability==='Out of stock'?pill('Out of stock','danger'):pill(p.availability||'To be confirmed','mute')}
-         ${p.via&&p.price!=null?pill('Imported from '+p.retailerName,'accent'):p.live==='ok'&&p.price!=null?pill('Price read from page','accent'):p.live==='failed'?pill('Enter price manually','mute'):''}
+         ${p.availability==='In stock'?pill('In stock','accent'):p.availability==='Out of stock'?pill('Out of stock','danger'):pill(p.availability||'To be confirmed','mute')}
+         ${p.via&&p.price!=null?pill('Imported from '+p.retailerName,'accent'):p.live==='ok'&&p.price!=null?pill('Price read from page','accent'):''}
        </div>
        <input type="text" id="pName" placeholder="Product name" value="${esc(p.name)}" style="font-weight:600">
-       ${loading?`<div class="tiny muted">Fetching the retailer page for the name, price and image.</div>`
-        :p.live==='failed'?`<div class="tiny muted">${esc(p.retailerName)} does not let us open the page automatically. Check the name below and type the price you can see. We confirm it against the retailer either way.</div>`
-        :p.price!=null?`<div class="tiny ${p.via==='page'?'':'muted'}" ${p.via==='page'?'style="color:var(--warn)"':''}>Page shows <b class="mono">${money(p.price)}</b>${p.wasPrice?` was <s class="mono">${money(p.wasPrice)}</s>`:''} · ${esc(srcLabel(p.via||'live').toLowerCase())}${p.via==='page'?', so please check it matches':''}. A person confirms it before you pay.</div>`
+       ${p.price!=null?`<div class="tiny ${p.via==='page'?'':'muted'}" ${p.via==='page'?'style="color:var(--warn)"':''}>Page shows <b class="mono">${money(p.price)}</b>${p.wasPrice?` was <s class="mono">${money(p.wasPrice)}</s>`:''} · ${esc(srcLabel(p.via||'live').toLowerCase())}${p.via==='page'?', so please check it matches':''}. A person confirms it before you pay.</div>`
         :p.reason==='noname'?`<div class="tiny" style="color:var(--warn)">We could not read a product name from that link. Please type it in so we buy the right thing.</div>`
-        :`<div class="tiny muted">Read from your link. Check it matches the page, and correct it if not.</div>`}
+        :`<div class="tiny muted">Name read from your link, check it matches the page. Most UK shops block us from reading their prices, so type the price you can see and a person confirms it against the shop before you pay.</div>`}
      </div>
    </div>
    <div class="field-grid">
      <label class="f">Quantity<input type="number" id="pQty" min="1" max="20" value="1"></label>
-     <label class="f">Price on the page ${p.price!=null?'<span class="hint">read from the page, correct if wrong</span>':'<span class="hint">optional, helps us quote faster</span>'}<input type="number" step="0.01" id="pPrice" value="${p.price!=null?p.price:''}" placeholder="63.99"></label>
+     <label class="f">Price on the page ${p.price!=null?'<span class="hint">read from the page, correct if wrong</span>':'<span class="hint">type the price you can see</span>'}<input type="number" step="0.01" id="pPrice" value="${p.price!=null?p.price:''}" placeholder="63.99"></label>
    </div>
    ${catFields(p)}
    <hr class="hr">
@@ -3183,14 +3184,22 @@ document.addEventListener('click',e=>{
     if(!url){toast('Paste a product link first');return}
     const r=extract(url);
     if(!r.ok){dr.pending={reason:'badurl',msg:r.reason};save();rerender(true);return}
-    // Show the card immediately, then fill in what the retailer page tells us.
-    dr.pending={...r,live:'loading'};save();rerender(true);
+    // Measured against the live sites: Boots, Superdrug, ASOS and Beauty Bay
+    // return nothing after a full timeout. Making everyone watch a spinner for
+    // that is a cost with no matching benefit, so the card lands complete from
+    // the link alone and the price field takes focus immediately.
+    dr.pending={...r,live:'idle'};save();rerender(true);
+    const f=document.getElementById('pPrice'); if(f&&!f.value)f.focus();
+    if(r.reason==='noauto')return;
+    // The few shops that do answer are still worth asking, but in the
+    // background. If it lands the price appears; if not, nobody waited.
     const filled=await enrich(dr.pending);
+    const typed=document.getElementById('pPrice');
+    if(typed&&typed.value!=='')return;           // they got there first, leave the caret alone
     const d2=draft();
-    if(d2.pending&&d2.pending.url===filled.url){d2.pending=filled;save();rerender(true);
-      if(filled.live==='ok'&&filled.price!=null)toast('Read '+money(filled.price)+' from '+filled.retailerName);
-      const f=document.getElementById('pPrice');
-      if(f&&!f.value)f.focus();
+    if(d2.pending&&d2.pending.url===filled.url&&filled.live==='ok'&&filled.price!=null){
+      d2.pending=filled;save();rerender(true);
+      toast('Read '+money(filled.price)+' from '+filled.retailerName);
     }
   },
   clearPending(){ const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true) },

@@ -71,7 +71,7 @@ function steps(api, cta) {
   return `<div class="steps">
     <div class="step"><span class="n">01</span><b>Send the link</b><span class="small muted">Paste the product page address, tell us the size and how many.</span></div>
     <div class="step"><span class="n">02</span><b>We check it by hand</b><span class="small muted">A person opens the link and confirms the price and stock with the shop.</span></div>
-    <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and the flight home, in a single payment.</span></div>
+    <div class="step"><span class="n">03</span><b>You pay one total</b><span class="small muted">Product, UK delivery, our fee and the shipping, in a single payment.</span></div>
     <div class="step zw"><span class="n">04</span><b>You collect in Harare</b><span class="small muted">Checked in the UK, flown out, then ready to collect.</span></div>
   </div>
   <p><a class="btn btn-primary btn-lg" href="${cta}">Start with a link</a></p>`;
@@ -86,7 +86,7 @@ function costTable(api) {
         <tr><td>The product</td><td class="mono">at cost</td><td>Exactly what the shop charges on the day we buy.</td></tr>
         <tr><td>UK delivery</td><td class="mono">at cost</td><td>Per shop, no mark up. Often free once a basket passes the shop’s threshold.</td></tr>
         <tr><td>Our fee</td><td class="mono">${s.procurementPct}%, min ${api.money(s.procurementMin)}</td><td>Of the product value. This is the only money we make on the purchase.</td></tr>
-        <tr><td>Flight to Zimbabwe</td><td class="mono">${api.money(s.cargoRate)}/kg</td><td>Minimum ${api.money(s.cargoMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
+        <tr><td>Shipping to Zimbabwe</td><td class="mono">${api.money(s.cargoRate)}/kg</td><td>Minimum ${api.money(s.cargoMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
         <tr><td>Minimum order</td><td class="mono">${api.money(s.minSpend)}</td><td>Product value, before fee and shipping.</td></tr>
       </tbody>
     </table>
@@ -106,7 +106,7 @@ function workedExample(api, retailerId, productName, price) {
       <div class="l"><span>Product at ${esc(r.name)}</span><span class="v">${api.money(q.productTotal)}</span></div>
       <div class="l"><span>UK delivery${q.deliveryTotal ? '' : ', free at this basket size'}</span><span class="v">${q.deliveryTotal ? api.money(q.deliveryTotal) : 'free'}</span></div>
       <div class="l"><span>Our fee</span><span class="v">${api.money(q.fee)}</span></div>
-      <div class="l"><span>Flight and clearance</span><span class="v">${api.money(q.cargoEst)}</span></div>
+      <div class="l"><span>Shipping and clearance</span><span class="v">${api.money(q.cargoEst)}</span></div>
       <div class="l total"><span>You pay, once</span><span class="v">${api.money(q.total)}</span></div>
     </div>
     <p class="tiny muted" style="margin-top:10px">Worked with today’s rates. Your real quote is confirmed against the shop before you pay.</p>
@@ -116,14 +116,14 @@ function workedExample(api, retailerId, productName, price) {
 
 function shipTable(api) {
   const s = api.settings;
-  const flights = api.shipSchedule(3);
+  const sailings = api.shipSchedule(3);
   return `<div class="card">
-    <div class="card-h"><b>The next three flights</b><span class="tiny muted">Stock moves every ${s.shipEveryDays / 7} weeks</span></div>
+    <div class="card-h"><b>The next three shipments</b><span class="tiny muted">Every ${s.shipEveryDays / 7} weeks, ${Math.round(s.transitDays / 7)}-week crossing</span></div>
     <div class="card-b"><table class="t">
-      <thead><tr><th>Leaves the UK</th><th>Pay by</th><th>Lands in Zimbabwe</th></tr></thead>
-      <tbody>${flights.map(f => `<tr><td><b>${api.fmtDay(f.departs)}</b></td><td class="${f.cutoffPassed ? 'muted' : ''}">${f.cutoffPassed ? 'closed' : api.fmtDay(f.cutoff)}</td><td class="muted">around ${api.fmtDay(f.arrives)}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Leaves the UK</th><th>Pay by</th><th>Collectable in Harare</th></tr></thead>
+      <tbody>${sailings.map(f => `<tr><td><b>${api.fmtDay(f.departs)}</b></td><td class="${f.cutoffPassed ? 'muted' : ''}">${f.cutoffPassed ? 'closed' : api.fmtDay(f.cutoff)}</td><td class="muted">around ${api.fmtDay(f.arrives)}</td></tr>`).join('')}</tbody>
     </table>
-    <p class="tiny muted" style="margin-top:10px">Your order joins the first flight whose payment date has not passed. Sending everything in one order is faster than sending it piece by piece, because a parcel waits for its slowest item.</p>
+    <p class="tiny muted" style="margin-top:10px">Your order joins the first shipment whose payment date has not passed. Sending everything in one order is faster than sending it piece by piece, because a parcel waits for its slowest item.</p>
     </div></div>`;
 }
 
@@ -168,7 +168,7 @@ export function buildPages(api) {
       `,
       faq: [
         [`Can I buy from ${r.name} with a Zimbabwean card?`, `Not directly. ${r.name} needs a UK billing address and most Zimbabwean cards are declined at their checkout. You pay us instead, and we pay them with a UK card.`],
-        [`How long does a ${r.name} order take to reach Zimbabwe?`, `Two to three days for ${r.name} to reach our UK address, then we check it in and put it on the next shipment. Allow around two to three weeks door to door, depending on the cargo schedule and clearance.`],
+        [`How long does a ${r.name} order take to reach Zimbabwe?`, `Two to three days for ${r.name} to reach our UK address, then we check it in and it waits for the next shipment. Shipments leave every ${s.shipEveryDays / 7} weeks and the crossing takes about ${Math.round(s.transitDays / 7)} weeks, so allow ${Math.round(s.transitDays / 7)} to ${Math.round((s.transitDays + s.shipEveryDays) / 7)} weeks in total depending on how close you order to a departure.`],
         [`What if the price changes after I pay?`, `Small rises up to ${api.money(s.absorbIncrease)} we absorb. Anything larger and we come back to you with options before we buy: pay the difference, change the item, reduce the quantity or get a refund.`],
         [`What if it is out of stock when you go to buy it?`, `We contact you. You can wait for restock, accept a substitute you have already approved, pick something else, or take a refund on that item. We never substitute without your say-so unless you gave us a backup link up front.`]
       ]
@@ -194,7 +194,7 @@ export function buildPages(api) {
     faq: [
       ['Can you buy from a shop that is not on this list?', 'Yes, any UK shop. The list is shops we already know well, not a restriction.'],
       ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
-      ['Can I order from more than one shop in the same request?', 'Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and the flight are worked out across the whole order.']
+      ['Can I order from more than one shop in the same request?', 'Yes, and most people do. You will pay each shop’s UK delivery separately because that is what we are charged, but our fee and shipping are worked out across the whole order.']
     ]
   });
 
@@ -202,7 +202,7 @@ export function buildPages(api) {
   pages.push({
     path: 'collection/',
     title: 'Collect your UK order in Harare',
-    description: 'Order from any UK shop and collect it in Harare. One price including the flight and clearance, agreed before you pay.',
+    description: 'Order from any UK shop and collect it in Harare. One price including shipping and clearance, agreed before you pay.',
     h1: 'Collect it in Harare',
     lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
     crumbs: [['Collection', 'collection/']],
@@ -224,7 +224,7 @@ export function buildPages(api) {
       ${shipTable(api)}
 
       <h2>What it costs to get here</h2>
-      <p>The flight is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
+      <p>Shipping is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
 
       <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
@@ -253,17 +253,17 @@ export function buildPages(api) {
       ${workedExample(api, 'boots', 'a larger beauty order', 90)}
 
       <h2>Why there is a minimum order</h2>
-      <p>Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos. On a very small order the flight would cost more than the goods, which is not a service anyone should buy. The ${api.money(s.minSpend)} minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
+      <p>Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos. On a very small order shipping would cost more than the goods, which is not a service anyone should buy. The ${api.money(s.minSpend)} minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
 
       <h2>Why shipping is estimated, and what happens if it is wrong</h2>
-      <p>We work the flight out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. We quote it slightly high on purpose, so the usual outcome is a refund of the unused part. If it comes in heavier we ask you for the difference, and we tell you before the parcel ships either way.</p>
+      <p>We work the shipping out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. We quote it slightly high on purpose, so the usual outcome is a refund of the unused part. If it comes in heavier we ask you for the difference, and we tell you before the parcel ships either way.</p>
 
       <h2>What we make</h2>
-      <p>Our fee, and nothing else. We do not mark up the product, we do not mark up UK delivery, and we do not mark up the flight. If a discount code appears between your quote and our purchase, the saving is yours.</p>
+      <p>We do not mark up the product and we do not mark up UK delivery. Shipping carries a small safety margin, because we charge it before the parcel exists and have to quote it slightly high; the rate you see on your quote already includes it, and if the scales come in lighter you get the difference back. If a discount code appears between your quote and our purchase, the saving is yours.</p>
 
       ${steps(api, '{{BASE}}#/request')}`,
     faq: [
-      ['Are there any hidden charges?', `No. One payment covers the product, UK delivery, our ${s.procurementPct}% fee and the flight to Zimbabwe including clearance. Nothing is due on arrival.`],
+      ['Are there any hidden charges?', `No. One payment covers the product, UK delivery, our ${s.procurementPct}% fee and shipping to Zimbabwe including clearance. Nothing is due on arrival.`],
       ['How is your fee calculated?', `${s.procurementPct}% of the product value, with a ${api.money(s.procurementMin)} minimum. It is worked out across the whole order, not per shop.`],
       ['What if the shop drops the price after I pay?', 'The saving is yours. We refund the difference or hold it as credit, your choice.'],
       ['Do I pay customs duty separately?', 'Clearance is included in the figure you agree. Zimbabwe duty on personal beauty and clothing shipments is handled by our cargo partner and covered in that line.']
@@ -324,7 +324,7 @@ export function buildPages(api) {
       <p>This is the part we do not automate, and it is deliberate. Retailer stock data is wrong often enough that trusting it would mean taking money for things we cannot buy. So a person opens every link, confirms the price in the basket, checks stock and confirms the UK delivery cost. That normally takes a few hours and always within ${s.responseHours}.</p>
 
       <h2>3. You pay one total</h2>
-      <p>Your quote shows the product, UK delivery per shop, our fee and the flight to Zimbabwe, then one number. It is valid for ${s.quoteExpiryMins} minutes, because retailer prices genuinely move that fast and we will not hold a price we cannot buy at. If it lapses, ask and we will recheck and resend.</p>
+      <p>Your quote shows the product, UK delivery per shop, our fee and shipping to Zimbabwe, then one number. It is valid for ${s.quoteExpiryMins} minutes, because retailer prices genuinely move that fast and we will not hold a price we cannot buy at. If it lapses, ask and we will recheck and resend.</p>
 
       <h2>4. We buy it, check it and send it</h2>
       <p>Once your payment clears we place the order with the shop and record the order number and tracking. When it reaches our UK address we check the product, the quantity and the variant against what you asked for, photograph anything that matters, and only then pack it for Zimbabwe.</p>
@@ -349,11 +349,11 @@ export function buildPages(api) {
       ['Can I buy from a shop that is not on your list?', 'Yes. The list is shops we know well, not a restriction. Send a link from anywhere in the UK.'],
       ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
       ['Do I need an account?', 'No. You get a private tracking link when you submit, and that is all you need.'],
-      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order the flight would cost more than the goods. The minimum keeps it proportionate.`]
+      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order shipping would cost more than the goods. The minimum keeps it proportionate.`]
     ]],
     ['What it costs', [
-      ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and the flight at ${api.money(s.cargoRate)} per kilo. All in one payment, every line shown before you pay.`],
-      ['Are there any hidden charges?', 'No. Nothing is due when you collect. One payment covers the product, UK delivery, our fee and the flight including clearance.'],
+      ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and shipping at ${api.money(s.cargoRate)} per kilo. All in one payment, every line shown before you pay.`],
+      ['Are there any hidden charges?', 'No. Nothing is due when you collect. One payment covers the product, UK delivery, our fee and shipping including clearance.'],
       ['How is your fee worked out?', `${s.procurementPct}% of the product value with a ${api.money(s.procurementMin)} minimum, calculated across the whole order rather than per shop.`],
       ['Do you mark up the product or the postage?', 'No. Our fee is the only money we make. If a discount code appears between your quote and our purchase, the saving is yours.'],
       ['What if the shop puts the price up after I pay?', `Rises up to ${api.money(s.absorbIncrease)} we absorb. Anything larger and we come back to you before spending your money: pay the difference, change the item, reduce the quantity, or take a refund.`],
@@ -367,7 +367,7 @@ export function buildPages(api) {
       ['Is my money safe if you cannot buy the item?', 'You are refunded. Every refund is recorded against your order with a reference and a reason.']
     ]],
     ['Getting it to Zimbabwe', [
-      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next flight, which leaves every ${s.shipEveryDays / 7} weeks, and clears in about ten days.`],
+      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next shipment, which leaves every ${s.shipEveryDays / 7} weeks, and clears in about ten days.`],
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
       ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],

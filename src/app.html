@@ -2828,7 +2828,7 @@ function paneQuote(o,q){
       <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
       <div class="l"><span>UK retailer delivery</span><span class="v">${money(q.deliveryTotal)}</span></div>
       <div class="l"><span>Procurement fee <span class="tiny muted">${st.procurementPct}% min ${money(st.procurementMin)}, ${st.feeBasis==='combined'?'combined basis':'per retailer'}</span></span><span class="v">${money(q.fee)}</span></div>
-      <div class="l"><span>Zimbabwe shipping <span class="tiny muted">est. ${q.cargoKg} kg, auto ${money(q.cargoAuto)} incl. ${st.cargoSafetyPct}% margin</span></span><span class="v">${money(q.cargoEst)}</span></div>
+      <div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?'by air, '+q.cargoKg+' kg incl. '+st.cargoSafetyPct+'% margin':'by sea, '+esc(q.seaTier)+' box, '+q.sea.cells+' of '+st.cellsPerArchiveBox+' cells, '+q.cargoL+' L of goods'}${q.cargoEst!==q.cargoAuto?', overridden from '+money(q.cargoAuto):''}</span></span><span class="v">${money(q.cargoEst)}</span></div>
       ${q.adjustments.map((a,i)=>`<div class="l"><span>${esc(a.reason)} <span class="tiny muted">${esc(a.by)} ${fmtTime(a.at)}</span></span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))} <button class="btn btn-xs btn-ghost" data-act="delAdj" data-ref="${o.ref}" data-i="${i}">${icon('x',12)}</button></span></div>`).join('')}
       <div class="l total"><span>Single payment</span><span class="v">${money(q.total)}</span></div>
     </div>

@@ -650,18 +650,17 @@ const DEFAULT_SETTINGS={
  // cheaper flips at about 237 kg per cubic metre, so cosmetics go by sea and
  // anything bulky and light goes by air, usually for less money AND less time.
  seaBoxMmL:453, seaBoxMmW:366, seaBoxMmH:326, seaBoxPrice:120, packEfficiencyPct:75, seaMin:4,
- // The archive box the partner prices against is 453x366x326mm, and it divides
- // cleanly into EIGHT cells of 220x180x160. So we buy real boxes that occupy a
- // whole number of cells, each one labelled and handed over as a unit. Nothing
- // gets thrown loose into a shared box, quoting is "how many cells", and there
- // is nothing to measure or reconcile afterwards.
- cellMmL:220, cellMmW:180, cellMmH:160, cellsPerArchiveBox:8, boxFillPct:80,
+ // Every one of these is a real product with a live listing, checked 10 Aug
+ // 2026. The space we buy divides into twelve of the smallest, which packs
+ // 2x3x2 and uses 94% of it. Each box is labelled and handed over as a unit,
+ // so nothing of anyone's travels loose in with somebody else's order.
+ // Card costs are ex VAT at low quantity and roughly halve at 100+ bundles.
+ cellMmL:220, cellMmW:120, cellMmH:160, cellsPerArchiveBox:12, boxFillPct:80,
  seaBoxes:[
-  {id:'s', name:'Small',  mm:[220,180,160], cells:1, price:22},
-  {id:'l', name:'Long',   mm:[440,180,160], cells:2, price:40},
-  {id:'f', name:'Flat',   mm:[440,360,160], cells:4, price:74},
-  {id:'t', name:'Tall',   mm:[440,360,240], cells:6, price:106},
-  {id:'xl',name:'Full',   mm:[440,360,320], cells:8, price:140}
+  {id:'s', name:'Small', mm:[220,120,160], cells:1,  price:16,  card:0.26, from:'ProPackaging'},
+  {id:'l', name:'Layer', mm:[450,350,80],  cells:3,  price:42,  card:1.23, from:'Stampbourne'},
+  {id:'h', name:'Half',  mm:[440,340,144], cells:6,  price:78,  card:1.10, from:'Priory Direct'},
+  {id:'f', name:'Full',  mm:[453,366,326], cells:12, price:150, card:5.99, from:'Safestore'}
  ],
  airRate:12.5, airMin:8, adviseAirOver:250,
  clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
@@ -1070,6 +1069,24 @@ function hasSailed(o){return (JOURNEY_RANK[o.status]||0)>=6}
    still sails, just lighter, and the weigh-in already refunds the difference,
    so paying it back here would pay it back twice. On a full cancellation no
    parcel is ever weighed, so nothing else would ever return it. */
+/* Draft a complete quote from what we already know: the customer's reported
+   price, the retailer's recorded postage, the box the goods fit into. It is a
+   proposal, not a promise, and it is only ever sent by a human pressing
+   approve. Anything that genuinely needs a person, a restricted item or a shop
+   whose postage we have never recorded, blocks it and says why. */
+function autoQuote(o){
+ const st=S.settings;
+ if(o.items.some(i=>i.restricted.length&&!i.restrictedCleared))return {ok:false,why:'a restricted item needs clearing'};
+ if(activeItems(o).some(i=>i.displayedPrice==null&&i.confirmedPrice==null))return {ok:false,why:'an item has no price on it'};
+ const q=quoteCalc(o);
+ if(q.deliveryUnknown)return {ok:false,why:'we have never bought from one of these shops, so their postage is unknown'};
+ o.quote=Object.assign({id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:null,expiresAt:null,
+   expiryMins:st.quoteExpiryMins,status:'Draft',auto:true},o.quote||{});
+ o.quote.auto=true; o.quote.sentAt=null;
+ setStatus(o,'Quote ready','Priced automatically, awaiting approval');
+ logAudit(o.ref,'Quote drafted automatically','',money(quoteCalc(o).total));
+ return {ok:true};
+}
 function refundCalc(o,it,retailerHeld){
  const st=S.settings;
  const product=itemLine(it);
@@ -1628,7 +1645,7 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
         <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaBoxes[0].price)}<span style="font-size:13px;font-weight:400">/box</span></div><div class="tiny muted">By sea, per labelled box, up to ${money(st.seaBoxes[st.seaBoxes.length-1].price)} for a full one. Air ${money(st.airRate)}/kg</div></div>
       </div>
-      ${note(`<b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.`,'accent','check')}
+      ${note(`<b>You pay once, and both routes are tracked.</b> Shipping is included in your total. Sea travels in a labelled box of its own, air is charged by weight, and we show you both prices before you choose. Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. Our shipping partner has run this route for five years without a major incident.`,'accent','check')}
     </div>
    </section>
 
@@ -2105,8 +2122,9 @@ function shipChooser(d,q){
     ? note(`<b>Air is ${money(saving)} cheaper here, and weeks faster.</b> Sea charges for the space your order takes up, and yours is bulky for its weight, so flying it costs less than sailing it.`,'accent','plane')
     : ''}
   ${q.productTotal>=st.adviseAirOver&&mode!=='air'
-    ? note(`<b>We would send this by air.</b> Nothing we ship can be insured, so on an order this size the argument is time and handling: air spends ${st.airTransitMinDays} to ${st.airTransitMaxDays} days in the system instead of ${Math.round(st.seaTransitMinDays/7)} to ${Math.round(st.seaTransitMaxDays/7)} weeks, through fewer hands. It is your call.`,'warn','shield')
+    ? note(`<b>We would send this by air.</b> Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. So on an order this size the argument is time and handling: air spends ${st.airTransitMinDays} to ${st.airTransitMaxDays} days in the system instead of ${Math.round(st.seaTransitMinDays/7)} to ${Math.round(st.seaTransitMaxDays/7)} weeks, through fewer hands. It is your call.`,'warn','shield')
     : ''}
+  <div class="tiny muted">${icon('search',11)} Both routes are tracked, and your order page updates at every stage.</div>
  </div>`;
 }
 function runningTotal(d){
@@ -2697,6 +2715,7 @@ function adminOrder(ref){
    <div class="col" style="align-items:flex-end;gap:6px">
      <div class="mono" style="font-size:20px;font-weight:700">${money(q.total)}</div>
      <div class="tiny muted">${t.initialPaid?'Paid '+money(t.initialPaid):'Not paid'}${t.cargoPaid?' · cargo '+money(t.cargoPaid):''}</div>
+     ${o.quote&&!o.quote.sentAt&&!t.initialPaid?`<button class="btn btn-primary" data-act="approveQuote" data-ref="${o.ref}">${icon('check',16)}Approve and send ${money(q.total)}</button>`:''}
      <div class="row" style="gap:6px">
        <a class="btn btn-xs" href="#/track/${o.ref}/${o.token}" target="_blank">${icon('ext',13)}Customer view</a>
        <select data-act="forceStatus" data-ref="${o.ref}" style="width:auto;font-size:12px;padding:3px 6px">
@@ -2715,6 +2734,7 @@ function adminOrder(ref){
 function paneReview(o){
  const st=S.settings, q=quoteCalc(o);
  return `<div class="stack" style="padding-top:16px">
+  ${o.quote&&o.quote.auto&&!o.quote.sentAt?note('<b>Priced automatically from the link and the shop\'s recorded postage.</b> Check the prices against the shop, then press <b>Approve and send</b>. Nothing has gone to the customer.','accent','file'):''}
   ${o.items.some(i=>i.restricted.length&&!i.restrictedCleared)?note('<b>Restricted keywords found.</b> Clear or reject each flagged item before a quote can be sent. The customer must not be asked to pay first.','danger','alert'):''}
   ${o.items.some(i=>!i.retailerId)?note('<b>A shop we have no record of.</b> Open it, check it is a real UK retailer that will deliver to us, and set its delivery cost on the quote tab. Add it to the shop list if you expect it again.','info','shield'):''}
   ${o.customerNotes||o.notes?note('<b>Customer note:</b> '+esc(o.customerNotes||o.notes),'info','note'):''}
@@ -3492,6 +3512,11 @@ document.addEventListener('click',e=>{
     if(flagged)setStatus(o,'Restricted-product review','Keywords: '+[...new Set(o.items.flatMap(i=>i.restricted))].join(', '));
     
     else setStatus(o,'Awaiting price confirmation');
+    // Last, so its status is not overwritten by the checks above. Everything
+    // the machine can work out is worked out, so what lands on the operations
+    // desk is a finished price to check rather than a form to fill in. Nothing
+    // reaches the customer until a person presses approve.
+    autoQuote(o);
     logAudit(o.ref,'Request submitted','',o.items.length+' items','');
     logMsg(o.ref,'Request received','Email',o.customer.email,'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.');
     S.draft=null;save();go('#/submitted/'+o.ref);
@@ -3565,6 +3590,17 @@ document.addEventListener('click',e=>{
     save();rerender(true);toast('Adjustment recorded') },
   delAdj(){ const before=quoteCalc(o).total;const a=o.quote.adjustments.splice(Number(d.i),1)[0];
     logAudit(o.ref,'Adjustment removed',money(before),money(quoteCalc(o).total),a.reason);save();rerender(true) },
+  approveQuote(){
+    const q=quoteCalc(o);
+    const unpriced=activeItems(o).filter(i=>i.confirmedPrice==null);
+    if(!confirm('Approve and send '+money(q.total)+' to '+o.customer.email+'?'+
+      (unpriced.length?'\n\n'+unpriced.length+' item'+(unpriced.length>1?'s':'')+' will be confirmed at the price the customer reported. Check them against the shop first if you have not.':'')))return;
+    // Approving accepts the reported prices as the ones we will buy at.
+    unpriced.forEach(i=>{i.confirmedPrice=i.displayedPrice;i.itemStatus='Approved'});
+    o.quote=Object.assign({id:uid('q'),deliveryOverrides:{},adjustments:[],expiryMins:S.settings.quoteExpiryMins,status:'Draft'},o.quote||{});
+    logAudit(o.ref,'Quote approved','',money(q.total),unpriced.length?unpriced.length+' price(s) taken as reported':'all prices already confirmed');
+    A.sendQuote();
+  },
   sendQuote(){
     const mins=Number(val('expMins'))||S.settings.quoteExpiryMins;
     const q=quoteCalc(o);

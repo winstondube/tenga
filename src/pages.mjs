@@ -344,9 +344,9 @@ export function buildPages(api) {
       <p class="tiny muted">Indicative, from typical packed sizes. Your quote uses your actual items, and we show you both numbers before you choose.</p>
 
       <h2>We cannot insure your order, and we will not pretend otherwise</h2>
-      <p>Consumer goods going into Zimbabwe are not insurable on any terms worth having. That is a function of where the goods are going rather than anything about your order, and it applies to everyone shipping this route, whether or not they tell you.</p>
+      <p>Consumer goods going into Zimbabwe are not insurable on any terms worth having. That is a function of where the goods are going rather than anything about your order, and it applies to everyone shipping this route.</p>
       <p>What we can tell you is the record. Our shipping partner has run this route for <b>five years without a single major incident</b>. Shipments have been delayed, sometimes by weeks. Nothing has been lost and nothing has arrived damaged beyond use. That is a track record rather than a guarantee, and we would rather you hear the difference from us than discover it later.</p>
-      <p><b>You can track either route.</b> Sea and air both give you a reference you can follow, and your order page updates as it moves.</p>
+      <p><b>Both routes are tracked.</b> Sea and air each give you a reference you can follow, and your order page updates at every stage from our UK address to the collection point in Harare.</p>
 
       <h2>Which is why we suggest air for anything expensive</h2>
       <p>Not for the speed. If nothing is insured, the sensible thing to do with an expensive order is to reduce how long it spends in the system and how many times it is handled. Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days and a short chain of custody. Sea is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks of crossing, plus the wait for a sailing, through a longer one.</p>
@@ -354,9 +354,9 @@ export function buildPages(api) {
 
       ${api.note(`<b>Sea sails once a month.</b> We hand the goods over on the ${s.handoverDay}th, so they must be with us by the ${s.goodsByDay}th, which means ordering by the ${s.orderByDay}th. Miss that and you are on the following month's boat. Air does not wait for anything.`, 'accent', 'clock')}`,
     faq: [
-      ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has five years on it without a major incident, which is a record rather than a promise.'],
+      ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has five years on it without a major incident, which is a record rather than a promise. Both sea and air are tracked, so you always know where your order is.'],
       ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea sells labelled boxes from ${api.money(s.seaBoxes[0].price)}, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
-      ['Can I track it?', 'Yes, both routes. You get a reference and your order page updates as it moves.'],
+      ['Can I track it?', 'Yes, sea and air are both tracked. You get a reference and your order page updates at every stage.'],
       ['How long does each take?', `Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days once your goods are with us. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
       ['Why would I ever pick sea then?', 'Because for small dense things it is meaningfully cheaper, and a whole box to yourself is very good value, and if you are not in a hurry that saving is real. A shelf of skincare costs a few pounds to sail and considerably more to fly.']
     ]

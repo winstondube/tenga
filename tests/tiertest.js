@@ -7,28 +7,30 @@ eval(js + `
 const st=S.settings;
 console.log('box '+boxLitres()+' L gross, '+usableLitres()+' L of goods, costs '+money(st.seaBoxPrice));
 console.log('');
-console.log('size          up to      price    per L   how many fill a box   that box collects');
-let bad=[];
-let lastRate=Infinity;
-st.seaTiers.forEach(t=>{
-  const fit=Math.floor(usableLitres()/t.maxL);
-  const rev=round2(fit*t.price);
-  const perL=round2(t.price/t.maxL);
-  if(perL>lastRate)bad.push('NO, '+t.name+' costs more per litre than the size below it');
-  lastRate=perL;
-  console.log(t.name.padEnd(13), (t.maxL+' L').padStart(6), money(t.price).padStart(10), money(perL).padStart(8),
-    String(fit).padStart(20), (money(rev)+(rev>=st.seaBoxPrice?'  covers it':'  SHORT')).padStart(20));
+console.log('the space divides into '+st.cellsPerArchiveBox+' cells of '+st.cellMmL+'x'+st.cellMmW+'x'+st.cellMmH+'mm');
+console.log('');
+console.log('box     size mm            cells   holds    price   per cell   a full box sold as these');
+let bad=[], lastPer=Infinity;
+st.seaBoxes.forEach(b=>{
+  const cap=boxCapacityL(b), fit=Math.floor(st.cellsPerArchiveBox/b.cells);
+  const rev=round2(fit*b.price), per=round2(b.price/b.cells);
+  if(per>lastPer)bad.push('NO, '+b.name+' costs more per cell than the box below it');
+  lastPer=per;
+  console.log(b.name.padEnd(7), (b.mm.join('x')).padEnd(18), String(b.cells).padStart(5),
+    (cap+' L').padStart(8), money(b.price).padStart(9), money(per).padStart(10),
+    ('   '+fit+' x = '+money(rev)+(rev>=st.seaBoxPrice?'  covers it':'  SHORT')));
 });
 console.log('');
-console.log('bigger sizes are cheaper per litre:', bad.length?bad.join('; '):'yes');
+console.log('bigger boxes are cheaper per cell:', bad.length?bad.join('; '):'yes');
+console.log('boxes all fit the archive box   :', st.seaBoxes.every(b=>b.mm[0]<=453&&b.mm[1]<=366&&b.mm[2]<=326));
 console.log('');
 
 // quoting must never need a measurement, just a size that fits
-console.log('goods      -> size quoted                       price   headroom');
-[0.5,2.9,3.1,8,17.9,25,39,41,80].forEach(L=>{
-  const t=seaTierFor(L);
-  console.log((L+' L').padStart(7), '->', t.name.padEnd(34), money(t.price).padStart(7),
-    (t.headroom!=null?t.headroom+' L':'-').padStart(9));
+console.log('goods      -> box quoted                        price   cells   spare');
+[0.5,4,4.7,9,18,19,38,39,90].forEach(L=>{
+  const t=seaBoxFor(L);
+  console.log((L+' L').padStart(7), '->', t.name.padEnd(33), money(t.price).padStart(7),
+    String(t.cells).padStart(7), (t.headroom+' L').padStart(8));
 });
 console.log('');
 
@@ -42,11 +44,11 @@ const scenarios=[
   ['a month of small beauty orders', Array.from({length:8},()=>mk('skincare',3))],
   ['one perfume, nothing else',      [mk('fragrance',1)]]
 ];
-console.log('scenario                        litres  boxes  fill   collected   cost   margin');
+console.log('scenario                        cells  fill   collected   cost   margin');
 scenarios.forEach(([name,orders])=>{
   const e=boxEconomics(orders);
-  console.log(name.padEnd(32), String(e.litres).padStart(6), String(e.boxes).padStart(6),
+  console.log(name.padEnd(32), (e.cells+'/'+e.capacity).padStart(5),
     (e.fillPct+'%').padStart(6), money(e.revenue).padStart(11), money(e.cost).padStart(7),
-    (money(e.margin)+(e.pays?'':'  SAIL AND LOSE')).padStart(9));
+    (money(e.margin)+(e.pays?'':'  need '+e.needCells+' more')).padStart(9));
 });
 `);

@@ -650,16 +650,18 @@ const DEFAULT_SETTINGS={
  // cheaper flips at about 237 kg per cubic metre, so cosmetics go by sea and
  // anything bulky and light goes by air, usually for less money AND less time.
  seaBoxMmL:453, seaBoxMmW:366, seaBoxMmH:326, seaBoxPrice:120, packEfficiencyPct:75, seaMin:4,
- // Sea is sold in standard sizes, not by the litre. Nobody can measure litres
- // at quote time, and a per-litre price quietly assumes the box fills up: sail
- // it half empty and you have still paid for a whole box. Sizes let the small
- // ones carry a loading, so a partly-full box still pays for itself.
- seaTiers:[
-  {id:'xs',name:'Extra small',maxL:3, price:16},
-  {id:'s', name:'Small',      maxL:8, price:34},
-  {id:'m', name:'Medium',     maxL:18,price:64},
-  {id:'l', name:'Large',      maxL:30,price:104},
-  {id:'xl',name:'Full box',   maxL:40,price:126}
+ // The archive box the partner prices against is 453x366x326mm, and it divides
+ // cleanly into EIGHT cells of 220x180x160. So we buy real boxes that occupy a
+ // whole number of cells, each one labelled and handed over as a unit. Nothing
+ // gets thrown loose into a shared box, quoting is "how many cells", and there
+ // is nothing to measure or reconcile afterwards.
+ cellMmL:220, cellMmW:180, cellMmH:160, cellsPerArchiveBox:8, boxFillPct:80,
+ seaBoxes:[
+  {id:'s', name:'Small',  mm:[220,180,160], cells:1, price:22},
+  {id:'l', name:'Long',   mm:[440,180,160], cells:2, price:40},
+  {id:'f', name:'Flat',   mm:[440,360,160], cells:4, price:74},
+  {id:'t', name:'Tall',   mm:[440,360,240], cells:6, price:106},
+  {id:'xl',name:'Full',   mm:[440,360,320], cells:8, price:140}
  ],
  airRate:12.5, airMin:8, adviseAirOver:250,
  clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
@@ -1169,38 +1171,47 @@ function usableLitres(){return round2(boxLitres()*(S.settings.packEfficiencyPct|
    usable rate and the customer pays for the same empty space twice. */
 function seaRate(){return round2(S.settings.seaBoxPrice/usableLitres())}
 function seaRateGross(){return round2(S.settings.seaBoxPrice/boxLitres())}
-/* Pick the smallest standard size the goods fit into. Past a full box it is
-   whole boxes plus a size for the remainder, because that is literally what
-   gets packed. */
-function seaTierFor(litres){
- const st=S.settings, tiers=(st.seaTiers||[]).slice().sort((a,b)=>a.maxL-b.maxL);
- if(!tiers.length)return {name:'Box',price:st.seaBoxPrice,maxL:usableLitres(),boxes:1,over:0};
- const full=tiers[tiers.length-1];
- const boxes=Math.floor(litres/full.maxL);
- const rest=round2(litres-boxes*full.maxL);
- const t=tiers.find(x=>rest<=x.maxL);
- if(!t)return {name:(boxes+1)+' full boxes',price:round2((boxes+1)*full.price),maxL:(boxes+1)*full.maxL,boxes:boxes+1,over:0,tier:full};
- const price=round2(boxes*full.price+(rest>0?t.price:0));
- const name=boxes?(boxes+' full box'+(boxes>1?'es':'')+(rest>0?' plus '+t.name.toLowerCase():'')):t.name;
- return {name,price,maxL:boxes*full.maxL+(rest>0?t.maxL:0),boxes,tier:rest>0?t:full,
-         headroom:round2((rest>0?t.maxL:full.maxL)-rest)};
+/* Pick the smallest box the goods actually go in. Boxes are not filled to the
+   brim, so allow for the gaps: rigid things leave voids and soft things only
+   compress so far. Past the biggest box it is whole boxes plus one for the
+   remainder, because that is literally what gets packed and labelled. */
+function boxCapacityL(b){
+ const st=S.settings, i=b.mm.map(x=>x-6);
+ return round2(i[0]*i[1]*i[2]/1e6*(st.boxFillPct||80)/100);
+}
+function seaBoxFor(litres){
+ const st=S.settings, boxes=(st.seaBoxes||[]).slice().sort((a,b)=>a.cells-b.cells);
+ if(!boxes.length)return {name:'Box',price:st.seaBoxPrice,cells:8,count:1,capacity:0,headroom:0};
+ const big=boxes[boxes.length-1], bigCap=boxCapacityL(big);
+ const whole=Math.floor(litres/bigCap);
+ const rest=round2(litres-whole*bigCap);
+ const b=boxes.find(x=>rest<=boxCapacityL(x));
+ if(!b)return {name:(whole+1)+' Full boxes',price:round2((whole+1)*big.price),cells:(whole+1)*big.cells,count:whole+1,capacity:round2((whole+1)*bigCap),headroom:0,box:big};
+ const price=round2(whole*big.price+(rest>0?b.price:0));
+ const cells=whole*big.cells+(rest>0?b.cells:0);
+ const name=whole?(whole+' Full box'+(whole>1?'es':'')+(rest>0?' plus a '+b.name:'')):b.name;
+ return {name,price,cells,count:whole+(rest>0?1:0),box:rest>0?b:big,
+         capacity:round2(whole*bigCap+(rest>0?boxCapacityL(b):0)),
+         headroom:round2((rest>0?boxCapacityL(b):bigCap)-rest)};
 }
 /* What one sailing is worth against what it costs. This is the number that
    decides whether a box should go at all. */
 function boxEconomics(orders){
- const st=S.settings;
- let litres=0,revenue=0,n=0;
+ const st=S.settings, per=st.cellsPerArchiveBox||8;
+ let cells=0,revenue=0,n=0,litres=0;
  (orders||[]).forEach(o=>{
   if((o.shipMode||'sea')!=='sea')return;
   const q=quoteCalc(o);
-  litres+=q.cargoL||0; revenue+=q.cargoFreight||0; n++;
+  cells+=q.sea?q.sea.cells:0; revenue+=q.cargoFreight||0; litres+=q.cargoL||0; n++;
  });
- litres=round2(litres); revenue=round2(revenue);
- const boxes=Math.max(1,Math.ceil(litres/usableLitres()));
+ revenue=round2(revenue); litres=round2(litres);
+ const boxes=Math.max(1,Math.ceil(cells/per));
  const cost=round2(boxes*st.seaBoxPrice);
- return {orders:n,litres,revenue,boxes,cost,margin:round2(revenue-cost),
-         fillPct:round2(litres/(boxes*boxLitres())*100),
-         pays:revenue>=cost};
+ return {orders:n,cells,litres,revenue,boxes,cost,margin:round2(revenue-cost),
+         capacity:boxes*per, fillPct:round2(cells/(boxes*per)*100),
+         pays:revenue>=cost,
+         // the number worth knowing on the 14th of the month
+         needCells:Math.max(0,Math.ceil((cost-revenue)/((st.seaBoxes&&st.seaBoxes[0].price)||22)))};
 }
 function estimateItemL(it){
  if(it.estL!=null&&it.estLManual)return Number(it.estL);
@@ -1238,14 +1249,14 @@ function estimateCargo(o,mode){
  const seaRateM=round2(seaRate()*m), seaMinM=round2((st.seaMin||0)*m);
  // Sea is a standard size, so the price is the size's price. The margin is
  // already inside the published sizes; padding them again would double it.
- const tier=seaTierFor(litres);
+ const tier=seaBoxFor(litres);
  const seaFreight=round2(tier.price);
  const airRateM=round2((st.airRate||0)*m), airMinM=round2((st.airMin||0)*m);
  const airFreight=round2(Math.max(kg*airRateM,airMinM));
 
  const sea={mode:'sea',kg,litres,rate:seaRateM,min:seaMinM,freight:seaFreight,clearance,
             amount:round2(seaFreight+clearance),boxShare:round2(litres/usableLitres()*100),
-            tier:tier.name,tierMaxL:tier.maxL,headroom:tier.headroom,boxes:tier.boxes};
+            tier:tier.name,tierMaxL:tier.capacity,headroom:tier.headroom,boxes:tier.count,cells:tier.cells};
  const air={mode:'air',kg,litres,rate:airRateM,min:airMinM,freight:airFreight,clearance,
             amount:round2(airFreight+clearance)};
  const chosen=(mode||o.shipMode||'sea')==='air'?air:sea;
@@ -1615,7 +1626,7 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaTiers[0].price)}<span style="font-size:13px;font-weight:400">+</span></div><div class="tiny muted">By sea, standard sizes up to ${money(st.seaTiers[st.seaTiers.length-1].price)} for a whole box. Air ${money(st.airRate)}/kg</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaBoxes[0].price)}<span style="font-size:13px;font-weight:400">/box</span></div><div class="tiny muted">By sea, per labelled box, up to ${money(st.seaBoxes[st.seaBoxes.length-1].price)} for a full one. Air ${money(st.airRate)}/kg</div></div>
       </div>
       ${note(`<b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.`,'accent','check')}
     </div>
@@ -2578,7 +2589,7 @@ function adminDash(){
     return `<div class="card"><div class="card-h"><b>Next sailing</b>${e.pays?pill('Pays for itself','accent'):pill('Short by '+money(-e.margin),'danger')}</div>
      <div class="card-b sum">
        <div class="l"><span>${e.orders} paid order${e.orders>1?'s':''} waiting</span><span class="v">${e.litres} L</span></div>
-       <div class="l"><span>Box${e.boxes>1?'es':''} needed, ${boxLitres()} L each</span><span class="v">${e.boxes}</span></div>
+       <div class="l"><span>Cells booked of ${e.capacity}</span><span class="v">${e.cells}</span></div>
        <div class="l"><span>Filled</span><span class="v">${e.fillPct}%</span></div>
        <div class="l"><span>Shipping collected</span><span class="v">${money(e.revenue)}</span></div>
        <div class="l"><span>The shipper charges us</span><span class="v">-${money(e.cost)}</span></div>
@@ -2586,7 +2597,7 @@ function adminDash(){
      </div>
      ${e.pays
        ? note('This box covers its own cost. Anything else added before the '+S.settings.orderByDay+'th is margin.','accent','check')
-       : note('<b>Sailing now loses '+money(-e.margin)+'.</b> A box costs the same whether it is full or not, so either fill it before the '+S.settings.orderByDay+'th or hold these orders for the next one.','danger','alert')}
+       : note('<b>Sailing now loses '+money(-e.margin)+'.</b> A box costs the same whether it is full or not. Roughly '+e.needCells+' more small box'+(e.needCells>1?'es':'')+' would cover it, so either fill it before the '+S.settings.orderByDay+'th or hold these orders for the next sailing.','danger','alert')}
     </div>`})()}
   <div class="kpis" style="display:none">
   </div>

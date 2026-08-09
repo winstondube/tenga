@@ -658,7 +658,7 @@ body > *{min-width:0}
       </div>
       <div class="shelf-dest" id="heroDest"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg> Harare</div>
       <div class="shelf-pick" id="heroPicked"><img alt="" width="308" height="308"></div>
-      <div class="shelf-ptag" id="heroPtag">£87.19 landed</div>
+      <div class="shelf-ptag" id="heroPtag">£98.79 landed</div>
     </div>
   </div>
  </section>
@@ -693,7 +693,7 @@ body > *{min-width:0}
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">£40.00</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">20%</div><div class="tiny muted">Of product value, minimum £10.00</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">£2.96<span style="font-size:13px;font-weight:400">/litre</span></div><div class="tiny muted">By sea, or £12.50/kg by air. Included in your total</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">£16.00<span style="font-size:13px;font-weight:400">+</span></div><div class="tiny muted">By sea, standard sizes up to £126.00 for a whole box. Air £12.50/kg</div></div>
       </div>
       <div class="note n-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg><div><b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.</div></div>
     </div>
@@ -890,6 +890,17 @@ const DEFAULT_SETTINGS={
  // cheaper flips at about 237 kg per cubic metre, so cosmetics go by sea and
  // anything bulky and light goes by air, usually for less money AND less time.
  seaBoxMmL:453, seaBoxMmW:366, seaBoxMmH:326, seaBoxPrice:120, packEfficiencyPct:75, seaMin:4,
+ // Sea is sold in standard sizes, not by the litre. Nobody can measure litres
+ // at quote time, and a per-litre price quietly assumes the box fills up: sail
+ // it half empty and you have still paid for a whole box. Sizes let the small
+ // ones carry a loading, so a partly-full box still pays for itself.
+ seaTiers:[
+  {id:'xs',name:'Extra small',maxL:3, price:16},
+  {id:'s', name:'Small',      maxL:8, price:34},
+  {id:'m', name:'Medium',     maxL:18,price:64},
+  {id:'l', name:'Large',      maxL:30,price:104},
+  {id:'xl',name:'Full box',   maxL:40,price:126}
+ ],
  airRate:12.5, airMin:8, adviseAirOver:250,
  clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
  // The estimate is padded by cargoSafetyPct, so every difference gets settled
@@ -1346,6 +1357,7 @@ function quoteCalc(o){
   mode,cargoKg:cargoAuto.kg,cargoL:cargoAuto.litres,cargoAuto:cargoAuto.amount,
   cargoRate:cargoAuto.rate,cargoMin:cargoAuto.min,cargoFreight:cargoAuto.freight,cargoClearance:cargoAuto.clearance,
   sea:cargoAuto.sea,air:cargoAuto.air,cheaper:cargoAuto.cheaper,saving:cargoAuto.saving,adviseAir,
+  seaTier:cargoAuto.sea.tier,seaHeadroom:cargoAuto.sea.headroom,
   boxShare:cargoAuto.sea.boxShare,
   total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
 }
@@ -1397,6 +1409,39 @@ function usableLitres(){return round2(boxLitres()*(S.settings.packEfficiencyPct|
    usable rate and the customer pays for the same empty space twice. */
 function seaRate(){return round2(S.settings.seaBoxPrice/usableLitres())}
 function seaRateGross(){return round2(S.settings.seaBoxPrice/boxLitres())}
+/* Pick the smallest standard size the goods fit into. Past a full box it is
+   whole boxes plus a size for the remainder, because that is literally what
+   gets packed. */
+function seaTierFor(litres){
+ const st=S.settings, tiers=(st.seaTiers||[]).slice().sort((a,b)=>a.maxL-b.maxL);
+ if(!tiers.length)return {name:'Box',price:st.seaBoxPrice,maxL:usableLitres(),boxes:1,over:0};
+ const full=tiers[tiers.length-1];
+ const boxes=Math.floor(litres/full.maxL);
+ const rest=round2(litres-boxes*full.maxL);
+ const t=tiers.find(x=>rest<=x.maxL);
+ if(!t)return {name:(boxes+1)+' full boxes',price:round2((boxes+1)*full.price),maxL:(boxes+1)*full.maxL,boxes:boxes+1,over:0,tier:full};
+ const price=round2(boxes*full.price+(rest>0?t.price:0));
+ const name=boxes?(boxes+' full box'+(boxes>1?'es':'')+(rest>0?' plus '+t.name.toLowerCase():'')):t.name;
+ return {name,price,maxL:boxes*full.maxL+(rest>0?t.maxL:0),boxes,tier:rest>0?t:full,
+         headroom:round2((rest>0?t.maxL:full.maxL)-rest)};
+}
+/* What one sailing is worth against what it costs. This is the number that
+   decides whether a box should go at all. */
+function boxEconomics(orders){
+ const st=S.settings;
+ let litres=0,revenue=0,n=0;
+ (orders||[]).forEach(o=>{
+  if((o.shipMode||'sea')!=='sea')return;
+  const q=quoteCalc(o);
+  litres+=q.cargoL||0; revenue+=q.cargoFreight||0; n++;
+ });
+ litres=round2(litres); revenue=round2(revenue);
+ const boxes=Math.max(1,Math.ceil(litres/usableLitres()));
+ const cost=round2(boxes*st.seaBoxPrice);
+ return {orders:n,litres,revenue,boxes,cost,margin:round2(revenue-cost),
+         fillPct:round2(litres/(boxes*boxLitres())*100),
+         pays:revenue>=cost};
+}
 function estimateItemL(it){
  if(it.estL!=null&&it.estLManual)return Number(it.estL);
  const l=CAT_L[it.category]; return round2(l!=null?l:CAT_L.other);
@@ -1431,12 +1476,16 @@ function estimateCargo(o,mode){
  const litres=round2(items.reduce((a,i)=>a+estimateItemL(i)*(Number(i.qty)||1),0));
 
  const seaRateM=round2(seaRate()*m), seaMinM=round2((st.seaMin||0)*m);
- const seaFreight=round2(Math.max(litres*seaRateM,seaMinM));
+ // Sea is a standard size, so the price is the size's price. The margin is
+ // already inside the published sizes; padding them again would double it.
+ const tier=seaTierFor(litres);
+ const seaFreight=round2(tier.price);
  const airRateM=round2((st.airRate||0)*m), airMinM=round2((st.airMin||0)*m);
  const airFreight=round2(Math.max(kg*airRateM,airMinM));
 
  const sea={mode:'sea',kg,litres,rate:seaRateM,min:seaMinM,freight:seaFreight,clearance,
-            amount:round2(seaFreight+clearance),boxShare:round2(litres/usableLitres()*100)};
+            amount:round2(seaFreight+clearance),boxShare:round2(litres/usableLitres()*100),
+            tier:tier.name,tierMaxL:tier.maxL,headroom:tier.headroom,boxes:tier.boxes};
  const air={mode:'air',kg,litres,rate:airRateM,min:airMinM,freight:airFreight,clearance,
             amount:round2(airFreight+clearance)};
  const chosen=(mode||o.shipMode||'sea')==='air'?air:sea;
@@ -1806,7 +1855,7 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(seaRate())}<span style="font-size:13px;font-weight:400">/litre</span></div><div class="tiny muted">By sea, or ${money(st.airRate)}/kg by air. Included in your total</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaTiers[0].price)}<span style="font-size:13px;font-weight:400">+</span></div><div class="tiny muted">By sea, standard sizes up to ${money(st.seaTiers[st.seaTiers.length-1].price)} for a whole box. Air ${money(st.airRate)}/kg</div></div>
       </div>
       ${note(`<b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.`,'accent','check')}
     </div>
@@ -2277,7 +2326,7 @@ function shipChooser(d,q){
   <div class="tiny muted" style="letter-spacing:.06em;text-transform:uppercase">How it travels</div>
   <div class="ship-opts">
    ${opt('sea','Sea',q.sea.amount,`Order by ${fmtDay(n.cutoff)}, collect around ${fmtDay(n.arrives)}`,
-        `${q.sea.boxShare}% of a shipping box`)}
+        `${esc(q.sea.tier)}, up to ${q.sea.tierMaxL} litres`)}
    ${opt('air','Air',q.air.amount,`${st.airTransitMinDays} to ${st.airTransitMaxDays} days once we have it`,
         `${q.air.kg} kg by weight`)}
   </div>
@@ -2300,7 +2349,7 @@ function runningTotal(d){
     <div class="l"><span>Product value${missing?` <span class="tiny muted">(${missing} item${missing>1?'s':''} still need a price)</span>`:''}</span><span class="v">${money(q.productTotal)}</span></div>
     <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${q.deliveryUnknown?'we confirm':money(q.deliveryTotal)}</span></div>
     <div class="l"><span>Our fee <span class="tiny muted">${st.procurementPct}% of product value, min ${money(st.procurementMin)}</span></span><span class="v">${money(q.fee)}</span></div>
-    <div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?'by air, about '+q.cargoKg+' kg':'by sea, about '+q.cargoL+' litres'}</span></span><span class="v">${money(q.cargoEst)}</span></div>
+    <div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?'by air, about '+q.cargoKg+' kg':'by sea, '+esc(q.seaTier).toLowerCase()+' size'}</span></span><span class="v">${money(q.cargoEst)}</span></div>
     <div class="l total"><span>Total, paid once</span><span class="v">${q.deliveryUnknown?'from ':''}${money(q.total)}</span></div>
   </div>
   ${!q.meetsMin
@@ -2598,7 +2647,7 @@ function viewQuote(ref,token){
      ${q.cargoEst===q.cargoAuto
        // Split so the customer can check the sum. If we have overridden the
        // figure by hand the parts no longer add up to it, so show one line.
-       ? `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?q.cargoKg+' kg at '+money(q.cargoRate)+' per kg':q.cargoL+' litres at '+money(q.cargoRate)+' a litre, '+q.boxShare+'% of a shipping box'}</span></span><span class="v">${money(q.cargoFreight)}</span></div>
+       ? `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?q.cargoKg+' kg at '+money(q.cargoRate)+' per kg':esc(q.seaTier)+', up to '+q.sea.tierMaxL+' litres'}</span></span><span class="v">${money(q.cargoFreight)}</span></div>
           <div class="l"><span>Customs clearance</span><span class="v">${money(q.cargoClearance)}</span></div>`
        : `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.cargoKg} kg, quoted by hand</span></span><span class="v">${money(q.cargoEst)}</span></div>`}
      ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
@@ -2763,6 +2812,23 @@ function adminDash(){
     <div class="kpi"><span class="v num">${money(revenue)}</span><span class="l">Collected, net of refunds</span></div>
     <div class="kpi"><span class="v num">${money(feeRev)}</span><span class="l">Procurement fee revenue</span></div>
     <div class="kpi stripe-d"><span class="v num">${held.length}</span><span class="l">Payments on provider hold</span></div>
+  </div>
+  ${(()=>{const e=boxEconomics(S.orders.filter(o=>!/Delivered|Closed|refunded/i.test(o.status)&&(o.shipMode||'sea')==='sea'&&payTotals(o).initialPaid>0));
+    if(!e.orders)return '';
+    return `<div class="card"><div class="card-h"><b>Next sailing</b>${e.pays?pill('Pays for itself','accent'):pill('Short by '+money(-e.margin),'danger')}</div>
+     <div class="card-b sum">
+       <div class="l"><span>${e.orders} paid order${e.orders>1?'s':''} waiting</span><span class="v">${e.litres} L</span></div>
+       <div class="l"><span>Box${e.boxes>1?'es':''} needed, ${boxLitres()} L each</span><span class="v">${e.boxes}</span></div>
+       <div class="l"><span>Filled</span><span class="v">${e.fillPct}%</span></div>
+       <div class="l"><span>Shipping collected</span><span class="v">${money(e.revenue)}</span></div>
+       <div class="l"><span>The shipper charges us</span><span class="v">-${money(e.cost)}</span></div>
+       <div class="l total"><span>${e.margin>=0?'Margin on the freight':'Out of pocket'}</span><span class="v" style="color:${e.margin>=0?'var(--accent)':'var(--danger)'}">${money(e.margin)}</span></div>
+     </div>
+     ${e.pays
+       ? note('This box covers its own cost. Anything else added before the '+S.settings.orderByDay+'th is margin.','accent','check')
+       : note('<b>Sailing now loses '+money(-e.margin)+'.</b> A box costs the same whether it is full or not, so either fill it before the '+S.settings.orderByDay+'th or hold these orders for the next one.','danger','alert')}
+    </div>`})()}
+  <div class="kpis" style="display:none">
   </div>
 
   ${acts.length?`<div class="card">

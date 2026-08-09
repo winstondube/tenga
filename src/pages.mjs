@@ -86,7 +86,7 @@ function costTable(api) {
         <tr><td>The product</td><td class="mono">at cost</td><td>Exactly what the shop charges on the day we buy.</td></tr>
         <tr><td>UK delivery</td><td class="mono">at cost</td><td>Per shop, no mark up. Often free once a basket passes the shop’s threshold.</td></tr>
         <tr><td>Our fee</td><td class="mono">${s.procurementPct}%, min ${api.money(s.procurementMin)}</td><td>Of the product value. This is the only money we make on the purchase.</td></tr>
-        <tr><td>Shipping to Zimbabwe</td><td class="mono">${api.money(api.seaRate())}/litre by sea, ${api.money(s.airRate)}/kg by air</td><td>Sea minimum ${api.money(s.seaMin)}, air minimum ${api.money(s.airMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
+        <tr><td>Shipping to Zimbabwe</td><td class="mono">${api.money(s.seaTiers[0].price)} to ${api.money(s.seaTiers[s.seaTiers.length-1].price)} by sea, ${api.money(s.airRate)}/kg by air</td><td>Sea is a standard size, air is by weight with a ${api.money(s.airMin)} minimum, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
         <tr><td>Minimum order</td><td class="mono">${api.money(s.minSpend)}</td><td>Product value, before fee and shipping.</td></tr>
       </tbody>
     </table>
@@ -224,7 +224,7 @@ export function buildPages(api) {
       ${shipTable(api)}
 
       <h2>What it costs to get here</h2>
-      <p>Sea is charged on the space your order takes inside a shipping box, ${api.money(api.seaRate())} a litre. Air is charged on weight, ${api.money(s.airRate)} a kilo. Plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
+      <p>Sea comes in standard sizes, from ${api.money(s.seaTiers[0].price)} for a few cosmetics up to ${api.money(s.seaTiers[s.seaTiers.length-1].price)} for a whole box to yourself. Air is charged on weight, ${api.money(s.airRate)} a kilo. Plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
 
       <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
@@ -315,7 +315,18 @@ export function buildPages(api) {
     crumbs: [['Sea or air', 'sea-or-air/']],
     body: `
       <h2>They are not priced the same way, and that matters more than you would think</h2>
-      <p>Sea freight is bought by the box. One box measures ${s.seaBoxMmL} by ${s.seaBoxMmW} by ${s.seaBoxMmH} millimetres, which is ${api.boxLitres()} litres, and it costs a fixed amount to land in Harare no matter what is inside it. So your share is the space you take up: about ${api.money(api.seaRate())} a litre once you allow for the fact that nothing packs perfectly.</p>
+      <p>Sea freight is bought by the box. One box measures ${s.seaBoxMmL} by ${s.seaBoxMmW} by ${s.seaBoxMmH} millimetres, which is ${api.boxLitres()} litres, and it costs the same to land in Harare whether it is full or half empty. So rather than invent a price per litre, we sell space in it in standard sizes, and you pay for the size your order fits into.</p>
+      <div class="tablewrap"><table class="t">
+        <thead><tr><th>Size</th><th>Holds up to</th><th>Price</th><th>Roughly</th></tr></thead>
+        <tbody>
+          <tr><td><b>${s.seaTiers[0].name}</b></td><td>${s.seaTiers[0].maxL} litres</td><td class="mono">${api.money(s.seaTiers[0].price)}</td><td>A perfume and a couple of serums</td></tr>
+          <tr><td><b>${s.seaTiers[1].name}</b></td><td>${s.seaTiers[1].maxL} litres</td><td class="mono">${api.money(s.seaTiers[1].price)}</td><td>A full skincare shelf, or two pairs of jeans</td></tr>
+          <tr><td><b>${s.seaTiers[2].name}</b></td><td>${s.seaTiers[2].maxL} litres</td><td class="mono">${api.money(s.seaTiers[2].price)}</td><td>A wig plus a shop of beauty, or two pairs of trainers</td></tr>
+          <tr><td><b>${s.seaTiers[3].name}</b></td><td>${s.seaTiers[3].maxL} litres</td><td class="mono">${api.money(s.seaTiers[3].price)}</td><td>Three pairs of trainers and a coat</td></tr>
+          <tr><td><b>${s.seaTiers[4].name}</b></td><td>${s.seaTiers[4].maxL} litres</td><td class="mono">${api.money(s.seaTiers[4].price)}</td><td>The whole box, whatever you like</td></tr>
+        </tbody>
+      </table></div>
+      <p>Bigger sizes cost less per litre, so it is always worth sending one order rather than three. If your order outgrows a whole box, it travels as full boxes plus a size for the remainder.</p>
       <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}.</p>
       <p>That means <b>which route is cheaper depends on how dense your order is</b>, not how big or how expensive it is. Anything heavy for its size goes cheaper by sea. Anything bulky and light goes cheaper by air, and arrives in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days instead of months.</p>
 
@@ -344,10 +355,10 @@ export function buildPages(api) {
       ${api.note(`<b>Sea sails once a month.</b> We hand the goods over on the ${s.handoverDay}th, so they must be with us by the ${s.goodsByDay}th, which means ordering by the ${s.orderByDay}th. Miss that and you are on the following month's boat. Air does not wait for anything.`, 'accent', 'clock')}`,
     faq: [
       ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has five years on it without a major incident, which is a record rather than a promise.'],
-      ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea charges for space at about ${api.money(api.seaRate())} a litre, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
+      ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea sells space in standard sizes from ${api.money(s.seaTiers[0].price)}, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
       ['Can I track it?', 'Yes, both routes. You get a reference and your order page updates as it moves.'],
       ['How long does each take?', `Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days once your goods are with us. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
-      ['Why would I ever pick sea then?', 'Because for small dense things it is meaningfully cheaper, and if you are not in a hurry that saving is real. A shelf of skincare costs a few pounds to sail and considerably more to fly.']
+      ['Why would I ever pick sea then?', 'Because for small dense things it is meaningfully cheaper, and a whole box to yourself is very good value, and if you are not in a hurry that saving is real. A shelf of skincare costs a few pounds to sail and considerably more to fly.']
     ]
   });
 
@@ -470,7 +481,7 @@ export function buildPages(api) {
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
       ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
-      ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type, plus packaging and a small safety margin on the freight. Because of that margin the quote is deliberately a little high, so once the parcel is weighed in the UK you normally get some of it back. If it comes in heavier, we ask you before it ships.`],
+      ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type. By sea we work out which standard size your order fits into; by air we estimate the weight and add a small safety margin. Because of that margin the quote is deliberately a little high, so once the parcel is weighed in the UK you normally get some of it back. If it comes in heavier, we ask you before it ships.`],
       ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready to collect.']
     ]],
     ['What we can and cannot send', [

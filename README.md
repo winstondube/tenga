@@ -99,12 +99,16 @@ Seven demo orders are seeded at different stages so the queues are populated on 
 | UK retailer delivery | At cost, calculated **separately per retailer** |
 | Quote expiry | 60 minutes, configurable per quote |
 | Price rise absorbed at purchase | Up to £2, above that the customer decides |
-| Zimbabwe shipping | **Inside the single payment**, estimated at quote, reconciled on the scales |
-| Shipping rate shown | £9.50/kg and £15 minimum, **plus a 10% safety margin**, so the quote shows £10.45/kg and £16.50 |
+| Zimbabwe shipping | **Inside the single payment**, estimated at quote, reconciled on arrival |
+| Sea freight | Bought **by the box**: 453 x 366 x 326 mm = 54.05 L for £120. Quoted at £2.96/L (usable litres), reconciled at £2.22/L (gross litres of the packed carton) |
+| Air freight | £12.50/kg |
+| Which is cheaper | Depends on **density, not size or price**. Crossover is ~237 kg/m³: cosmetics and liquids sail, clothing, shoes and wigs fly, usually for less money AND two months less waiting |
 | Clearance | £6, quoted at cost and **never marked up** |
 | Shipping tolerance | £0.50. Every real difference is refunded or asked for, not absorbed |
-| Departures | Every 6 weeks, pay by 5 days before |
-| Crossing | About 6 weeks, so **6 to 12 weeks total** depending on which shipment you catch |
+| Sea schedule | Monthly. Order by the 15th, goods with us by the 20th, handed over on the 25th |
+| Sea crossing | 6 to 7 weeks, so 6-7 weeks best case and 10-11 weeks if you miss the 15th |
+| Air | 5 to 7 days once the goods are with us, no sailing to wait for |
+| Insurance | **None, at any price.** Not available for consumer goods into Zimbabwe. Partner has 5 years on the route with no major incident. Tracking on both routes |
 | Cancellation deadline | 2 working days before departure, and within 28 days of purchase |
 | Cancellation handling fee | 5% of the item, minimum £6, plus anything the shop withholds |
 
@@ -112,6 +116,13 @@ The 10% margin and the £0.50 tolerance work together deliberately: the quote is
 padded, so the normal outcome after weighing is a small refund to the customer
 rather than a silent gain to us. Raising the tolerance back up would turn that
 padding into retained overcharge, which is what it used to be.
+
+The two sea rates are not a markup on each other. Quoting works from the sum of
+item volumes, which is the space the goods themselves occupy, so it divides by
+the USABLE litres of a box: the void between things is already priced into that
+smaller denominator. Reconciling works from the outer carton actually packed,
+which already contains the void, so it divides by the GROSS litres. Charge the
+carton at the quoting rate and the customer pays for the same empty space twice.
 
 Worked examples from the spec, both verified in the build:
 

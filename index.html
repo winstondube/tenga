@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Tenga UK","url":"https://winstondube.github.io/tenga/","description":"Buy-for-me and Zimbabwe forwarding","email":"help@tenga.uk","areaServed":["ZW","GB"],"logo":"https://winstondube.github.io/tenga/"}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and shipping at £10.45 per kilo with a £16.50 minimum, plus £6.00 clearance. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"Where do I collect it?","acceptedAnswer":{"@type":"Answer","text":"Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and shipping. Sea is charged on the space your order takes in the container box, about £3.26 a litre; air is £13.75 a kilo. Plus £6.00 clearance. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"Where do I collect it?","acceptedAnswer":{"@type":"Answer","text":"Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"UK buy-for-me and Zimbabwe forwarding","provider":{"@type":"Organization","name":"Tenga UK"},"areaServed":{"@type":"Country","name":"Zimbabwe"},"description":"Send a link to a product in a UK shop. We buy it, check it and ship it to Zimbabwe for one agreed price including shipping.","offers":{"@type":"Offer","priceCurrency":"GBP","description":"20% procurement fee, minimum £10.00, on a minimum order of £40.00"}}</script>
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh}img,svg,video{display:block;max-width:100%}
@@ -173,6 +173,15 @@ summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
 .faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
+.ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
+.ship-opt:hover{border-color:var(--ink-3)}
+.ship-opt.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--surface-2)}
+.ship-opt .so-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:14.5px}
+.ship-opt .so-w{font-size:12px;color:var(--ink-2);line-height:1.35}
+.ship-opt .so-y{font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+@media (max-width:480px){.ship-opts{grid-template-columns:1fr}}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -649,7 +658,7 @@ body > *{min-width:0}
       </div>
       <div class="shelf-dest" id="heroDest"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg> Harare</div>
       <div class="shelf-pick" id="heroPicked"><img alt="" width="308" height="308"></div>
-      <div class="shelf-ptag" id="heroPtag">£99.29 landed</div>
+      <div class="shelf-ptag" id="heroPtag">£87.19 landed</div>
     </div>
   </div>
  </section>
@@ -659,8 +668,8 @@ body > *{min-width:0}
      <span class="ship-unit">days<br>until the<br>next shipment</span>
    </div>
    <div class="ship-detail">
-     <b>Shipments leave every 6 weeks and the crossing takes about 6 weeks.</b> The next one leaves the UK on <b>Friday 14 August</b> and is collectable in Harare around <b>Friday 25 September</b>.
-     <div class="ship-cut "><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Pay by <b>Sunday 9 August</b> to be on it.</span></div>
+     <b>Sea leaves once a month, and the crossing takes 6 to 7 weeks.</b> Order by <b>Saturday 15 August</b> to catch the Tuesday 25 August sailing, collectable in Harare around <b>Tuesday 6 October</b>. In a hurry? Air is 5 to 7 days.
+     <div class="ship-cut "><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Pay by <b>Saturday 15 August</b> to be on it.</span></div>
    </div>
    <a class="btn btn-primary" href="#/request">Get on this shipment</a>
  </div></section>
@@ -684,9 +693,9 @@ body > *{min-width:0}
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">£40.00</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">20%</div><div class="tiny muted">Of product value, minimum £10.00</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">£9.50<span style="font-size:13px;font-weight:400">/kg</span></div><div class="tiny muted">Included in your total</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">£2.96<span style="font-size:13px;font-weight:400">/litre</span></div><div class="tiny muted">By sea, or £12.50/kg by air. Included in your total</div></div>
       </div>
-      <div class="note n-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg><div><b>You pay once.</b> Shipping to Zimbabwe is worked out from what you ordered and included in the total. We quote it slightly high on purpose. Once your parcel is weighed, whatever is left over comes back to you, and if it comes in heavier we tell you before it ships.</div></div>
+      <div class="note n-accent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></svg><div><b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.</div></div>
     </div>
    </section>
 
@@ -721,7 +730,7 @@ body > *{min-width:0}
    <section class="stack-s">
    <h2 style="font-size:clamp(22px,3vw,28px)">Questions</h2>
    <div class="faq-list">
-     <details><summary>How much does it cost in total?</summary><div class="faq-a">Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and shipping at £10.45 per kilo with a £16.50 minimum, plus £6.00 clearance. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value.</div></details><details><summary>Which UK shops can you buy from?</summary><div class="faq-a">Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.</div></details><details><summary>Where do I collect it?</summary><div class="faq-a">Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.</div></details>
+     <details><summary>How much does it cost in total?</summary><div class="faq-a">Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and shipping. Sea is charged on the space your order takes in the container box, about £3.26 a litre; air is £13.75 a kilo. Plus £6.00 clearance. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value.</div></details><details><summary>Which UK shops can you buy from?</summary><div class="faq-a">Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.</div></details><details><summary>Where do I collect it?</summary><div class="faq-a">Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.</div></details>
    </div>
    <div class="row wrap" style="padding-top:12px">
      <a class="btn" href="faqs/"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg>More questions</a>
@@ -748,7 +757,7 @@ body > *{min-width:0}
  
  <div class="floatcta" id="floatCta">
    <div class="floatcta-in">
-     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included · pay by Sunday 9 August for the next shipment</span></div>
+     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included · pay by Saturday 15 August for the next shipment</span></div>
      <a class="btn" href="#/request"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6"/></svg><span class="long">Send a link</span><span class="short">Get my price</span></a>
    </div>
  </div></div>
@@ -876,7 +885,13 @@ const DEFAULT_SETTINGS={
  quoteExpiryMins:60, responseHours:24,
  absorbIncrease:2, priceDropPolicy:'credit', priceDropThreshold:2,
  feeBasis:'combined',
- cargoRate:9.5, cargoMin:15, clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
+ // Sea freight is bought by the box, not by the kilo: one 453x366x326mm box
+ // costs seaBoxPrice to land in Harare. Air is bought by the kilo. Which is
+ // cheaper flips at about 237 kg per cubic metre, so cosmetics go by sea and
+ // anything bulky and light goes by air, usually for less money AND less time.
+ seaBoxMmL:453, seaBoxMmW:366, seaBoxMmH:326, seaBoxPrice:120, packEfficiencyPct:75, seaMin:4,
+ airRate:12.5, airMin:8, adviseAirOver:250,
+ clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
  // The estimate is padded by cargoSafetyPct, so every difference gets settled
  // rather than absorbed. The tolerance only swallows rounding noise.
  // Cancelling: the shop's own rules decide whether it comes back at all, which
@@ -885,8 +900,10 @@ const DEFAULT_SETTINGS={
  cargoSafetyPct:10, cargoTolerance:0.5,
  // Six weeks on the water, and departures are six weeks apart, so the total
  // wait is 6 to 12 weeks depending on which shipment you catch.
- transitDays:42,
- shipAnchor:'2026-08-14', shipEveryDays:42, shipCutoffDays:5,
+ seaTransitMinDays:42, seaTransitMaxDays:49, airTransitMinDays:5, airTransitMaxDays:7,
+ // Sea sails monthly. The partner needs the goods by the 25th, so they must
+ // reach us by the 20th, which means customers must order by the 15th.
+ handoverDay:25, goodsByDay:20, orderByDay:15,
  currency:'GBP'
 };
 const DEFAULT_RETAILERS=[
@@ -917,6 +934,13 @@ function load(){
     // Anyone with a saved session predates whatever setting was added last.
     // Fill the gaps from defaults rather than rendering NaN at them.
     S.settings=Object.assign({},DEFAULT_SETTINGS,S.settings||{});
+    // Freight used to be per kilo for everyone. A saved cargo.rate of 9.5 now
+    // means GBP9.50 per LITRE on a sea order, which multiplies the bill by ten.
+    // Drop the stale rate and let it recompute from the current model.
+    (S.orders||[]).forEach(o=>{
+      if(!o.shipMode)o.shipMode='sea';
+      if(o.cargo&&o.cargo.rate!=null&&Number(o.cargo.rate)===9.5)delete o.cargo.rate;
+    });
     if(!Array.isArray(S.batches))S.batches=[];
     if(S.session===undefined)S.session=null;
     S.menuOpen=false;
@@ -1310,31 +1334,73 @@ function quoteCalc(o){
  // Zimbabwe shipping is quoted up front, estimated from the products, so
  // the customer settles everything in one payment. If the scales disagree
  // later we ask for the difference or refund it.
- const cargoAuto=estimateCargo({items});
+ const mode=o.shipMode||'sea';
+ const cargoAuto=estimateCargo({items,shipMode:mode});
  const cargoEst=(o.quote&&o.quote.cargoEstimate!=null&&o.quote.cargoEstimate!=='')?round2(Number(o.quote.cargoEstimate)):cargoAuto.amount;
  const total=round2(productTotal+deliveryTotal+fee+adjTotal+cargoEst);
- return {groups:list,productTotal,deliveryTotal,deliveryUnknown,fee,adjTotal,adjustments,cargoEst,cargoKg:cargoAuto.kg,cargoAuto:cargoAuto.amount,
+ // Expensive orders are advised to fly: nothing is insured, so the argument is
+ // less time and fewer hands, not speed. Cheap and bulky orders are advised to
+ // fly too, because it simply costs less.
+ const adviseAir=mode!=='air'&&(productTotal>=st.adviseAirOver||cargoAuto.cheaper==='air');
+ return {groups:list,productTotal,deliveryTotal,deliveryUnknown,fee,adjTotal,adjustments,cargoEst,
+  mode,cargoKg:cargoAuto.kg,cargoL:cargoAuto.litres,cargoAuto:cargoAuto.amount,
   cargoRate:cargoAuto.rate,cargoMin:cargoAuto.min,cargoFreight:cargoAuto.freight,cargoClearance:cargoAuto.clearance,
+  sea:cargoAuto.sea,air:cargoAuto.air,cheaper:cargoAuto.cheaper,saving:cargoAuto.saving,adviseAir,
+  boxShare:cargoAuto.sea.boxShare,
   total,meetsMin:productTotal>=st.minSpend,shortfall:round2(Math.max(0,st.minSpend-productTotal))};
 }
 function cargoCalc(o){
  const st=S.settings, c=o.cargo||{};
+ const mode=o.shipMode||'sea';
  const actual=Number(c.actualWeight)||0;
- const vol=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/(st.volDivisor||5000)):(Number(c.volWeight)||0);
  const pack=c.packaging!=null&&c.packaging!==''?Number(c.packaging):(st.packagingKg||0);
- const chargeable=round2(Math.max(actual+pack,vol));
- const rate=c.rate!=null&&c.rate!==''?Number(c.rate):st.cargoRate;
- const freight=round2(Math.max(chargeable*rate,st.cargoMin));
  const clearance=c.clearance!=null&&c.clearance!==''?Number(c.clearance):st.clearance;
  const local=c.localDelivery!=null&&c.localDelivery!==''?Number(c.localDelivery):st.localDelivery;
  const other=Number(c.other)||0;
+ // Measured litres from the packed carton. Sea is charged on the space it takes
+ // in the box, so this is the number that matters, not the scales.
+ const litres=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/1000):(Number(c.litres)||0);
+ let freight,rate,basis,chargeable;
+ if(mode==='air'){
+  // Air still charges volumetric weight when a parcel is bulky and light.
+  const vol=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/(st.volDivisor||5000)):0;
+  chargeable=round2(Math.max(actual+pack,vol));
+  rate=c.rate!=null&&c.rate!==''?Number(c.rate):st.airRate;
+  freight=round2(Math.max(chargeable*rate,st.airMin));
+  basis=chargeable+' kg chargeable';
+ } else {
+  chargeable=litres;
+  rate=c.rate!=null&&c.rate!==''?Number(c.rate):seaRateGross();
+  freight=round2(Math.max(litres*rate,st.seaMin));
+  basis=litres+' litres, '+round2(litres/usableLitres()*100)+'% of a box';
+ }
  const total=round2(freight+clearance+local+other);
- return {actual,vol,pack,chargeable,rate,freight,clearance,local,other,total};
+ return {mode,actual,litres,pack,chargeable,rate,basis,freight,clearance,local,other,total,
+         boxShare:round2(litres/usableLitres()*100)};
 }
 /* Shipping is quoted up front so the customer pays once, so the weight
    guess has to be honest. Volume from the size where we have it, a
    sensible default per product kind where we do not, plus packaging. */
 const CAT_KG={fragrance:0.35,makeup:0.12,hairpiece:0.30,footwear:1.10,clothing:0.35,haircare:0.30,skincare:0.30,other:0.40};
+/* Packed volume in litres, retail box included, because sea freight charges for
+   the space a thing occupies and not what it weighs. These are the numbers the
+   whole sea price rests on, so they are worth arguing with. */
+const CAT_L={fragrance:0.55,makeup:0.45,hairpiece:4.80,footwear:8.70,clothing:3.50,haircare:1.10,skincare:0.60,other:2.00};
+function boxLitres(){const st=S.settings;return round2(st.seaBoxMmL*st.seaBoxMmW*st.seaBoxMmH/1e6)}
+function usableLitres(){return round2(boxLitres()*(S.settings.packEfficiencyPct||75)/100)}
+/* Two rates, and they are not a markup on each other.
+   Quoting works from the sum of item volumes, which is the space the goods
+   themselves occupy, so it uses the USABLE litres of a box: the void between
+   things is already priced into that smaller denominator.
+   Reconciling works from the outer carton we actually pack, which already
+   contains the void, so it uses the GROSS litres. Charge the carton at the
+   usable rate and the customer pays for the same empty space twice. */
+function seaRate(){return round2(S.settings.seaBoxPrice/usableLitres())}
+function seaRateGross(){return round2(S.settings.seaBoxPrice/boxLitres())}
+function estimateItemL(it){
+ if(it.estL!=null&&it.estLManual)return Number(it.estL);
+ const l=CAT_L[it.category]; return round2(l!=null?l:CAT_L.other);
+}
 function estimateItemKg(it){
  if(it.estKg!=null&&it.estKgManual)return Number(it.estKg);
  const size=(it.attrs&&it.attrs.size)||'';
@@ -1348,19 +1414,35 @@ function estimateItemKg(it){
  } else kg=CAT_KG[it.category]!=null?CAT_KG[it.category]:0.4;
  return round2(Math.max(0.05,kg));
 }
-function estimateCargo(o){
+/* Prices BOTH routes for the same goods, because which one is cheaper is not
+   obvious and depends on density, not on price or size alone. Sea charges for
+   the space, air charges for the weight, and they cross over at about
+   237 kg/m3: cosmetics and liquids go by sea, anything bulky and light goes by
+   air for less money and two months less waiting. The customer sees both. */
+function estimateCargo(o,mode){
  const st=S.settings;
  const items=activeItems(o);
- const kg=round2(items.reduce((a,i)=>a+estimateItemKg(i)*(Number(i.qty)||1),0)+(st.packagingKg||0));
  // The safety margin goes on freight only. Clearance is money we hand straight
  // to the carrier, so quoting a padded figure and still calling it clearance is
  // the one line that would not survive a customer seeing a carrier invoice.
  const m=1+(st.cargoSafetyPct||0)/100;
- const rate=round2(st.cargoRate*m), min=round2(st.cargoMin*m);
- const freight=round2(Math.max(kg*rate,min));
- const clearance=(st.clearance||0)+(st.localDelivery||0);
- const amount=round2(freight+clearance);
- return {kg,freight,amount,rate,min,clearance};
+ const clearance=round2((st.clearance||0)+(st.localDelivery||0));
+ const kg=round2(items.reduce((a,i)=>a+estimateItemKg(i)*(Number(i.qty)||1),0)+(st.packagingKg||0));
+ const litres=round2(items.reduce((a,i)=>a+estimateItemL(i)*(Number(i.qty)||1),0));
+
+ const seaRateM=round2(seaRate()*m), seaMinM=round2((st.seaMin||0)*m);
+ const seaFreight=round2(Math.max(litres*seaRateM,seaMinM));
+ const airRateM=round2((st.airRate||0)*m), airMinM=round2((st.airMin||0)*m);
+ const airFreight=round2(Math.max(kg*airRateM,airMinM));
+
+ const sea={mode:'sea',kg,litres,rate:seaRateM,min:seaMinM,freight:seaFreight,clearance,
+            amount:round2(seaFreight+clearance),boxShare:round2(litres/usableLitres()*100)};
+ const air={mode:'air',kg,litres,rate:airRateM,min:airMinM,freight:airFreight,clearance,
+            amount:round2(airFreight+clearance)};
+ const chosen=(mode||o.shipMode||'sea')==='air'?air:sea;
+ return Object.assign({},chosen,{sea,air,
+   cheaper:air.amount<sea.amount?'air':'sea',
+   saving:round2(Math.abs(air.amount-sea.amount))});
 }
 /* ---------------- shipping cycle ----------------
    Stock moves on a fixed six-week cycle, so the useful question is not
@@ -1368,26 +1450,35 @@ function estimateCargo(o){
    to pay to be on it". Everything is derived from one anchor date. */
 const DAY=86400000;
 function shipSchedule(count){
- const st=S.settings;
- const every=(Number(st.shipEveryDays)||42)*DAY;
- let anchor=new Date(String(st.shipAnchor||DEFAULT_SETTINGS.shipAnchor)+'T12:00:00').getTime();
- if(!isFinite(anchor))anchor=new Date(DEFAULT_SETTINGS.shipAnchor+'T12:00:00').getTime();
- const now=Date.now();
- let next=anchor;
- if(next<now)next=anchor+Math.ceil((now-anchor)/every)*every;
+ const st=S.settings, now=Date.now();
+ const day=n=>Math.min(Math.max(Number(n)||1,1),28);
+ const hand=day(st.handoverDay), goods=day(st.goodsByDay), order=day(st.orderByDay);
+ const at=(y,m,d)=>new Date(y,m,d,12,0,0).getTime();
+ const d0=new Date(now);
  const out=[];
- for(let i=0;i<(count||1);i++){
-  const departs=next+i*every;
-  const cutoff=departs-(Number(st.shipCutoffDays)||5)*DAY;
+ // Sea sails once a calendar month, so the schedule is months, not an interval.
+ for(let i=0,m=d0.getMonth(),y=d0.getFullYear();out.length<(count||1);i++){
+  const mm=m+i, yy=y+Math.floor(mm/12), mo=((mm%12)+12)%12;
+  const departs=at(yy,mo,hand), cutoff=at(yy,mo,order), goodsBy=at(yy,mo,goods);
+  if(cutoff<now-DAY)continue;                  // that boat has gone
   out.push({
-   departs,cutoff,
+   departs,cutoff,goodsBy,
    daysAway:Math.max(0,Math.ceil((departs-now)/DAY)),
    cutoffDays:Math.ceil((cutoff-now)/DAY),
    cutoffPassed:now>cutoff,
-   arrives:departs+(Number(st.transitDays)||42)*DAY
+   arrives:departs+(Number(st.seaTransitMinDays)||42)*DAY,
+   arrivesLate:departs+(Number(st.seaTransitMaxDays)||49)*DAY
   });
  }
  return out;
+}
+/* Air does not wait for a boat. It leaves once the goods are with us and
+   checked, so the only lead time is the retailer's own delivery. */
+function airEta(){
+ const st=S.settings;
+ return {min:Date.now()+(3+(Number(st.airTransitMinDays)||5))*DAY,
+         max:Date.now()+(3+(Number(st.airTransitMaxDays)||7))*DAY,
+         minDays:Number(st.airTransitMinDays)||5, maxDays:Number(st.airTransitMaxDays)||7};
 }
 function nextShipment(){
  // If the cutoff for the next shipment has passed, the honest answer is the one after.
@@ -1513,7 +1604,7 @@ function seed(){
  const q5=quoteCalc(o5);
  o5.payments.push({id:uid('p'),type:'initial',provider:'Card',amount:q5.total,currency:'GBP',status:'Payment completed',ref:'ch_3PkQ22Lm',createdAt:Date.now()-199*3600e3,paidAt:Date.now()-198.8*3600e3,held:false});
  ['Quote sent','Initial payment completed','Purchased from retailer','Retailer dispatched','Received in the UK','Received and checked','Awaiting final weight'].forEach(s=>setStatus(o5,s));
- o5.cargo={actualWeight:1.4,packaging:0.3,l:32,w:24,h:16,rate:9.5,clearance:6,localDelivery:0,other:0};
+ o5.cargo={actualWeight:1.4,packaging:0.3,l:24,w:18,h:10,clearance:6,localDelivery:0,other:0};
 
  // 6. in transit to Zimbabwe, cargo paid
  const o6=mk({ageH:600,customer:{name:'Blessing Marufu',email:'b.marufu@example.com',whatsapp:'+263 77 880 4412',country:'Zimbabwe'},
@@ -1526,7 +1617,7 @@ function seed(){
  o6.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-599*3600e3,expiresAt:Date.now()-598*3600e3,expiryMins:60,status:'Accepted'};
  const q6=quoteCalc(o6);
  o6.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712C04',createdAt:Date.now()-599*3600e3,paidAt:Date.now()-598*3600e3,held:false});
- o6.cargo={actualWeight:2.2,packaging:0.3,l:34,w:22,h:14,rate:9.5,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,shipRef:'SCZ-2026-0714',eta:Date.now()+96*3600e3,tracking:'SCZ714-0092'};
+ o6.cargo={actualWeight:2.2,packaging:0.3,l:30,w:22,h:12,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,shipRef:'SCZ-2026-0714',eta:Date.now()+96*3600e3,tracking:'SCZ714-0092'};
  const c6=cargoCalc(o6);
  o6.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:c6.total,currency:'GBP',status:'Payment completed',ref:'PP-7712D88',createdAt:Date.now()-120*3600e3,paidAt:Date.now()-118*3600e3,held:false});
  S.batches.push({id:'BATCH-0714',company:'Swift Cargo Zimbabwe',shipDate:Date.now()-72*3600e3,eta:Date.now()+96*3600e3,ref:'SCZ-2026-0714',manifest:'manifest-0714.pdf',status:'In transit to Zimbabwe',orders:[o6.ref]});
@@ -1542,7 +1633,7 @@ function seed(){
  o7.quote={id:uid('q'),deliveryOverrides:{},adjustments:[],sentAt:Date.now()-1399*3600e3,expiresAt:Date.now()-1398*3600e3,expiryMins:60,status:'Accepted'};
  const q7=quoteCalc(o7);
  o7.payments.push({id:uid('p'),type:'initial',provider:'PayPal',amount:q7.total,currency:'GBP',status:'Payment completed',ref:'PP-5590A2',createdAt:Date.now()-1399*3600e3,paidAt:Date.now()-1398*3600e3,held:false});
- o7.cargo={actualWeight:0.7,packaging:0.3,rate:9.5,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipRef:'SCZ-2026-0620'};
+ o7.cargo={actualWeight:0.7,packaging:0.3,clearance:6,localDelivery:0,other:0,company:'Swift Cargo Zimbabwe',shipRef:'SCZ-2026-0620'};
  o7.payments.push({id:uid('p'),type:'cargo',provider:'PayPal',amount:cargoCalc(o7).total,currency:'GBP',status:'Payment completed',ref:'PP-5590B7',createdAt:Date.now()-1290*3600e3,paidAt:Date.now()-1288*3600e3,held:false});
  ['Quote sent','Initial payment completed','Purchased from retailer','Received and checked','Cargo payment received','Handed to cargo company','In transit to Zimbabwe','Arrived in Zimbabwe','Ready for collection','Delivered'].forEach(s=>setStatus(o7,s));
 
@@ -1715,9 +1806,9 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.cargoRate)}<span style="font-size:13px;font-weight:400">/kg</span></div><div class="tiny muted">Included in your total</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(seaRate())}<span style="font-size:13px;font-weight:400">/litre</span></div><div class="tiny muted">By sea, or ${money(st.airRate)}/kg by air. Included in your total</div></div>
       </div>
-      ${note(`<b>You pay once.</b> Shipping to Zimbabwe is worked out from what you ordered and included in the total. We quote it slightly high on purpose. Once your parcel is weighed, whatever is left over comes back to you, and if it comes in heavier we tell you before it ships.`,'accent','check')}
+      ${note(`<b>You pay once.</b> Shipping is included in your total. Sea charges for the space your order takes in the box, air charges for the weight, and we show you both before you choose. We quote it slightly high on purpose, so once the parcel is measured whatever is left over comes back to you.`,'accent','check')}
     </div>
    </section>
 
@@ -1769,7 +1860,7 @@ function shipBand(n){
      <span class="ship-unit">day${n.daysAway===1?'':'s'}<br>until the<br>next shipment</span>
    </div>
    <div class="ship-detail">
-     <b>Shipments leave every ${S.settings.shipEveryDays/7} weeks and the crossing takes about ${Math.round((S.settings.transitDays||42)/7)} weeks.</b> The next one leaves the UK on <b>${fmtDay(n.departs)}</b> and is collectable in Harare around <b>${fmtDay(n.arrives)}</b>.
+     <b>Sea leaves once a month, and the crossing takes ${Math.round(S.settings.seaTransitMinDays/7)} to ${Math.round(S.settings.seaTransitMaxDays/7)} weeks.</b> Order by <b>${fmtDay(n.cutoff)}</b> to catch the ${fmtDay(n.departs)} sailing, collectable in Harare around <b>${fmtDay(n.arrives)}</b>. In a hurry? Air is ${S.settings.airTransitMinDays} to ${S.settings.airTransitMaxDays} days.
      <div class="ship-cut ${late?'late':''}">${icon('clock',14)}<span>${n.cutoffDays<=0?'Payment for this shipment has closed. Order now and you are on the one after.':`Pay by <b>${fmtDay(n.cutoff)}</b> to be on it${late?', which is soon':''}.`}</span></div>
    </div>
    <a class="btn btn-primary" href="#/request">Get on this shipment</a>
@@ -1803,7 +1894,7 @@ function trustSection(){
 function HOME_FAQ(){
  const st=S.settings;
  return [
-  ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and shipping at ${money(round2(st.cargoRate*(1+(st.cargoSafetyPct||0)/100)))} per kilo with a ${money(round2(st.cargoMin*(1+(st.cargoSafetyPct||0)/100)))} minimum, plus ${money(st.clearance)} clearance. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
+  ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and shipping. Sea is charged on the space your order takes in the container box, about ${money(round2(seaRate()*(1+(st.cargoSafetyPct||0)/100)))} a litre; air is ${money(round2(st.airRate*(1+(st.cargoSafetyPct||0)/100)))} a kilo. Plus ${money(st.clearance)} clearance. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
   ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
   ['Where do I collect it?','Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.']
  ];
@@ -2147,7 +2238,7 @@ function viewRequest(){
    fields the summary has scrolled away, which is exactly when they want to
    check what they are committing to. */
 function payBar(d){
- const q=quoteCalc({items:d.items,quote:null});
+ const q=quoteCalc({items:d.items,quote:null,shipMode:d.shipMode||'sea'});
  const priced=d.items.filter(i=>i.displayedPrice!=null).length;
  const nMissing=d.items.length-priced;
  let sub=d.items.length+' item'+(d.items.length===1?'':'s');
@@ -2168,25 +2259,56 @@ function payBar(d){
 
 /* What they will actually pay now, shown while they build the request
    rather than sprung on them at the quote. Product + 20% + UK delivery. */
+/* Two real routes with a real trade-off, so the customer picks with both
+   numbers in front of them rather than being told. Sea charges for space and
+   air for weight, so which is cheaper depends on density: a wig flies for less
+   than it sails. */
+function shipChooser(d,q){
+ const st=S.settings, mode=d.shipMode||'sea';
+ const n=nextShipment();
+ const opt=(key,label,price,when,why)=>`
+   <button class="ship-opt ${mode===key?'on':''}" data-act="pickShip" data-v="${key}">
+     <span class="so-h"><b>${label}</b><b class="mono">${money(price)}</b></span>
+     <span class="so-w">${when}</span>
+     <span class="so-y">${why}</span>
+   </button>`;
+ const cheaper=q.cheaper, saving=q.saving;
+ return `<div class="stack-s">
+  <div class="tiny muted" style="letter-spacing:.06em;text-transform:uppercase">How it travels</div>
+  <div class="ship-opts">
+   ${opt('sea','Sea',q.sea.amount,`Order by ${fmtDay(n.cutoff)}, collect around ${fmtDay(n.arrives)}`,
+        `${q.sea.boxShare}% of a shipping box`)}
+   ${opt('air','Air',q.air.amount,`${st.airTransitMinDays} to ${st.airTransitMaxDays} days once we have it`,
+        `${q.air.kg} kg by weight`)}
+  </div>
+  ${cheaper==='air'&&mode!=='air'
+    ? note(`<b>Air is ${money(saving)} cheaper here, and weeks faster.</b> Sea charges for the space your order takes up, and yours is bulky for its weight, so flying it costs less than sailing it.`,'accent','plane')
+    : ''}
+  ${q.productTotal>=st.adviseAirOver&&mode!=='air'
+    ? note(`<b>We would send this by air.</b> Nothing we ship can be insured, so on an order this size the argument is time and handling: air spends ${st.airTransitMinDays} to ${st.airTransitMaxDays} days in the system instead of ${Math.round(st.seaTransitMinDays/7)} to ${Math.round(st.seaTransitMaxDays/7)} weeks, through fewer hands. It is your call.`,'warn','shield')
+    : ''}
+ </div>`;
+}
 function runningTotal(d){
  const st=S.settings;
  const priced=d.items.filter(i=>i.displayedPrice!=null);
  if(!priced.length)return `<div class="note n-mute" style="margin-top:4px">${icon('pound',15)}<div>Add the price shown on each page and we will total it up for you here, including our fee and UK delivery.</div></div>`;
- const q=quoteCalc({items:d.items,quote:null});
+ const q=quoteCalc({items:d.items,quote:null,shipMode:d.shipMode||'sea'});
  const missing=d.items.length-priced.length;
  return `<div class="stack-s" style="border-top:1px solid var(--line);padding-top:12px">
   <div class="sum">
     <div class="l"><span>Product value${missing?` <span class="tiny muted">(${missing} item${missing>1?'s':''} still need a price)</span>`:''}</span><span class="v">${money(q.productTotal)}</span></div>
     <div class="l"><span>UK delivery${q.groups.length>1?` <span class="tiny muted">${q.groups.length} shops, charged separately</span>`:''}</span><span class="v">${q.deliveryUnknown?'we confirm':money(q.deliveryTotal)}</span></div>
     <div class="l"><span>Our fee <span class="tiny muted">${st.procurementPct}% of product value, min ${money(st.procurementMin)}</span></span><span class="v">${money(q.fee)}</span></div>
-    <div class="l"><span>Zimbabwe shipping <span class="tiny muted">about ${q.cargoKg} kg</span></span><span class="v">${money(q.cargoEst)}</span></div>
+    <div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?'by air, about '+q.cargoKg+' kg':'by sea, about '+q.cargoL+' litres'}</span></span><span class="v">${money(q.cargoEst)}</span></div>
     <div class="l total"><span>Total, paid once</span><span class="v">${q.deliveryUnknown?'from ':''}${money(q.total)}</span></div>
   </div>
   ${!q.meetsMin
     ? note(`<b>${money(q.shortfall)} under our ${money(st.minSpend)} minimum.</b> Add another item and this order is good to go. You can still submit as it is, and we will come back to you.`,'warn','alert')
     : `<div class="tiny" style="color:var(--accent)">${icon('check',12)} Meets the ${money(st.minSpend)} minimum.</div>`}
   ${q.deliveryUnknown?'<div class=\"tiny\" style=\"color:var(--warn)\">We have not bought from one of these shops before, so we do not know their UK postage yet. We confirm it with them and show it on your quote before you pay.</div>':''}
-  <div class="tiny muted">One payment covers everything, including getting it to Zimbabwe. Shipping is worked out from the products, so it is close but not final until the parcel is weighed. We quote it slightly high on purpose, and refund whatever is left once the parcel is weighed. If it comes in heavier we tell you before it ships. We check every price against the shop before you pay anything.</div>
+  ${shipChooser(d,q)}
+  <div class="tiny muted">One payment covers everything, including getting it to Zimbabwe. Shipping is worked out from the products, so it is close but not final until the parcel is measured. We quote it slightly high on purpose, and refund whatever is left. If it measures larger we tell you before it ships. We check every price against the shop before you pay anything.</div>
  </div>`;
 }
 
@@ -2476,7 +2598,7 @@ function viewQuote(ref,token){
      ${q.cargoEst===q.cargoAuto
        // Split so the customer can check the sum. If we have overridden the
        // figure by hand the parts no longer add up to it, so show one line.
-       ? `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.cargoKg} kg at ${money(q.cargoRate)} per kg, minimum ${money(q.cargoMin)}</span></span><span class="v">${money(q.cargoFreight)}</span></div>
+       ? `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?q.cargoKg+' kg at '+money(q.cargoRate)+' per kg':q.cargoL+' litres at '+money(q.cargoRate)+' a litre, '+q.boxShare+'% of a shipping box'}</span></span><span class="v">${money(q.cargoFreight)}</span></div>
           <div class="l"><span>Customs clearance</span><span class="v">${money(q.cargoClearance)}</span></div>`
        : `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.cargoKg} kg, quoted by hand</span></span><span class="v">${money(q.cargoEst)}</span></div>`}
      ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
@@ -3049,7 +3171,7 @@ function paneCargo(o){
       <label class="f">Length (cm)<input type="number" data-cargo="l" value="${c.l||''}"></label>
       <label class="f">Width (cm)<input type="number" data-cargo="w" value="${c.w||''}"></label>
       <label class="f">Height (cm)<input type="number" data-cargo="h" value="${c.h||''}"></label>
-      <label class="f">Rate £ per kg<input type="number" step="0.01" data-cargo="rate" value="${c.rate!=null?c.rate:S.settings.cargoRate}"></label>
+      <label class="f">Rate £ per ${o.shipMode==='air'?'kg':'litre'}<input type="number" step="0.01" data-cargo="rate" value="${c.rate!=null?c.rate:(o.shipMode==='air'?S.settings.airRate:seaRate())}"></label>
       <label class="f">Clearance £<input type="number" step="0.01" data-cargo="clearance" value="${c.clearance!=null?c.clearance:S.settings.clearance}"></label>
       <label class="f">Local delivery £<input type="number" step="0.01" data-cargo="localDelivery" value="${c.localDelivery!=null?c.localDelivery:S.settings.localDelivery}"></label>
       <label class="f">Other charges £<input type="number" step="0.01" data-cargo="other" value="${c.other||''}"></label>
@@ -3057,7 +3179,7 @@ function paneCargo(o){
     <div class="sum">
       <div class="l"><span>Volumetric weight <span class="tiny muted">divisor ${S.settings.volDivisor}</span></span><span class="v">${calc.vol||0} kg</span></div>
       <div class="l"><span>Chargeable weight</span><span class="v">${calc.chargeable} kg</span></div>
-      <div class="l"><span>Freight <span class="tiny muted">min ${money(S.settings.cargoMin)}</span></span><span class="v">${money(calc.freight)}</span></div>
+      <div class="l"><span>Freight <span class="tiny muted">${esc(calc.basis)}, min ${money(o.shipMode==='air'?S.settings.airMin:S.settings.seaMin)}</span></span><span class="v">${money(calc.freight)}</span></div>
       <div class="l"><span>Clearance and local delivery</span><span class="v">${money(round2(calc.clearance+calc.local))}</span></div>
       ${calc.other?`<div class="l"><span>Other</span><span class="v">${money(calc.other)}</span></div>`:''}
       <div class="l total"><span>Zimbabwe shipping payable</span><span class="v">${money(calc.total)}</span></div>
@@ -3193,24 +3315,34 @@ function adminSettings(){
     ${f('priceDropThreshold','Refund threshold £','Used by the threshold policy')}
   </div></div>
   <div class="card"><div class="card-h"><b>Zimbabwe cargo</b></div><div class="card-b field-grid">
-    ${f('cargoRate','Rate £ per kg')}
-    ${f('cargoMin','Minimum cargo charge £')}
+    ${f('seaBoxPrice','Sea: price per box £','What the partner charges for one box')}
+    ${f('seaBoxMmL','Sea: box length mm')}
+    ${f('seaBoxMmW','Sea: box width mm')}
+    ${f('seaBoxMmH','Sea: box height mm')}
+    ${f('packEfficiencyPct','Sea: usable share of the box %','Nothing packs to 100%. 75 is realistic','1')}
+    ${f('seaMin','Sea: minimum charge £')}
+    ${f('airRate','Air: rate £ per kg')}
+    ${f('airMin','Air: minimum charge £')}
+    ${f('adviseAirOver','Advise air above product value £','Nothing is insured, so expensive orders should spend less time in transit')}
     ${f('clearance','Customs and clearance £')}
     ${f('localDelivery','Zimbabwe local delivery £','Zero while collection only')}
     ${f('volDivisor','Volumetric divisor','Length x width x height / divisor','100')}
     ${f('packagingKg','Packaging weight kg','Added to actual weight','0.05')}
     ${f('cargoSafetyPct','Safety margin on the estimate %','Padding on quoted freight, refunded if the scales come in lighter','1')}
     ${f('cargoTolerance','Rounding we ignore £','Keep this near zero: every real difference is settled either way')}
-    ${f('transitDays','Crossing time, days','How long the freight itself takes')}
+    ${f('seaTransitMinDays','Sea: crossing, best case days')}
+    ${f('seaTransitMaxDays','Sea: crossing, worst case days')}
+    ${f('airTransitMinDays','Air: days, best case')}
+    ${f('airTransitMaxDays','Air: days, worst case')}
     ${f('returnAdminPct','Cancellation handling %','Our charge for taking an item back to the shop','1')}
     ${f('returnAdminMin','Cancellation handling minimum £','Floor, so a cheap item still covers the trip')}
     ${f('returnNoticeDays','Notice we need, working days','Before the shipment leaves the UK')}
     ${f('retailerReturnDays','Shop return window, days','Typical only, the shop decides')}
   </div></div>
   <div class="card"><div class="card-h"><b>Shipping cycle</b></div><div class="card-b field-grid">
-    <label class="f">Next known departure <span class="hint">anchor date, ISO format</span><input type="date" data-set="shipAnchor" value="${s.shipAnchor}"></label>
-    ${f('shipEveryDays','Ships every, days','42 is six weeks','1')}
-    ${f('shipCutoffDays','Payment cutoff, days before','Pay by this many days before departure','1')}
+    ${f('orderByDay','Order by, day of month','Customers order by this day to catch the sailing','1')}
+    ${f('goodsByDay','Goods with us by, day of month','','1')}
+    ${f('handoverDay','Handed to the shipper, day of month','','1')}
   </div></div>
   <div class="row"><button class="btn btn-primary" data-act="saveSettings">${icon('check',16)}Save settings</button></div>
  </div>`;
@@ -3474,6 +3606,7 @@ document.addEventListener('click',e=>{
       toast('Read '+money(filled.price)+' from '+filled.retailerName);
     }
   },
+  pickShip(){ const dr=draft(); dr.shipMode=d.v==='air'?'air':'sea'; save(); rerender(true) },
   clearPending(){ const dr=draft();dr.pending=null;dr.pendingUrl='';save();rerender(true) },
   addItem(){ if(addPending()) goToStep('yourDetails') },
   addAnother(){ if(addPending()) goToStep('linkInput',true) },
@@ -3514,7 +3647,7 @@ document.addEventListener('click',e=>{
     }
     const o=newOrder({});
     Object.assign(o.customer,dr.customer);Object.assign(o.recipient,dr.recipient);
-    o.items=dr.items;o.partOfLargerOrder=dr.partOfLargerOrder;o.customerNotes=dr.notes;
+    o.items=dr.items;o.partOfLargerOrder=dr.partOfLargerOrder;o.customerNotes=dr.notes;o.shipMode=dr.shipMode||'sea';
     S.orders.push(o);
     setStatus(o,'Product information captured');
     const flagged=o.items.some(i=>i.restricted.length);
@@ -3824,7 +3957,7 @@ render();
 </script>
 
 <footer class="site-foot"><div class="site-foot-in">
-  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
+  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/sea-or-air/">Sea or air</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
   <div><h3>Shops</h3><a href="/tenga/shop/boots/">Boots</a><a href="/tenga/shop/superdrug/">Superdrug</a><a href="/tenga/shop/lookfantastic/">LookFantastic</a><a href="/tenga/shop/cultbeauty/">Cult Beauty</a><a href="/tenga/shop/beautybay/">Beauty Bay</a><a href="/tenga/shop/spacenk/">Space NK</a><a href="/tenga/shop/">All shops</a></div>
   <div><h3>Collection</h3><a href="/tenga/collection/">Collect in Harare</a></div>
   <div><h3>Start</h3><a href="/tenga/#/request">Send a link</a><a href="/tenga/#/lookup">Track an order</a></div>

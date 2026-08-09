@@ -86,7 +86,7 @@ function costTable(api) {
         <tr><td>The product</td><td class="mono">at cost</td><td>Exactly what the shop charges on the day we buy.</td></tr>
         <tr><td>UK delivery</td><td class="mono">at cost</td><td>Per shop, no mark up. Often free once a basket passes the shop’s threshold.</td></tr>
         <tr><td>Our fee</td><td class="mono">${s.procurementPct}%, min ${api.money(s.procurementMin)}</td><td>Of the product value. This is the only money we make on the purchase.</td></tr>
-        <tr><td>Shipping to Zimbabwe</td><td class="mono">${api.money(s.cargoRate)}/kg</td><td>Minimum ${api.money(s.cargoMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
+        <tr><td>Shipping to Zimbabwe</td><td class="mono">${api.money(api.seaRate())}/litre by sea, ${api.money(s.airRate)}/kg by air</td><td>Sea minimum ${api.money(s.seaMin)}, air minimum ${api.money(s.airMin)}, plus ${api.money(s.clearance)} clearance. Collected in Harare, so no local delivery leg.</td></tr>
         <tr><td>Minimum order</td><td class="mono">${api.money(s.minSpend)}</td><td>Product value, before fee and shipping.</td></tr>
       </tbody>
     </table>
@@ -118,7 +118,7 @@ function shipTable(api) {
   const s = api.settings;
   const sailings = api.shipSchedule(3);
   return `<div class="card">
-    <div class="card-h"><b>The next three shipments</b><span class="tiny muted">Every ${s.shipEveryDays / 7} weeks, ${Math.round(s.transitDays / 7)}-week crossing</span></div>
+    <div class="card-h"><b>The next three sailings</b><span class="tiny muted">Monthly, ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} week crossing</span></div>
     <div class="card-b"><table class="t">
       <thead><tr><th>Leaves the UK</th><th>Pay by</th><th>Collectable in Harare</th></tr></thead>
       <tbody>${sailings.map(f => `<tr><td><b>${api.fmtDay(f.departs)}</b></td><td class="${f.cutoffPassed ? 'muted' : ''}">${f.cutoffPassed ? 'closed' : api.fmtDay(f.cutoff)}</td><td class="muted">around ${api.fmtDay(f.arrives)}</td></tr>`).join('')}</tbody>
@@ -207,7 +207,7 @@ export function buildPages(api) {
     lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
     crumbs: [['Collection', 'collection/']],
     body: `
-      <p>We fly a consolidated shipment every ${s.shipEveryDays / 7} weeks. When it clears, we message you and your order is ready to collect in Harare. Bring the phone number on the order and some ID.</p>
+      <p>Sea leaves once a month and air goes as soon as your goods are with us. When it clears, we message you and your order is ready to collect in Harare. Bring the phone number on the order and some ID.</p>
 
       ${api.note('<b>Collection only, for now.</b> We do not run a delivery leg inside Zimbabwe yet, so every order is collected in Harare. If you are outside Harare you are welcome to order and arrange your own onward transport, and we will say so plainly rather than promise a delivery we cannot make.', 'warn', 'pin')}
 
@@ -224,7 +224,7 @@ export function buildPages(api) {
       ${shipTable(api)}
 
       <h2>What it costs to get here</h2>
-      <p>Shipping is ${api.money(s.cargoRate)} per kilo with a ${api.money(s.cargoMin)} minimum, plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
+      <p>Sea is charged on the space your order takes inside a shipping box, ${api.money(api.seaRate())} a litre. Air is charged on weight, ${api.money(s.airRate)} a kilo. Plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
 
       <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
@@ -253,7 +253,7 @@ export function buildPages(api) {
       ${workedExample(api, 'boots', 'a larger beauty order', 90)}
 
       <h2>Why there is a minimum order</h2>
-      <p>Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos. On a very small order shipping would cost more than the goods, which is not a service anyone should buy. The ${api.money(s.minSpend)} minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
+      <p>Shipping has a minimum charge whether your parcel is tiny or not. On a very small order shipping would cost more than the goods, which is not a service anyone should buy. The ${api.money(s.minSpend)} minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
 
       <h2>Why shipping is estimated, and what happens if it is wrong</h2>
       <p>We work the shipping out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. We quote it slightly high on purpose, so the usual outcome is a refund of the unused part. If it comes in heavier we ask you for the difference, and we tell you before the parcel ships either way.</p>
@@ -305,6 +305,52 @@ export function buildPages(api) {
     ]
   });
 
+  /* ---- insurance, tracking, and choosing a route ---- */
+  pages.push({
+    path: 'sea-or-air/',
+    title: 'Sea or air to Zimbabwe, and why nothing is insured',
+    description: 'Sea is charged by space, air by weight, so which is cheaper depends on what you are sending. No consumer goods insurance is available into Zimbabwe. What that means for you.',
+    h1: 'Sea or air, and the insurance question',
+    lede: `Two routes, priced two different ways, and one thing we cannot offer you at any price.`,
+    crumbs: [['Sea or air', 'sea-or-air/']],
+    body: `
+      <h2>They are not priced the same way, and that matters more than you would think</h2>
+      <p>Sea freight is bought by the box. One box measures ${s.seaBoxMmL} by ${s.seaBoxMmW} by ${s.seaBoxMmH} millimetres, which is ${api.boxLitres()} litres, and it costs a fixed amount to land in Harare no matter what is inside it. So your share is the space you take up: about ${api.money(api.seaRate())} a litre once you allow for the fact that nothing packs perfectly.</p>
+      <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}.</p>
+      <p>That means <b>which route is cheaper depends on how dense your order is</b>, not how big or how expensive it is. Anything heavy for its size goes cheaper by sea. Anything bulky and light goes cheaper by air, and arrives in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days instead of months.</p>
+
+      <div class="tablewrap"><table class="t">
+        <thead><tr><th>Typical item</th><th>By sea</th><th>By air</th><th>Cheaper</th></tr></thead>
+        <tbody>
+          <tr><td>Perfume, 100ml boxed</td><td class="mono">${api.money(1.6)}</td><td class="mono">${api.money(5.0)}</td><td>Sea</td></tr>
+          <tr><td>Serum, 30ml</td><td class="mono">${api.money(1.17)}</td><td class="mono">${api.money(1.5)}</td><td>Sea</td></tr>
+          <tr><td>Shampoo, 400ml</td><td class="mono">${api.money(3.19)}</td><td class="mono">${api.money(6.25)}</td><td>Sea</td></tr>
+          <tr><td>Jeans</td><td class="mono">${api.money(13.32)}</td><td class="mono">${api.money(8.75)}</td><td><b>Air</b></td></tr>
+          <tr><td>Wig</td><td class="mono">${api.money(14.21)}</td><td class="mono">${api.money(4.38)}</td><td><b>Air</b></td></tr>
+          <tr><td>Trainers, boxed</td><td class="mono">${api.money(25.79)}</td><td class="mono">${api.money(15.0)}</td><td><b>Air</b></td></tr>
+        </tbody>
+      </table></div>
+      <p class="tiny muted">Indicative, from typical packed sizes. Your quote uses your actual items, and we show you both numbers before you choose.</p>
+
+      <h2>We cannot insure your order, and we will not pretend otherwise</h2>
+      <p>Consumer goods going into Zimbabwe are not insurable on any terms worth having. That is a function of where the goods are going rather than anything about your order, and it applies to everyone shipping this route, whether or not they tell you.</p>
+      <p>What we can tell you is the record. Our shipping partner has run this route for <b>five years without a single major incident</b>. Shipments have been delayed, sometimes by weeks. Nothing has been lost and nothing has arrived damaged beyond use. That is a track record rather than a guarantee, and we would rather you hear the difference from us than discover it later.</p>
+      <p><b>You can track either route.</b> Sea and air both give you a reference you can follow, and your order page updates as it moves.</p>
+
+      <h2>Which is why we suggest air for anything expensive</h2>
+      <p>Not for the speed. If nothing is insured, the sensible thing to do with an expensive order is to reduce how long it spends in the system and how many times it is handled. Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days and a short chain of custody. Sea is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks of crossing, plus the wait for a sailing, through a longer one.</p>
+      <p>On an order over about ${api.money(s.adviseAirOver)}, the extra shipping is small next to what you would be carrying yourself if something went wrong. On a small order it is usually not worth it, and often air is cheaper anyway. We will tell you which we would pick and why, and then it is your call.</p>
+
+      ${api.note(`<b>Sea sails once a month.</b> We hand the goods over on the ${s.handoverDay}th, so they must be with us by the ${s.goodsByDay}th, which means ordering by the ${s.orderByDay}th. Miss that and you are on the following month's boat. Air does not wait for anything.`, 'accent', 'clock')}`,
+    faq: [
+      ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has five years on it without a major incident, which is a record rather than a promise.'],
+      ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea charges for space at about ${api.money(api.seaRate())} a litre, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
+      ['Can I track it?', 'Yes, both routes. You get a reference and your order page updates as it moves.'],
+      ['How long does each take?', `Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days once your goods are with us. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
+      ['Why would I ever pick sea then?', 'Because for small dense things it is meaningfully cheaper, and if you are not in a hurry that saving is real. A shelf of skincare costs a few pounds to sail and considerably more to fly.']
+    ]
+  });
+
   /* ---- cancelling and refunds ---- */
   pages.push({
     path: 'cancelling/',
@@ -317,7 +363,7 @@ export function buildPages(api) {
       ${api.note(`<b>The deadline is the shipment, not the delivery.</b> Tell us at least ${s.returnNoticeDays} working days before the shipment leaves the UK, and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying the item. Your order page shows the exact date.`, 'accent', 'clock')}
 
       <h2>Why the window is earlier than you might expect</h2>
-      <p>Your item reaches our UK address within a few days, then waits for the next shipment and spends about ${Math.round(s.transitDays / 7)} weeks crossing. So by the time you are holding it in Harare, the shop's own return window has long closed. The only point at which a return is genuinely possible is while the goods are still sitting with us in the UK, which is also the whole time you have been waiting. Tell us before it leaves and we can act. After that we cannot.</p>
+      <p>Your item reaches our UK address within a few days. By sea it then waits for the next monthly sailing and spends ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks crossing. By air it leaves within days. So by the time you are holding it in Harare, the shop's own return window has long closed. The only point at which a return is genuinely possible is while the goods are still sitting with us in the UK, which is also the whole time you have been waiting. Tell us before it leaves and we can act. After that we cannot.</p>
 
       <h2>Whether it can go back at all is the shop's decision</h2>
       <p>We are buying from ordinary UK retailers on your behalf, so their returns policy is the one that applies. Plenty of things are not returnable anywhere: fragrance, sealed cosmetics, pierced earrings and underwear are the common ones, and some shops refuse opened items of any kind.</p>
@@ -351,7 +397,7 @@ export function buildPages(api) {
       ${api.note('<b>Nothing is bought until you approve a quote.</b> The cheapest cancellation is the one before we spend anything, and up to that point there is no charge of any kind.', 'accent', 'shield')}`,
     faq: [
       ['Can I cancel after I have paid?', `Yes, while the goods are still in the UK. Tell us at least ${s.returnNoticeDays} working days before the shipment leaves and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying it. After the shipment leaves the UK we cannot take anything back.`],
-      ['Can I return it once I have collected it in Harare?', `No. The crossing takes about ${Math.round(s.transitDays / 7)} weeks, so the shop's return window has closed well before you receive it. If the item is faulty or not what we were asked to buy, that is a different matter and you should tell us.`],
+      ['Can I return it once I have collected it in Harare?', `No. By sea the crossing alone takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so the shop's return window has closed well before you receive it. If the item is faulty or not what we were asked to buy, that is a different matter and you should tell us.`],
       ['Is perfume returnable?', 'Usually not, anywhere. Fragrance and sealed cosmetics are commonly excluded from returns by the shops themselves. Check the policy of the shop you are ordering from before you send us the link.'],
       ['What do you charge to cancel something?', `${s.returnAdminPct}% of the item with a ${api.money(s.returnAdminMin)} minimum, plus anything the shop keeps as a return fee. Our ${s.procurementPct}% fee is not refunded because the work was already done.`],
       ['Do I get the Zimbabwe shipping back?', 'If nothing is left on your order, yes, in full. If other items are still shipping, your parcel is just lighter, and that saving comes back to you when it is weighed.']
@@ -402,7 +448,7 @@ export function buildPages(api) {
       ['Can I buy from a shop that is not on your list?', 'Yes. The list is shops we know well, not a restriction. Send a link from anywhere in the UK.'],
       ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
       ['Do I need an account?', 'No. You get a private tracking link when you submit, and that is all you need.'],
-      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order shipping would cost more than the goods. The minimum keeps it proportionate.`]
+      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Shipping has a minimum, and air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order shipping would cost more than the goods. The minimum keeps it proportionate.`]
     ]],
     ['What it costs', [
       ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and shipping at ${api.money(s.cargoRate)} per kilo. All in one payment, every line shown before you pay.`],
@@ -435,7 +481,7 @@ export function buildPages(api) {
     ]],
     ['Changing your mind', [
       ['Can I cancel after I have paid?', `Yes, while the goods are still in the UK. Tell us at least ${s.returnNoticeDays} working days before the shipment leaves, and within ${s.retailerReturnDays - s.returnNoticeDays} days of us buying it. Once the shipment has left the UK we cannot take anything back. Full detail on our cancelling page.`],
-      ['Can I return something after collecting it in Harare?', `No. The crossing takes about ${Math.round(s.transitDays / 7)} weeks, so the shop's own return window has closed long before the parcel reaches you. Anything faulty or wrong is a separate matter, and you should tell us.`],
+      ['Can I return something after collecting it in Harare?', `No. By sea the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so the shop's own return window has closed long before the parcel reaches you. Anything faulty or wrong is a separate matter, and you should tell us.`],
       ['Will the shop definitely take it back?', 'That is the shop\'s decision, not ours, and their policy is the one that applies. Fragrance, sealed cosmetics, pierced earrings and underwear are commonly non-returnable anywhere. Read the returns policy of the shop you are ordering from before you send us the link.'],
       ['What does cancelling cost?', `${s.returnAdminPct}% of the item with a ${api.money(s.returnAdminMin)} minimum, plus anything the shop keeps as a restocking fee. Our ${s.procurementPct}% fee is not refunded, because the buying and checking were already done.`],
       ['Do I get the shipping back if I cancel?', 'If nothing is left on your order, yes, all of it. If other items are still going, your parcel is simply lighter and that saving comes back to you when it is weighed.']

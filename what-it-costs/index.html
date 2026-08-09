@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>What it costs to buy from the UK and ship to Zimbabwe | Tenga UK</title>
-<meta name="description" content="Product at cost, UK delivery at cost, 20% fee with a £10.00 minimum, and £9.50 per kilo to Zimbabwe. Worked examples, no hidden lines.">
+<meta name="description" content="Product at cost, UK delivery at cost, 20% fee with a £10.00 minimum, and £0.00 per kilo to Zimbabwe. Worked examples, no hidden lines.">
 <link rel="canonical" href="https://winstondube.github.io/tenga/what-it-costs/">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#F0F3F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0C1211" media="(prefers-color-scheme: dark)">
 <meta property="og:site_name" content="Tenga UK">
 <meta property="og:title" content="What it costs to buy from the UK and ship to Zimbabwe | Tenga UK">
-<meta property="og:description" content="Product at cost, UK delivery at cost, 20% fee with a £10.00 minimum, and £9.50 per kilo to Zimbabwe. Worked examples, no hidden lines.">
+<meta property="og:description" content="Product at cost, UK delivery at cost, 20% fee with a £10.00 minimum, and £0.00 per kilo to Zimbabwe. Worked examples, no hidden lines.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://winstondube.github.io/tenga/what-it-costs/">
@@ -172,6 +172,15 @@ summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
 .faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
+.ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
+.ship-opt:hover{border-color:var(--ink-3)}
+.ship-opt.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--surface-2)}
+.ship-opt .so-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:14.5px}
+.ship-opt .so-w{font-size:12px;color:var(--ink-2);line-height:1.35}
+.ship-opt .so-y{font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+@media (max-width:480px){.ship-opts{grid-template-columns:1fr}}
 .spin{width:15px;height:15px;border:2px solid var(--line-2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite;flex:none}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -586,7 +595,7 @@ body > *{min-width:0}
 <body>
 <header class="site-head"><div class="site-head-in">
   <a class="brand" href="/tenga/"><span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span><span>tenga<span class="tld">.uk</span></span></a>
-  <nav class="site-nav"><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></nav>
+  <nav class="site-nav"><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/sea-or-air/">Sea or air</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></nav>
 </div></header>
 <main class="page">
   <nav class="crumbs" aria-label="Breadcrumb"><a href="/tenga/">Home</a> › <a href="/tenga/what-it-costs/">What it costs</a></nav>
@@ -600,7 +609,7 @@ body > *{min-width:0}
         <tr><td>The product</td><td class="mono">at cost</td><td>Exactly what the shop charges on the day we buy.</td></tr>
         <tr><td>UK delivery</td><td class="mono">at cost</td><td>Per shop, no mark up. Often free once a basket passes the shop’s threshold.</td></tr>
         <tr><td>Our fee</td><td class="mono">20%, min £10.00</td><td>Of the product value. This is the only money we make on the purchase.</td></tr>
-        <tr><td>Shipping to Zimbabwe</td><td class="mono">£9.50/kg</td><td>Minimum £15.00, plus £6.00 clearance. Collected in Harare, so no local delivery leg.</td></tr>
+        <tr><td>Shipping to Zimbabwe</td><td class="mono">£2.96/litre by sea, £12.50/kg by air</td><td>Sea minimum £4.00, air minimum £8.00, plus £6.00 clearance. Collected in Harare, so no local delivery leg.</td></tr>
         <tr><td>Minimum order</td><td class="mono">£40.00</td><td>Product value, before fee and shipping.</td></tr>
       </tbody>
     </table></div>
@@ -613,8 +622,8 @@ body > *{min-width:0}
       <div class="l"><span>Product at Boots</span><span class="v">£32.00</span></div>
       <div class="l"><span>UK delivery, free at this basket size</span><span class="v">free</span></div>
       <div class="l"><span>Our fee</span><span class="v">£10.00</span></div>
-      <div class="l"><span>Shipping and clearance</span><span class="v">£22.50</span></div>
-      <div class="l total"><span>You pay, once</span><span class="v">£64.50</span></div>
+      <div class="l"><span>Shipping and clearance</span><span class="v">£10.40</span></div>
+      <div class="l total"><span>You pay, once</span><span class="v">£52.40</span></div>
     </div>
     <p class="tiny muted" style="margin-top:10px">Worked with today’s rates. Your real quote is confirmed against the shop before you pay.</p>
     </div></div>
@@ -624,14 +633,14 @@ body > *{min-width:0}
       <div class="l"><span>Product at Boots</span><span class="v">£90.00</span></div>
       <div class="l"><span>UK delivery, free at this basket size</span><span class="v">free</span></div>
       <div class="l"><span>Our fee</span><span class="v">£18.00</span></div>
-      <div class="l"><span>Shipping and clearance</span><span class="v">£22.50</span></div>
-      <div class="l total"><span>You pay, once</span><span class="v">£130.50</span></div>
+      <div class="l"><span>Shipping and clearance</span><span class="v">£10.40</span></div>
+      <div class="l total"><span>You pay, once</span><span class="v">£118.40</span></div>
     </div>
     <p class="tiny muted" style="margin-top:10px">Worked with today’s rates. Your real quote is confirmed against the shop before you pay.</p>
     </div></div>
 
       <h2>Why there is a minimum order</h2>
-      <p>Air cargo has a £15.00 minimum charge whether your parcel weighs 200 grams or two kilos. On a very small order shipping would cost more than the goods, which is not a service anyone should buy. The £40.00 minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
+      <p>Shipping has a minimum charge whether your parcel is tiny or not. On a very small order shipping would cost more than the goods, which is not a service anyone should buy. The £40.00 minimum keeps the shipping proportionate. If you are near it, adding one more item usually makes the whole order better value per item.</p>
 
       <h2>Why shipping is estimated, and what happens if it is wrong</h2>
       <p>We work the shipping out from what you ordered, using the size and product type, before your parcel physically exists. Once it lands at our UK address it goes on the scales. We quote it slightly high on purpose, so the usual outcome is a refund of the unused part. If it comes in heavier we ask you for the difference, and we tell you before the parcel ships either way.</p>
@@ -651,7 +660,7 @@ body > *{min-width:0}
   </section>
 </main>
 <footer class="site-foot"><div class="site-foot-in">
-  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
+  <div><h3>Service</h3><a href="/tenga/how-it-works/">How it works</a><a href="/tenga/what-it-costs/">What it costs</a><a href="/tenga/shop/">Shops</a><a href="/tenga/collection/">Collection</a><a href="/tenga/what-we-cannot-send/">What we cannot send</a><a href="/tenga/sea-or-air/">Sea or air</a><a href="/tenga/cancelling/">Cancelling</a><a href="/tenga/faqs/">Questions</a><a href="/tenga/contact/">Contact</a></div>
   <div><h3>Shops</h3><a href="/tenga/shop/boots/">Boots</a><a href="/tenga/shop/superdrug/">Superdrug</a><a href="/tenga/shop/lookfantastic/">LookFantastic</a><a href="/tenga/shop/cultbeauty/">Cult Beauty</a><a href="/tenga/shop/beautybay/">Beauty Bay</a><a href="/tenga/shop/spacenk/">Space NK</a><a href="/tenga/shop/">All shops</a></div>
   <div><h3>Collection</h3><a href="/tenga/collection/">Collect in Harare</a></div>
   <div><h3>Start</h3><a href="/tenga/#/request">Send a link</a><a href="/tenga/#/lookup">Track an order</a><a href="mailto:help@tenga.uk">help@tenga.uk</a></div>

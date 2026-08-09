@@ -1913,7 +1913,7 @@ function heroSection(dq){
   <div class="hero-in">
     <div>
       <h1 class="rise" style="animation-delay:.05s">UK shelves.<br><span class="zw">Harare doorstep.</span></h1>
-      <p class="hero-sub rise" style="animation-delay:.15s">Paste a link from a UK shop. We buy it, check it by hand, and fly it to Zimbabwe. One price, shipping included, agreed before you pay a penny.</p>
+      <p class="hero-sub rise" style="animation-delay:.15s">Paste a link from a UK shop. We buy it, check it by hand, and send it to Zimbabwe. One price, shipping included, agreed before you pay a penny.</p>
 
       <div class="hero-form rise" style="animation-delay:.25s">
         <div class="hero-field">
@@ -2124,7 +2124,7 @@ function shipChooser(d,q){
   ${q.productTotal>=st.adviseAirOver&&mode!=='air'
     ? note(`<b>We would send this by air.</b> Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. So on an order this size the argument is time and handling: air spends ${st.airTransitMinDays} to ${st.airTransitMaxDays} days in the system instead of ${Math.round(st.seaTransitMinDays/7)} to ${Math.round(st.seaTransitMaxDays/7)} weeks, through fewer hands. It is your call.`,'warn','shield')
     : ''}
-  <div class="tiny muted">${icon('search',11)} Both routes are tracked, and your order page updates at every stage.</div>
+  <div class="row tiny muted" style="gap:6px;align-items:center">${icon('search',12)}<span>Both routes are tracked, and your order page updates at every stage.</span></div>
  </div>`;
 }
 function runningTotal(d){

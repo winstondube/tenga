@@ -144,9 +144,9 @@ export function buildPages(api) {
     pages.push({
       path: `shop/${r.id}/`,
       title: `Buy from ${r.name} and ship to Zimbabwe`,
-      description: `Send us a ${r.name} link and we buy it, check it and fly it to Zimbabwe. One price including shipping, confirmed before you pay. Minimum ${api.money(s.minSpend)}.`,
+      description: `Send us a ${r.name} link and we buy it, check it and ship it to Zimbabwe. One price including shipping, confirmed before you pay. Minimum ${api.money(s.minSpend)}.`,
       h1: `Buy from ${r.name} and ship to Zimbabwe`,
-      lede: `${r.name} will not deliver to Zimbabwe and will not take a Zimbabwean card. Send us the link instead. We buy it in the UK, check it, and fly it out. Same for any other UK shop.`,
+      lede: `${r.name} will not deliver to Zimbabwe and will not take a Zimbabwean card. Send us the link instead. We buy it in the UK, check it, and ship it out. Same for any other UK shop.`,
       crumbs: [['Shops', 'shop/'], [r.name, `shop/${r.id}/`]],
       body: `
         <p>${c.blurb}</p>
@@ -179,7 +179,7 @@ export function buildPages(api) {
   pages.push({
     path: 'shop/',
     title: 'UK shops we buy from and ship to Zimbabwe',
-    description: 'Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and anywhere else. Send a link from any UK shop and we buy it and fly it to Zimbabwe.',
+    description: 'Boots, Superdrug, ASOS, LookFantastic, Cult Beauty and anywhere else. Send a link from any UK shop and we buy it and ship it to Zimbabwe.',
     h1: 'UK shops we buy from',
     lede: 'We buy from any UK shop. These are the ones we order from most, so their delivery rules and quirks are already written down.',
     crumbs: [['Shops', 'shop/']],
@@ -419,7 +419,7 @@ export function buildPages(api) {
   pages.push({
     path: 'how-it-works/',
     title: 'How Tenga works: paste a UK link, pay once, receive it in Zimbabwe',
-    description: 'Send a UK product link. A person confirms the price with the shop. You pay one total including shipping. We buy it, check it and fly it to Zimbabwe.',
+    description: 'Send a UK product link. A person confirms the price with the shop. You pay one total including shipping. We buy it, check it and ship it to Zimbabwe.',
     h1: 'How it works',
     lede: 'Four steps, and you only pay at the third.',
     crumbs: [['How it works', 'how-it-works/']],

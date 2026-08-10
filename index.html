@@ -173,6 +173,15 @@ summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
 .faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
+.route-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.route-pick{grid-template-columns:1fr}}
+.route-card{border:1px solid var(--line-2);border-radius:var(--r);padding:14px;background:var(--surface);
+  display:flex;flex-direction:column;gap:8px}
+.route-card .rc-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:15px}
+.route-card .rc-amt{font-size:27px;font-weight:700;line-height:1;letter-spacing:-.01em}
+.route-card .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2);
+  border-top:1px solid var(--line);padding-top:7px}
+.route-card .rc-when{font-size:12px;color:var(--ink-3);flex:1}
 .ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
   border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
@@ -2641,6 +2650,10 @@ function viewQuote(ref,token){
  if(!o||o.token!==token)return `<div class="narrow-s">${note('That link is not valid.','danger','lock')}</div>`;
  if(!o.quote||!o.quote.sentAt)return `<div class="narrow-s">${note('Your quote is not ready yet. We will email you as soon as it is.','info','clock')}</div>`;
  const q=quoteCalc(o), expired=quoteExpired(o), t=payTotals(o), est=estimateCargo(o);
+ // The customer is given both routes and pays whichever they prefer. Picking is
+ // a decision about money and time, and they are the only one who can weigh it.
+ const sea=quoteCalc(Object.assign({},o,{shipMode:'sea'})), air=quoteCalc(Object.assign({},o,{shipMode:'air'}));
+ const goods=round2(sea.total-sea.cargoEst);
  if(t.initialPaid)return `<div class="narrow-s"><div class="stack">${note('<b>This quote has been paid.</b> Thank you.','accent','check')}<a class="btn btn-primary" href="#/track/${o.ref}/${o.token}">Open tracking page</a></div></div>`;
  return `<div class="narrow"><div class="stack-l">
   <div class="spread wrap">
@@ -2680,10 +2693,33 @@ function viewQuote(ref,token){
           <div class="l"><span>Customs clearance</span><span class="v">${money(q.cargoClearance)}</span></div>`
        : `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.cargoKg} kg, quoted by hand</span></span><span class="v">${money(q.cargoEst)}</span></div>`}
      ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
-     <div class="l total"><span>Pay now, everything included</span><span class="v">${money(q.total)}</span></div>
+     <div class="l total"><span>Before shipping</span><span class="v">${money(goods)}</span></div>
    </div>
-   <hr class="hr" style="margin:14px 0">
-   ${note(`<b>One payment, nothing else to pay on arrival.</b> The shipping figure is worked out from what you have ordered, roughly ${q.cargoKg} kg. We quote it slightly high on purpose, so once your parcel is weighed in the UK you normally get some of it back. If it comes in heavier than that, we tell you and ask before it ships.`,'ochre','scale')}
+  </div>
+
+  <div class="stack-s">
+   <div class="eyebrow">Choose how it travels, then pay</div>
+   <div class="route-pick">
+    ${[['sea',sea,'Sea','shield'],['air',air,'Air','plane']].map(([k,r,label])=>`
+     <div class="route-card ${k}">
+       <div class="rc-h"><b>${label}</b>${r.total<=Math.min(sea.total,air.total)?pill('Cheaper','accent'):''}</div>
+       <div class="rc-amt mono">${money(r.total)}</div>
+       <div class="rc-line"><span>${k==='sea'?esc(r.seaTier)+' box, up to '+r.sea.tierMaxL+' L':r.cargoKg+' kg by weight'}</span><span class="mono">${money(r.cargoEst)}</span></div>
+       <div class="rc-when">${k==='sea'
+          ? 'Order by '+fmtDay(nextShipment().cutoff)+', collect around '+fmtDay(nextShipment().arrives)
+          : S.settings.airTransitMinDays+' to '+S.settings.airTransitMaxDays+' days once we have it'}</div>
+       <button class="btn ${r.total<=Math.min(sea.total,air.total)?'btn-primary':''} btn-block" data-act="pay" data-ref="${o.ref}" data-mode="${k}" ${expired?'disabled':''}>Pay ${money(r.total)} by ${label.toLowerCase()}</button>
+     </div>`).join('')}
+   </div>
+   ${air.total<sea.total
+     ? note(`<b>Air is ${money(round2(sea.total-air.total))} cheaper here, and weeks faster.</b> Sea charges for the space your order takes up and yours is bulky for its weight, so flying it costs less than sailing it.`,'accent','plane')
+     : note(`<b>Sea is ${money(round2(air.total-sea.total))} cheaper, if you can wait.</b> Air gets there in ${S.settings.airTransitMinDays} to ${S.settings.airTransitMaxDays} days instead of ${Math.round(S.settings.seaTransitMinDays/7)} to ${Math.round(S.settings.seaTransitMaxDays/7)} weeks.`,'info','scale')}
+   ${o.productTotal>=S.settings.adviseAirOver?'':''}
+   ${sea.productTotal>=S.settings.adviseAirOver
+     ? note('<b>On an order this size we would send it by air.</b> Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe, so the argument is less time and fewer hands rather than speed. It is your call.','warn','shield')
+     : ''}
+   <div class="row tiny muted" style="gap:6px;align-items:center">${icon('search',12)}<span>Both routes are tracked, and your order page updates at every stage.</span></div>
+   ${note(`<b>One payment, nothing else to pay on arrival.</b> Shipping is worked out from what you have ordered and quoted slightly high on purpose, so if the parcel measures smaller you get the difference back. If it measures larger we tell you before it ships.`,'ochre','scale')}
   </div>
 
   <div class="card">
@@ -2702,12 +2738,8 @@ function viewQuote(ref,token){
    <label class="check"><input type="checkbox" class="qc"><span>I understand the order is subject to retailer availability, and that prices are only guaranteed once payment is received and the retailer order is placed.</span></label>
    <label class="check"><input type="checkbox" class="qc"><span>I accept the terms and the <a class="link" href="cancelling/" target="_blank" rel="noopener">cancellation policy</a>, including that nothing can be returned once the shipment leaves the UK.</span></label>
    <hr class="hr">
-   <div class="stack-s">
-     <button class="btn btn-primary btn-lg btn-block" data-act="pay" data-ref="${o.ref}" data-provider="PayPal" ${expired?'disabled':''}>Pay ${money(q.total)} with PayPal</button>
-     <button class="btn btn-lg btn-block" data-act="pay" data-ref="${o.ref}" data-provider="Card" ${expired?'disabled':''}>${icon('card',16)}Pay by card</button>
-     ${expired?`<button class="btn btn-block" data-act="requestNewQuote" data-ref="${o.ref}">${icon('refresh',16)}Request an updated quote</button>`:''}
-   </div>
-   <div class="tiny muted center">You are paying Tenga UK, not the retailer. We buy the item on your behalf.</div>
+   ${expired?`<button class="btn btn-block" data-act="requestNewQuote" data-ref="${o.ref}">${icon('refresh',16)}Request an updated quote</button>`:''}
+   <div class="tiny muted center">Tick these, then choose sea or air above. You are paying Tenga UK, not the retailer.</div>
   </div>
  </div></div>`;
 }
@@ -3773,10 +3805,15 @@ document.addEventListener('click',e=>{
   pay(){
     const boxes=[...document.querySelectorAll('.qc')];
     if(boxes.some(b=>!b.checked)){toast('Please tick all the confirmations first');return}
+    // Two quotes were offered, so the route is only decided here, by the customer.
+    if(d.mode&&d.mode!==o.shipMode){
+      o.shipMode=d.mode==='air'?'air':'sea';
+      logAudit(o.ref,'Customer chose the route','',o.shipMode);
+    }
     const q=quoteCalc(o);
     let p=o.payments.filter(x=>x.type==='initial').slice(-1)[0];
-    if(!p||['Payment failed','Payment cancelled'].includes(p.status)){p={id:uid('p'),type:'initial',provider:d.provider,amount:q.total,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false};o.payments.push(p)}
-    p.provider=d.provider;p.amount=q.total;save();
+    if(!p||['Payment failed','Payment cancelled'].includes(p.status)){p={id:uid('p'),type:'initial',provider:d.provider||'PayPal',amount:q.total,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false};o.payments.push(p)}
+    p.provider=d.provider||'PayPal';p.amount=q.total;save();
     go('#/pay/'+o.ref+'/'+o.token+'/initial');
   },
   payNow(){

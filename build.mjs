@@ -51,7 +51,7 @@ globalThis.location = { hash: '#/', origin: ORIGIN, pathname: BASE };
 const api = eval(APP_JS + `
 ;({ S, settings: S.settings, retailers: S.retailers, restricted: S.restricted,
     viewHome, shell, quoteCalc, money, retailerById, newItem, note, icon, esc,
-    HOME_FAQ, shipSchedule, nextShipment, fmtDay, seaRate, seaRateGross, usableLitres, boxLitres, estimateCargo, CAT_L, CAT_KG })`);
+    HOME_FAQ, shipSchedule, nextShipment, fmtDay, seaRate, seaRateGross, usableLitres, seaBoxFor, boxCapacityL, estimateItemKg, estimateItemL, boxLitres, estimateCargo, CAT_L, CAT_KG })`);
 
 api.site = site;   // pages.mjs needs the contact details
 
@@ -192,10 +192,39 @@ ${inner}
 
 /* ---------- write ---------- */
 const written = [];
+
+/* A template that reads a setting we have since renamed does not throw, it
+   quietly prints NaN or undefined into the page and the build reports success.
+   Thirteen of twenty-one pages shipped that way once. Never again: the build
+   fails, loudly, naming the page and the surrounding words. */
+function assertClean(path, html) {
+  // The whole document, not just the body: a broken meta description or title
+  // is just as shipped as broken copy. Scripts are stripped because the app's
+  // own source legitimately contains the words we are hunting for.
+  const body = html.replace(/<script[\s\S]*?<\/script>/g, ' ');
+  const problems = [];
+  for (const bad of ['NaN', 'undefined', '[object Object]', '{{BASE}}']) {
+    let i = body.indexOf(bad);
+    while (i !== -1) {
+      const near = body.slice(Math.max(0, i - 70), i + bad.length + 40).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      problems.push(`  ${bad}  ...${near}...`);
+      i = body.indexOf(bad, i + 1);
+    }
+  }
+  if (problems.length) {
+    console.error(`\nBUILD FAILED  ${path || 'index.html'} rendered ${problems.length} broken value(s):`);
+    console.error(problems.slice(0, 6).join('\n'));
+    if (problems.length > 6) console.error(`  ...and ${problems.length - 6} more`);
+    process.exit(1);
+  }
+}
+
 function write(path, html) {
   const dir = path === '' ? root : join(root, path);
+  const out = html.replace(/\{\{BASE\}\}/g, BASE);
+  assertClean(path, out);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'index.html'), html.replace(/\{\{BASE\}\}/g, BASE));
+  writeFileSync(join(dir, 'index.html'), out);
   written.push(path);
 }
 

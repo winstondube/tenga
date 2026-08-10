@@ -168,7 +168,7 @@ export function buildPages(api) {
       `,
       faq: [
         [`Can I buy from ${r.name} with a Zimbabwean card?`, `Not directly. ${r.name} needs a UK billing address and most Zimbabwean cards are declined at their checkout. You pay us instead, and we pay them with a UK card.`],
-        [`How long does a ${r.name} order take to reach Zimbabwe?`, `Two to three days for ${r.name} to reach our UK address, then we check it in and it waits for the next shipment. Shipments leave every ${s.shipEveryDays / 7} weeks and the crossing takes about ${Math.round(s.transitDays / 7)} weeks, so allow ${Math.round(s.transitDays / 7)} to ${Math.round((s.transitDays + s.shipEveryDays) / 7)} weeks in total depending on how close you order to a departure.`],
+        [`How long does a ${r.name} order take to reach Zimbabwe?`, `Two to three days for ${r.name} to reach our UK address, then we check it in. By sea it waits for the monthly sailing and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so allow ${Math.round(s.seaTransitMinDays / 7)} weeks if you order by the ${s.orderByDay}th and nearer ${Math.round((s.seaTransitMaxDays + 30) / 7)} if you miss it. By air it is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days.`],
         [`What if the price changes after I pay?`, `Small rises up to ${api.money(s.absorbIncrease)} we absorb. Anything larger and we come back to you with options before we buy: pay the difference, change the item, reduce the quantity or get a refund.`],
         [`What if it is out of stock when you go to buy it?`, `We contact you. You can wait for restock, accept a substitute you have already approved, pick something else, or take a refund on that item. We never substitute without your say-so unless you gave us a backup link up front.`]
       ]
@@ -246,7 +246,7 @@ export function buildPages(api) {
   pages.push({
     path: 'what-it-costs/',
     title: 'What it costs to buy from the UK and ship to Zimbabwe',
-    description: `Product at cost, UK delivery at cost, ${s.procurementPct}% fee with a ${api.money(s.procurementMin)} minimum, and ${api.money(s.cargoRate)} per kilo to Zimbabwe. Worked examples, no hidden lines.`,
+    description: `Product at cost, UK delivery at cost, ${s.procurementPct}% fee with a ${api.money(s.procurementMin)} minimum, then a shipping box from ${api.money(s.seaBoxes[0].price)} by sea or ${api.money(s.airRate)} a kilo by air. Worked examples, no hidden lines.`,
     h1: 'What it costs',
     lede: 'Every line, with the arithmetic. There is nothing here you will not see on your quote.',
     crumbs: [['What it costs', 'what-it-costs/']],
@@ -320,7 +320,7 @@ export function buildPages(api) {
     crumbs: [['Sea or air', 'sea-or-air/']],
     body: `
       <h2>They are not priced the same way, and that matters more than you would think</h2>
-      <p>Sea freight is bought by the box, and the space we buy divides into eight cells of 220 by 180 by 160 millimetres. We pack into real boxes that take up a whole number of those cells, so you pay for the box your order goes in, not for a share of somebody else's.</p>
+      <p>Sea freight is bought by the box, and the space we buy divides into ${s.cellsPerArchiveBox} cells of ${s.cellMmL} by ${s.cellMmW} by ${s.cellMmH} millimetres. We pack into real boxes that take up a whole number of those cells, so you pay for the box your order goes in, not for a share of somebody else's.</p>
       <div class="tablewrap"><table class="t">
         <thead><tr><th>Box</th><th>Size mm</th><th>Price</th><th>Holds about</th></tr></thead>
         <tbody>
@@ -334,20 +334,34 @@ export function buildPages(api) {
       </table></div>
       <p>Bigger boxes cost less per litre, so one order beats three. <b>Your box is labelled with your name and handed over as a unit</b>, which is why nothing of yours travels loose in with somebody else's.</p>
       <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}.</p>
-      <p>That means <b>which route is cheaper depends on how dense your order is</b>, not how big or how expensive it is. Anything heavy for its size goes cheaper by sea. Anything bulky and light goes cheaper by air, and arrives in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days instead of months.</p>
+      <p>That means <b>which route is cheaper depends on how full a box you fill, and how heavy the contents are</b>. A part-empty box still costs a whole box, so small orders are usually cheaper by air, and they arrive in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days instead of months. Sea starts to win once you are filling a box with something heavy: bottles, jars, anything liquid.</p>
 
-      <div class="tablewrap"><table class="t">
-        <thead><tr><th>Typical item</th><th>By sea</th><th>By air</th><th>Cheaper</th></tr></thead>
-        <tbody>
-          <tr><td>Perfume, 100ml boxed</td><td class="mono">${api.money(1.6)}</td><td class="mono">${api.money(5.0)}</td><td>Sea</td></tr>
-          <tr><td>Serum, 30ml</td><td class="mono">${api.money(1.17)}</td><td class="mono">${api.money(1.5)}</td><td>Sea</td></tr>
-          <tr><td>Shampoo, 400ml</td><td class="mono">${api.money(3.19)}</td><td class="mono">${api.money(6.25)}</td><td>Sea</td></tr>
-          <tr><td>Jeans</td><td class="mono">${api.money(13.32)}</td><td class="mono">${api.money(8.75)}</td><td><b>Air</b></td></tr>
-          <tr><td>Wig</td><td class="mono">${api.money(14.21)}</td><td class="mono">${api.money(4.38)}</td><td><b>Air</b></td></tr>
-          <tr><td>Trainers, boxed</td><td class="mono">${api.money(25.79)}</td><td class="mono">${api.money(15.0)}</td><td><b>Air</b></td></tr>
-        </tbody>
-      </table></div>
-      <p class="tiny muted">Indicative, from typical packed sizes. Your quote uses your actual items, and we show you both numbers before you choose.</p>
+      ${(() => {
+        // Worked from the live model rather than typed in, so it cannot drift
+        // away from what the quote actually charges.
+        const baskets = [
+          ['One perfume', 'fragrance', 1],
+          ['Six perfumes', 'fragrance', 6],
+          ['A shelf of skincare', 'skincare', 8],
+          ['Four shampoo bottles', 'haircare', 4],
+          ['One pair of jeans', 'clothing', 1],
+          ['One wig', 'hairpiece', 1],
+          ['Trainers', 'footwear', 1]
+        ];
+        const rows = baskets.map(([label, cat, qty]) => {
+          const item = Object.assign(api.newItem({ url: 'https://x.co.uk/a', retailerId: null, retailerName: 'x',
+            displayedPrice: 40, confirmedPrice: 40, qty, name: label }), { category: cat, itemStatus: 'Approved' });
+          const e = api.estimateCargo({ items: [item] });
+          return { label, sea: e.sea.amount, air: e.air.amount, box: e.sea.tier, cheaper: e.cheaper };
+        });
+        return `<div class="tablewrap"><table class="t">
+        <thead><tr><th>What you are sending</th><th>By sea</th><th>By air</th><th>Cheaper</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td>${api.esc(r.label)} <span class="tiny muted">${api.esc(r.box)} box</span></td>` +
+          `<td class="mono">${api.money(r.sea)}</td><td class="mono">${api.money(r.air)}</td>` +
+          `<td>${r.cheaper === 'air' ? '<b>Air</b>' : 'Sea'}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+      })()}
+      <p class="tiny muted">Worked from our live rates using typical packed sizes. Your quote uses your actual items, and we show you both numbers before you choose.</p>
 
       <h2>We cannot insure your order, and we will not pretend otherwise</h2>
       <p>Consumer goods going into Zimbabwe are not insurable on any terms worth having. That is a function of where the goods are going rather than anything about your order, and it applies to everyone shipping this route.</p>
@@ -409,7 +423,7 @@ export function buildPages(api) {
       </div></div>
 
       <h2>If something is wrong rather than unwanted</h2>
-      <p>That is not a cancellation and this page does not apply. If the shop sends the wrong item, the wrong shade or a damaged one, we photograph it at check-in, hold it before it ships and take it up with the retailer. You are not out of pocket for our mistake or theirs. If a problem only becomes visible after collection in Harare, tell us and we will take it as far as the retailer will let us, but be aware that our leverage after ${Math.round(s.transitDays / 7)} weeks is limited.</p>
+      <p>That is not a cancellation and this page does not apply. If the shop sends the wrong item, the wrong shade or a damaged one, we photograph it at check-in, hold it before it ships and take it up with the retailer. You are not out of pocket for our mistake or theirs. If a problem only becomes visible after collection in Harare, tell us and we will take it as far as the retailer will let us, but be aware that our leverage months after the shop sold it is limited.</p>
 
       ${api.note('<b>Nothing is bought until you approve a quote.</b> The cheapest cancellation is the one before we spend anything, and up to that point there is no charge of any kind.', 'accent', 'shield')}`,
     faq: [
@@ -465,10 +479,10 @@ export function buildPages(api) {
       ['Can I buy from a shop that is not on your list?', 'Yes. The list is shops we know well, not a restriction. Send a link from anywhere in the UK.'],
       ['Why can I not just order from these shops myself?', 'Most UK retailers will not deliver to Zimbabwe, and their checkouts reject cards without a UK billing address. That is the problem this service exists to solve.'],
       ['Do I need an account?', 'No. You get a private tracking link when you submit, and that is all you need.'],
-      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. Shipping has a minimum, and air cargo has a ${api.money(s.cargoMin)} minimum charge whether your parcel weighs 200 grams or two kilos, so on a very small order shipping would cost more than the goods. The minimum keeps it proportionate.`]
+      [`Is there a minimum order?`, `Yes, ${api.money(s.minSpend)} of product value, before our fee and before shipping. The smallest shipping box is ${api.money(s.seaBoxes[0].price)} whether it holds one lipstick or six, so on a very small order shipping would cost more than the goods. The minimum keeps it proportionate.`]
     ]],
     ['What it costs', [
-      ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and shipping at ${api.money(s.cargoRate)} per kilo. All in one payment, every line shown before you pay.`],
+      ['How much does it cost in total?', `Product at cost, UK delivery at cost, our fee of ${s.procurementPct}% with a ${api.money(s.procurementMin)} minimum, and shipping: a box from ${api.money(s.seaBoxes[0].price)} by sea, or ${api.money(s.airRate)} a kilo by air. All in one payment, every line shown before you pay.`],
       ['Are there any hidden charges?', 'No. Nothing is due when you collect. One payment covers the product, UK delivery, our fee and shipping including clearance.'],
       ['How is your fee worked out?', `${s.procurementPct}% of the product value with a ${api.money(s.procurementMin)} minimum, calculated across the whole order rather than per shop.`],
       ['Do you mark up the product or the postage?', 'No. Our fee is the only money we make. If a discount code appears between your quote and our purchase, the saving is yours.'],
@@ -483,7 +497,7 @@ export function buildPages(api) {
       ['Is my money safe if you cannot buy the item?', 'You are refunded. Every refund is recorded against your order with a reference and a reason.']
     ]],
     ['Getting it to Zimbabwe', [
-      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next shipment, which leaves every ${s.shipEveryDays / 7} weeks, and clears in about ten days.`],
+      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. By sea it then joins the monthly sailing, closing on the ${s.orderByDay}th, and the crossing is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks. By air it is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days.`],
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
       ['Can someone else collect for me?', 'Yes. Tell us their name before they come and they bring their own photo ID plus your collection code. The code does not change. Do not send someone without telling us first, because we will turn them away.'],

@@ -2436,7 +2436,7 @@ function viewQuote(ref,token){
  const o=getOrder(ref);
  if(!o||o.token!==token)return `<div class="narrow-s">${note('That link is not valid.','danger','lock')}</div>`;
  if(!o.quote||!o.quote.sentAt)return `<div class="narrow-s">${note('Your quote is not ready yet. We will email you as soon as it is.','info','clock')}</div>`;
- const q=quoteCalc(o), expired=quoteExpired(o), t=payTotals(o), est=estimateCargo(o);
+ const q=quoteCalc(o), expired=quoteExpired(o), t=payTotals(o);
  // The customer is given both routes and pays whichever they prefer. Picking is
  // a decision about money and time, and they are the only one who can weigh it.
  const sea=quoteCalc(Object.assign({},o,{shipMode:'sea'})), air=quoteCalc(Object.assign({},o,{shipMode:'air'}));
@@ -2495,7 +2495,6 @@ function viewQuote(ref,token){
    ${air.total<sea.total
      ? note(`<b>Air is ${money(round2(sea.total-air.total))} cheaper here, and weeks faster.</b> Sea charges for the space your order takes up and yours is bulky for its weight, so flying it costs less than sailing it.`,'accent','plane')
      : note(`<b>Sea is ${money(round2(air.total-sea.total))} cheaper, if you can wait.</b> Air gets there in ${S.settings.airTransitMinDays} to ${S.settings.airTransitMaxDays} days instead of ${Math.round(S.settings.seaTransitMinDays/7)} to ${Math.round(S.settings.seaTransitMaxDays/7)} weeks.`,'info','scale')}
-   ${o.productTotal>=S.settings.adviseAirOver?'':''}
    ${sea.productTotal>=S.settings.adviseAirOver
      ? note('<b>On an order this size we would send it by air.</b> Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe, so the argument is less time and fewer hands rather than speed. It is your call.','warn','shield')
      : ''}

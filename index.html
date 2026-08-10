@@ -1407,25 +1407,32 @@ function cargoCalc(o){
  const clearance=c.clearance!=null&&c.clearance!==''?Number(c.clearance):st.clearance;
  const local=c.localDelivery!=null&&c.localDelivery!==''?Number(c.localDelivery):st.localDelivery;
  const other=Number(c.other)||0;
- // Measured litres from the packed carton. Sea is charged on the space it takes
- // in the box, so this is the number that matters, not the scales.
  const litres=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/1000):(Number(c.litres)||0);
+ // Reconcile at the rate we quoted, always. Settling against our own cost hands
+ // the customer the margin back on every order, which is how air used to earn
+ // nothing and how a sea order packed into exactly its quoted box refunded £14.
+ const m=1+(st.cargoSafetyPct||0)/100;
  let freight,rate,basis,chargeable;
  if(mode==='air'){
-  // Air still charges volumetric weight when a parcel is bulky and light.
   const vol=(c.l&&c.w&&c.h)?round2((Number(c.l)*Number(c.w)*Number(c.h))/(st.volDivisor||5000)):0;
   chargeable=round2(Math.max(actual+pack,vol));
-  rate=c.rate!=null&&c.rate!==''?Number(c.rate):st.airRate;
-  freight=round2(Math.max(chargeable*rate,st.airMin));
-  basis=chargeable+' kg chargeable';
+  rate=c.rate!=null&&c.rate!==''?Number(c.rate):round2(st.airRate*m);
+  freight=round2(Math.max(chargeable*rate,round2(st.airMin*m)));
+  basis=chargeable+' kg chargeable at '+money(rate);
  } else {
-  chargeable=litres;
-  rate=c.rate!=null&&c.rate!==''?Number(c.rate):seaRateGross();
-  freight=round2(Math.max(litres*rate,st.seaMin));
-  basis=litres+' litres, '+round2(litres/usableLitres()*100)+'% of a box';
+  // Sea is a box, so the only question is which box it actually went in. Ops
+  // picks it; there is nothing to measure and nothing to argue about.
+  const boxes=st.seaBoxes||[];
+  const used=boxes.find(b=>b.id===c.boxId) || boxes.find(b=>b.name===String(c.boxName||'').split(' ')[0]);
+  const box=used||boxes.find(b=>b.name===(quoteCalc(o).seaTier||'').split(' ')[0])||boxes[0];
+  chargeable=box?box.cells:0;
+  rate=box?box.price:0;
+  freight=round2(box?box.price:0);
+  basis=(box?box.name:'?')+' box, '+chargeable+' of '+(st.cellsPerArchiveBox||12)+' cells';
  }
  const total=round2(freight+clearance+local+other);
  return {mode,actual,litres,pack,chargeable,rate,basis,freight,clearance,local,other,total,
+         boxId:mode==='sea'?((c.boxId)||null):null,
          boxShare:round2(litres/usableLitres()*100)};
 }
 /* Shipping is quoted up front so the customer pays once, so the weight
@@ -1472,22 +1479,28 @@ function seaBoxFor(litres){
 }
 /* What one sailing is worth against what it costs. This is the number that
    decides whether a box should go at all. */
+/* We ship whatever size we actually need, so the shipper's bill scales with
+   what goes. The archive box is only the yardstick the box prices are a share
+   of, which is why there is no "the boat sails half empty and we eat it" risk
+   to warn about. What is worth watching is the margin the month is carrying. */
 function boxEconomics(orders){
- const st=S.settings, per=st.cellsPerArchiveBox||8;
- let cells=0,revenue=0,n=0,litres=0;
+ const st=S.settings, per=st.cellsPerArchiveBox||12;
+ let cells=0,revenue=0,n=0,litres=0,card=0;
  (orders||[]).forEach(o=>{
   if((o.shipMode||'sea')!=='sea')return;
   const q=quoteCalc(o);
   cells+=q.sea?q.sea.cells:0; revenue+=q.cargoFreight||0; litres+=q.cargoL||0; n++;
+  const b=(st.seaBoxes||[]).find(x=>x.name===(q.seaTier||'').split(' ')[0]);
+  card+=b?b.card:0;
  });
- revenue=round2(revenue); litres=round2(litres);
- const boxes=Math.max(1,Math.ceil(cells/per));
- const cost=round2(boxes*st.seaBoxPrice);
- return {orders:n,cells,litres,revenue,boxes,cost,margin:round2(revenue-cost),
-         capacity:boxes*per, fillPct:round2(cells/(boxes*per)*100),
-         pays:revenue>=cost,
-         // the number worth knowing on the 14th of the month
-         needCells:Math.max(0,Math.ceil((cost-revenue)/((st.seaBoxes&&st.seaBoxes[0].price)||22)))};
+ revenue=round2(revenue); litres=round2(litres); card=round2(card);
+ // Cost is proportional: cells booked as a share of the reference box.
+ const cost=round2(cells/per*st.seaBoxPrice);
+ return {orders:n,cells,litres,revenue,cost,card,
+         margin:round2(revenue-cost-card),
+         boxes:round2(cells/per),
+         capacity:per,
+         marginPct:revenue?Math.round((revenue-cost-card)/revenue*100):0};
 }
 function estimateItemL(it){
  if(it.estL!=null&&it.estLManual)return Number(it.estL);
@@ -2896,18 +2909,16 @@ function adminDash(){
   </div>
   ${(()=>{const e=boxEconomics(S.orders.filter(o=>!/Delivered|Closed|refunded/i.test(o.status)&&(o.shipMode||'sea')==='sea'&&payTotals(o).initialPaid>0));
     if(!e.orders)return '';
-    return `<div class="card"><div class="card-h"><b>Next sailing</b>${e.pays?pill('Pays for itself','accent'):pill('Short by '+money(-e.margin),'danger')}</div>
+    return `<div class="card"><div class="card-h"><b>Next sailing</b>${pill(e.marginPct+'% margin on the freight',e.marginPct>=20?'accent':e.marginPct>0?'ochre':'danger')}</div>
      <div class="card-b sum">
        <div class="l"><span>${e.orders} paid order${e.orders>1?'s':''} waiting</span><span class="v">${e.litres} L</span></div>
-       <div class="l"><span>Cells booked of ${e.capacity}</span><span class="v">${e.cells}</span></div>
-       <div class="l"><span>Filled</span><span class="v">${e.fillPct}%</span></div>
+       <div class="l"><span>Cells booked <span class="tiny muted">${boxLitres()} L reference box is ${e.capacity}</span></span><span class="v">${e.cells}</span></div>
        <div class="l"><span>Shipping collected</span><span class="v">${money(e.revenue)}</span></div>
-       <div class="l"><span>The shipper charges us</span><span class="v">-${money(e.cost)}</span></div>
-       <div class="l total"><span>${e.margin>=0?'Margin on the freight':'Out of pocket'}</span><span class="v" style="color:${e.margin>=0?'var(--accent)':'var(--danger)'}">${money(e.margin)}</span></div>
+       <div class="l"><span>Freight, ${e.boxes} of a reference box at ${money(S.settings.seaBoxPrice)}</span><span class="v">-${money(e.cost)}</span></div>
+       <div class="l"><span>Cardboard</span><span class="v">-${money(e.card)}</span></div>
+       <div class="l total"><span>Margin on the freight</span><span class="v" style="color:${e.margin>=0?'var(--accent)':'var(--danger)'}">${money(e.margin)}</span></div>
      </div>
-     ${e.pays
-       ? note('This box covers its own cost. Anything else added before the '+S.settings.orderByDay+'th is margin.','accent','check')
-       : note('<b>Sailing now loses '+money(-e.margin)+'.</b> A box costs the same whether it is full or not. Roughly '+e.needCells+' more small box'+(e.needCells>1?'es':'')+' would cover it, so either fill it before the '+S.settings.orderByDay+'th or hold these orders for the next sailing.','danger','alert')}
+     ${note('Freight is charged on what actually goes, so this scales with the month rather than being a fixed bill to fill. Watch the margin percentage: it should not drift as the mix changes.','info','box')}
     </div>`})()}
   <div class="kpis" style="display:none">
   </div>
@@ -3321,7 +3332,9 @@ function paneCargo(o){
       <label class="f">Length (cm)<input type="number" data-cargo="l" value="${c.l||''}"></label>
       <label class="f">Width (cm)<input type="number" data-cargo="w" value="${c.w||''}"></label>
       <label class="f">Height (cm)<input type="number" data-cargo="h" value="${c.h||''}"></label>
-      <label class="f">Rate £ per ${o.shipMode==='air'?'kg':'litre'}<input type="number" step="0.01" data-cargo="rate" value="${c.rate!=null?c.rate:(o.shipMode==='air'?S.settings.airRate:seaRate())}"></label>
+      ${o.shipMode==='air'
+        ? `<label class="f">Rate £ per kg<input type="number" step="0.01" data-cargo="rate" value="${c.rate!=null?c.rate:round2(S.settings.airRate*(1+(S.settings.cargoSafetyPct||0)/100))}"></label>`
+        : `<label class="f">Which box did it go in?<select data-cargo="boxId">${S.settings.seaBoxes.map(b=>`<option value="${b.id}" ${(c.boxId||(S.settings.seaBoxes.find(x=>x.name===(q.seaTier||'').split(' ')[0])||{}).id)===b.id?'selected':''}>${esc(b.name)} · ${b.mm.join('x')} · ${money(b.price)}</option>`).join('')}</select></label>`}
       <label class="f">Clearance £<input type="number" step="0.01" data-cargo="clearance" value="${c.clearance!=null?c.clearance:S.settings.clearance}"></label>
       <label class="f">Local delivery £<input type="number" step="0.01" data-cargo="localDelivery" value="${c.localDelivery!=null?c.localDelivery:S.settings.localDelivery}"></label>
       <label class="f">Other charges £<input type="number" step="0.01" data-cargo="other" value="${c.other||''}"></label>
@@ -3632,7 +3645,7 @@ function curRef(){const p=route().parts;return (p[0]==='admin'&&p[1]==='order')?
 function curOrder(){const r=curRef();return r?getOrder(r):null}
 function val(id){const el=document.getElementById(id);return el?el.value.trim():''}
 function rerender(keep){VIEW.keepScroll=!!keep;render()}
-const RECALC=new Set(['confirmedPrice','qty','displayedPrice','estKg','actualWeight','packaging','l','w','h','rate','clearance','localDelivery','other']);
+const RECALC=new Set(['boxId','confirmedPrice','qty','displayedPrice','estKg','actualWeight','packaging','l','w','h','rate','clearance','localDelivery','other']);
 
 /* --- generic binding --- */
 document.addEventListener('input',e=>{
@@ -3653,7 +3666,7 @@ document.addEventListener('input',e=>{
  if(d.attr&&o){const it=o.items.find(i=>i.id===d.attr);if(it){it.attrs=Object.assign({},it.attrs);if(v)it.attrs[d.k]=v;else delete it.attrs[d.k];save()}return}
  if(d.pur&&o){const it=o.items.find(i=>i.id===d.pur);if(it){it.purchase=it.purchase||{};it.purchase[d.k]=v;save()}return}
  if(d.rec&&o){const it=o.items.find(i=>i.id===d.rec);if(it){it.recDraft=it.recDraft||{};it.recDraft[d.k]=v;save()}return}
- if(d.cargo&&o){o.cargo=o.cargo||{};o.cargo[d.cargo]=(v===''?'':(['company','shipRef','tracking','etaDate','dropoff'].includes(d.cargo)?v:Number(v)));save();return}
+ if(d.cargo&&o){o.cargo=o.cargo||{};o.cargo[d.cargo]=(v===''?'':(['company','shipRef','tracking','etaDate','dropoff','boxId'].includes(d.cargo)?v:Number(v)));save();return}
  if(d.ret){const r=retailerById(d.ret);if(r){r[d.k]=(d.k==='delivery'||d.k==='freeOver')?Number(v||0):v;save()}return}
  if(d.set){S.settings[d.set]=(typeof DEFAULT_SETTINGS[d.set]==='number')?Number(v||0):v;save();return}
  if(d.batch&&d.k){const b=S.batches.find(x=>x.id===d.batch);if(b){b[d.k]=v;save()}return}

@@ -320,7 +320,7 @@ export function buildPages(api) {
     crumbs: [['Sea or air', 'sea-or-air/']],
     body: `
       <h2>They are not priced the same way, and that matters more than you would think</h2>
-      <p>Sea freight is bought by the box, and the space we buy divides into ${s.cellsPerArchiveBox} cells of ${s.cellMmL} by ${s.cellMmW} by ${s.cellMmH} millimetres. We pack into real boxes that take up a whole number of those cells, so you pay for the box your order goes in, not for a share of somebody else's.</p>
+      <p>Sea is priced by space. We take a reference box of ${api.boxLitres()} litres, divide it into ${s.cellsPerArchiveBox} cells of ${s.cellMmL} by ${s.cellMmW} by ${s.cellMmH} millimetres, and each box we sell is a whole number of those cells. You pay for the box your order goes in and nothing else. It is labelled with your name and handed to the shipper as a unit, so nothing of yours travels loose in with somebody else's.</p>
       <div class="tablewrap"><table class="t">
         <thead><tr><th>Box</th><th>Size mm</th><th>Price</th><th>Holds about</th></tr></thead>
         <tbody>
@@ -334,7 +334,7 @@ export function buildPages(api) {
       </table></div>
       <p>Bigger boxes cost less per litre, so one order beats three. <b>Your box is labelled with your name and handed over as a unit</b>, which is why nothing of yours travels loose in with somebody else's.</p>
       <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}.</p>
-      <p>That means <b>which route is cheaper depends on how full a box you fill, and how heavy the contents are</b>. A part-empty box still costs a whole box, so small orders are usually cheaper by air, and they arrive in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days instead of months. Sea starts to win once you are filling a box with something heavy: bottles, jars, anything liquid.</p>
+      <p>That means <b>which route is cheaper depends on how heavy your order is for its size</b>. Air charges by weight, so a small light order flies for very little and arrives in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days rather than months. Sea charges for space, so it wins as soon as you are sending something dense: bottles, jars, anything liquid, and it wins by a lot. A box packed with skincare can be less than half the air price.</p>
 
       ${(() => {
         // Worked from the live model rather than typed in, so it cannot drift
@@ -378,7 +378,7 @@ export function buildPages(api) {
       ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea sells labelled boxes from ${api.money(s.seaBoxes[0].price)}, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
       ['Can I track it?', 'Yes, sea and air are both tracked. You get a reference and your order page updates at every stage.'],
       ['How long does each take?', `Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days once your goods are with us. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
-      ['Why would I ever pick sea then?', 'Because for small dense things it is meaningfully cheaper, and a whole box to yourself is very good value, and if you are not in a hurry that saving is real. A shelf of skincare costs a few pounds to sail and considerably more to fly.']
+      ['Why would I ever pick sea then?', 'Because as soon as your order has any weight to it, sea is dramatically cheaper. A full box of bottles can cost less than half what the same box would cost to fly. If you are stocking up rather than replacing one thing, and you can wait, sea is the one to take.']
     ]
   });
 

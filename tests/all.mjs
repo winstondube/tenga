@@ -23,6 +23,16 @@ const root = join(here, '..');
 const src = readFileSync(join(root, 'src/app.html'), 'utf8');
 writeFileSync(join(here, 'check.js'), src.split('<script>')[1].split('</script>')[0]);
 
+// The build silently failing is worse than a test failing, because the site
+// keeps serving stale pages that still pass every test.
+try {
+  execFileSync(process.execPath, ['build.mjs'], { cwd: root, encoding: 'utf8', stdio: 'pipe' });
+} catch (e) {
+  console.log('\x1b[31mBUILD FAILED\x1b[0m');
+  process.stdout.write((e.stdout || '') + (e.stderr || ''));
+  process.exit(1);
+}
+
 const filter = process.argv[2] || '';
 const files = readdirSync(here)
   .filter(f => f.endsWith('.js') && !['harness.js', 'check.js'].includes(f))

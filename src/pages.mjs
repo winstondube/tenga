@@ -207,7 +207,11 @@ export function buildPages(api) {
     lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
     crumbs: [['Collection', 'collection/']],
     body: `
-      <p>Sea leaves once a month and air goes as soon as your goods are with us. When it clears, we message you and your order is ready to collect in Harare. Bring the phone number on the order and some ID.</p>
+      <p>Sea leaves once a month and air goes as soon as your goods are with us. When it clears, we message you and your order is ready to collect in Harare.</p>
+
+      <h2>Bring two things</h2>
+      <p><b>Your collection code</b> and <b>photo ID in the recipient's name.</b> The code is a six-character code we send you the moment your payment goes through, and it sits on your tracking page for the whole journey, so you cannot lose it. We hand nothing over without both.</p>
+      ${api.note('<b>Why we insist on both.</b> The code proves the order is yours. The ID proves you are the person it was sent to. Either one alone is guessable or borrowable, and once we have handed a parcel to the wrong person there is nothing we can do about it.', 'accent', 'lock')}
 
       ${api.note('<b>Collection only, for now.</b> We do not run a delivery leg inside Zimbabwe yet, so every order is collected in Harare. If you are outside Harare you are welcome to order and arrange your own onward transport, and we will say so plainly rather than promise a delivery we cannot make.', 'warn', 'pin')}
 
@@ -224,7 +228,7 @@ export function buildPages(api) {
       ${shipTable(api)}
 
       <h2>What it costs to get here</h2>
-      <p>Sea comes in five box sizes, from ${api.money(s.seaBoxes[0].price)} for a small one up to ${api.money(s.seaBoxes[4].price)} for a full one to yourself. Air is charged on weight, ${api.money(s.airRate)} a kilo. Plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
+      <p>Sea comes in four box sizes, from ${api.money(s.seaBoxes[0].price)} for a small one up to ${api.money(s.seaBoxes[3].price)} for a full one to yourself. Air is charged on weight, ${api.money(s.airRate)} a kilo. Plus ${api.money(s.clearance)} for clearance. All of it sits inside the single price you agree up front, so there is nothing to settle at collection. <a href="{{BASE}}what-it-costs/">Full breakdown</a>.</p>
 
       <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
@@ -232,8 +236,9 @@ export function buildPages(api) {
       ['Do you deliver to my address in Harare?', 'Not yet. Every order is collected from our Harare collection point. We would rather say that plainly than take your money and improvise.'],
       ['Do you deliver to Bulawayo, Mutare or anywhere else?', 'Not yet. You can still order from anywhere in Zimbabwe, but the parcel is collected in Harare and onward transport is yours to arrange. We will tell you that before you pay, not after.'],
       ['Do I pay anything at collection?', `No. Shipping and clearance are inside the price you agreed before we bought anything. If the parcel weighs more than we estimated we tell you before it ships, never at the counter. If it weighs less, you get the difference back.`],
-      ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
-      ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready. You do not need to chase us.']
+      ['Can someone else collect for me?', 'Yes. Tell us their name before they come and they bring their own photo ID plus your collection code. The code does not change. Do not send someone without telling us first, because we will turn them away.'],
+      ['How will I know it has arrived?', 'We message you the moment it lands, with your collection code in the message. Your private tracking link updates the whole way too. You do not need to chase us.'],
+      ['What if I lose my collection code?', 'You cannot really. It is on your tracking page from the moment you pay until the moment you collect, and it is in your payment confirmation. If you have lost the tracking link, look your order up by reference.']
     ]
   });
 
@@ -317,13 +322,14 @@ export function buildPages(api) {
       <h2>They are not priced the same way, and that matters more than you would think</h2>
       <p>Sea freight is bought by the box, and the space we buy divides into eight cells of 220 by 180 by 160 millimetres. We pack into real boxes that take up a whole number of those cells, so you pay for the box your order goes in, not for a share of somebody else's.</p>
       <div class="tablewrap"><table class="t">
-        <thead><tr><th>Box</th><th>Size</th><th>Price</th><th>Holds about</th></tr></thead>
+        <thead><tr><th>Box</th><th>Size mm</th><th>Price</th><th>Holds about</th></tr></thead>
         <tbody>
-          <tr><td><b>Small</b></td><td class="mono">220 x 180 x 160</td><td class="mono">${api.money(s.seaBoxes[0].price)}</td><td>Six perfumes, or four face creams, or eight palettes</td></tr>
-          <tr><td><b>Long</b></td><td class="mono">440 x 180 x 160</td><td class="mono">${api.money(s.seaBoxes[1].price)}</td><td>Twelve perfumes, or four shampoo bottles, or three pairs of jeans</td></tr>
-          <tr><td><b>Flat</b></td><td class="mono">440 x 360 x 160</td><td class="mono">${api.money(s.seaBoxes[2].price)}</td><td>A shop of beauty, or six pairs of jeans, or five wigs</td></tr>
-          <tr><td><b>Tall</b></td><td class="mono">440 x 360 x 240</td><td class="mono">${api.money(s.seaBoxes[3].price)}</td><td>Three quarters of the space. Nine pairs of jeans, or a big beauty haul</td></tr>
-          <tr><td><b>Full</b></td><td class="mono">440 x 360 x 320</td><td class="mono">${api.money(s.seaBoxes[4].price)}</td><td>The lot. Twelve pairs of jeans, or thirty bottles</td></tr>
+          ${s.seaBoxes.map((b, i) => `<tr><td><b>${b.name}</b></td><td class="mono">${b.mm.join(' x ')}</td><td class="mono">${api.money(b.price)}</td><td>${[
+            'Six perfumes, or four face creams, or eight palettes',
+            'A shop of beauty, or three pairs of jeans',
+            'A big beauty haul, or six pairs of jeans, or five wigs',
+            'The lot, to yourself. Twelve pairs of jeans, or thirty bottles'
+          ][i] || ''}</td></tr>`).join('')}
         </tbody>
       </table></div>
       <p>Bigger boxes cost less per litre, so one order beats three. <b>Your box is labelled with your name and handed over as a unit</b>, which is why nothing of yours travels loose in with somebody else's.</p>
@@ -480,7 +486,7 @@ export function buildPages(api) {
       ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. Then it goes on the next shipment, which leaves every ${s.shipEveryDays / 7} weeks, and clears in about ten days.`],
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
-      ['Can someone else collect for me?', 'Yes. Give us their name and phone number when you order. They will need ID matching the name on the order.'],
+      ['Can someone else collect for me?', 'Yes. Tell us their name before they come and they bring their own photo ID plus your collection code. The code does not change. Do not send someone without telling us first, because we will turn them away.'],
       ['How is shipping worked out before the parcel exists?', `From the products themselves, using size and type. By sea we work out which box your order goes in; by air we estimate the weight and add a small safety margin. Because of that margin the quote is deliberately a little high, so once the parcel is weighed in the UK you normally get some of it back. If it comes in heavier, we ask you before it ships.`],
       ['How will I know it has arrived?', 'Your private tracking link updates the whole way, and we message you when it is ready to collect.']
     ]],
@@ -551,7 +557,7 @@ export function buildPages(api) {
       <p>You do not need to write a long message. A link and a size is enough to get a price.</p>
 
       <h2>Where you collect</h2>
-      <p>Orders are collected in Harare. We confirm the exact collection point and opening hours when your shipment lands, so you are not making a wasted trip on an estimate.</p>
+      <p>Orders are collected in Harare, with your collection code and photo ID. We confirm the exact collection point and opening hours when your shipment lands, so you are not making a wasted trip on an estimate.</p>
 
       <h2>Before you message</h2>
       <p>Most first questions are answered on <a href="{{BASE}}faqs/">the questions page</a>, particularly cost, timings and what cannot be flown. If yours is not there, ask.</p>

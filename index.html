@@ -173,6 +173,10 @@ summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
 .faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
+.collect-card{border-color:var(--ochre)}
+.collect-code{font-size:clamp(30px,7vw,42px);font-weight:700;letter-spacing:.10em;line-height:1.1;
+  padding:12px 14px;border:1px dashed var(--ochre);border-radius:var(--r);text-align:center;
+  background:color-mix(in srgb,var(--ochre) 8%,transparent)}
 .route-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:560px){.route-pick{grid-template-columns:1fr}}
 .route-card{border:1px solid var(--line-2);border-radius:var(--r);padding:14px;background:var(--surface);
@@ -960,6 +964,7 @@ function load(){
     // Drop the stale rate and let it recompute from the current model.
     (S.orders||[]).forEach(o=>{
       if(!o.shipMode)o.shipMode='sea';
+      if(!o.collectCode)o.collectCode=collectCode();
       if(o.cargo&&o.cargo.rate!=null&&Number(o.cargo.rate)===9.5)delete o.cargo.rate;
     });
     if(!Array.isArray(S.batches))S.batches=[];
@@ -994,6 +999,11 @@ function setStatus(o,st,note){
  const before=o.status;o.status=st;
  o.timeline.push({status:st,at:Date.now(),note:note||'',actor:'System'});
  logAudit(o.ref,'Status changed',before,st,note||'');
+ // Reaching Harare is the one status the customer has to act on, so it tells
+ // them itself rather than waiting for somebody to remember. Once only.
+ if(st==='Ready for collection'&&o.collectCode&&!S.messages.some(m=>m.ref===o.ref&&m.type==='Ready for collection')){
+  logMsg(o.ref,'Ready for collection','WhatsApp',o.customer.whatsapp||o.customer.email,TEMPLATE_BODY('Ready for collection',o));
+ }
 }
 
 /* ---------------- link reading (simulated extraction) ---------------- */
@@ -1607,10 +1617,18 @@ function newItem(p){
  if(!it.category)it.category=detectCategory(it.name,it.retailerName).k;
  return it;
 }
+/* Read aloud down a phone line and copied off a screen by someone standing at
+   a counter, so no O/0 or I/1/L to argue about. */
+function collectCode(){
+ const A='ACDEFHJKMNPQRTUVWXY3479';
+ let out='';
+ for(let i=0;i<6;i++)out+=A[Math.floor(Math.random()*A.length)];
+ return out.slice(0,3)+'-'+out.slice(3);
+}
 function newOrder(p){
  const ref=nextRef();
  return Object.assign({
-  ref,token:uid('t'),createdAt:Date.now(),status:'Request submitted',
+  ref,token:uid('t'),collectCode:collectCode(),createdAt:Date.now(),status:'Request submitted',
   customer:{name:'',email:'',whatsapp:'',country:'United Kingdom'},
   recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},
   items:[],partOfLargerOrder:false,customerNotes:'',
@@ -2302,7 +2320,7 @@ function viewRequest(){
        <label class="f">Recipient name<input type="text" data-bind="recipient.name" value="${esc(d.recipient.name)}"></label>
        <label class="f">Recipient phone<input type="tel" data-bind="recipient.phone" placeholder="+263" value="${esc(d.recipient.phone)}"></label>
      </div>
-     ${note('<b>Collected in Harare.</b> Every order is picked up from our Harare collection point, so there is no delivery address to give. We message you the moment it is ready. Whoever collects needs ID matching the name above.','ochre','pin')}
+     ${note('<b>Collected in Harare.</b> Every order is picked up from our Harare collection point, so there is no delivery address to give. Once you pay we send you a collection code, and whoever collects brings that code plus photo ID in the name above. We hand nothing over without both.','ochre','pin')}
      <label class="f">Anything we should know<textarea data-bind="notes" placeholder="Delivery notes, timing, who to call">${esc(d.notes)}</textarea></label>
      <label class="check"><input type="checkbox" data-bind="partOfLargerOrder" ${d.partOfLargerOrder?'checked':''}><span>This is part of a larger order I am putting together, please hold it for consolidation.</span></label>
    </div>
@@ -2547,7 +2565,7 @@ function customerStatusLine(o){
  // The whole Zimbabwe leg used to fall past this point to the "your quote is on
  // its way" default, which is the wrong thing to tell someone whose parcel has
  // already landed. Each stage says where the parcel actually is.
- if(o.status==='Ready for collection')return {tone:'accent',ic:'pin',text:'Your order is in Harare and ready to collect. Whoever collects needs ID matching the recipient name.',cta:{label:'Where to collect',href:'collection/'}};
+ if(o.status==='Ready for collection')return {tone:'accent',ic:'pin',text:'Your order is in Harare and ready to collect. Bring your collection code and photo ID.',cta:{label:'Where to collect',href:'collection/'}};
  if(o.status==='Out for delivery')return {tone:'ochre',ic:'truck',text:'Out for delivery in Harare today.',cta:null};
  if(/Arrived in Zimbabwe|Customs clearance/i.test(o.status))return {tone:'ochre',ic:'plane',text:'Landed in Zimbabwe and clearing customs. We message you the moment it is ready to collect.',cta:null};
  if(/In transit to Zimbabwe|Handed to cargo company/i.test(o.status))return {tone:'ochre',ic:'plane',text:'On the water to Zimbabwe. Nothing more to pay.',cta:null};
@@ -2576,6 +2594,15 @@ function viewTrack(ref,token){
     <div class="note n-${s.tone}">${icon(s.ic,16)}<div>${s.text}</div></div>
     ${s.cta?`<a class="btn btn-primary btn-block btn-lg" href="${s.cta.href}">${s.cta.label}</a>`:''}
   </div>
+
+  ${t.initialPaid?`<div class="card collect-card">
+   <div class="card-h"><b>Your collection code</b>${o.status==='Delivered'?pill('Collected','accent'):o.status==='Ready for collection'?pill('Ready now','ochre'):pill('Keep this safe','mute')}</div>
+   <div class="card-b stack">
+     <div class="collect-code mono">${esc(o.collectCode)}</div>
+     <div class="small">Bring this code and <b>photo ID in the name of ${esc(o.recipient.name||o.customer.name)}</b> to our Harare collection point. We hand nothing over without both.</div>
+     <div class="tiny muted">If someone else is collecting, tell us their name first and they bring their own ID. The code stays the same.</div>
+   </div>
+  </div>`:''}
 
   <div class="card">
    <div class="card-h"><b>Progress</b><span class="row tiny muted" style="gap:12px"><span class="row" style="gap:5px"><i style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:block"></i>UK leg</span><span class="row" style="gap:5px"><i style="width:8px;height:8px;border-radius:50%;background:var(--ochre);display:block"></i>Zimbabwe leg</span></span></div>
@@ -2982,6 +3009,7 @@ function adminOrder(ref){
      <div class="mono" style="font-size:20px;font-weight:700">${money(q.total)}</div>
      <div class="tiny muted">${t.initialPaid?'Paid '+money(t.initialPaid):'Not paid'}${t.cargoPaid?' · cargo '+money(t.cargoPaid):''}</div>
      ${o.quote&&!o.quote.sentAt&&!t.initialPaid?`<button class="btn btn-primary" data-act="approveQuote" data-ref="${o.ref}">${icon('check',16)}Approve and send ${money(q.total)}</button>`:''}
+     ${t.initialPaid?`<div class="row tiny" style="gap:6px;align-items:center;color:var(--ink-2)">${icon('lock',12)}<span>Collection code <b class="mono" style="font-size:13.5px;letter-spacing:.06em">${esc(o.collectCode)}</b></span></div>`:''}
      <div class="row" style="gap:6px">
        <a class="btn btn-xs" href="#/track/${o.ref}/${o.token}" target="_blank">${icon('ext',13)}Customer view</a>
        <select data-act="forceStatus" data-ref="${o.ref}" style="width:auto;font-size:12px;padding:3px 6px">
@@ -4069,10 +4097,10 @@ function TEMPLATE_BODY(t,o){
   'Request received':'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.',
   'Quote ready':'Your quote for '+o.ref+' is '+(q?money(q.total):'')+'. It expires in '+(o.quote&&o.quote.expiryMins||60)+' minutes.',
   'Quote expiring':'Your quote for '+o.ref+' expires shortly. Prices move, so we will need to recheck if it lapses.',
-  'Payment received':'We have received your payment for '+o.ref+'. We will now place the retailer order. Zimbabwe shipping is charged separately.',
+  'Payment received':'We have received your payment for '+o.ref+' and we will now place the retailer order. Your collection code is '+o.collectCode+'. Keep it: you will need it, plus photo ID in the name of '+(o.recipient.name||o.customer.name)+', to collect in Harare. It is also on your tracking page.',
   'Cargo payment required':'Your parcel has been weighed'+(c?' at '+c.chargeable+' kg':'')+'. Zimbabwe shipping is '+(c?money(c.total):'')+'.',
-  'Ready for collection':'Your parcel has arrived and is ready for collection'+(o.recipient.collection?' at '+o.recipient.collection:'')+'. Bring ID.',
-  'Delivered':'Your order '+o.ref+' has been delivered. Thank you for using Tenga.'
+  'Ready for collection':'Your order '+o.ref+' has arrived and is ready for collection'+(o.recipient.collection?' at '+o.recipient.collection:' at our Harare collection point')+'. Bring your collection code '+o.collectCode+' and photo ID in the name of '+(o.recipient.name||o.customer.name)+'. We cannot hand it over without both.',
+  'Delivered':'Your order '+o.ref+' has been collected. Thank you for using Tenga.'
  };
  return M[t]||(t+' update for order '+o.ref+'.');
 }
@@ -4083,7 +4111,12 @@ function applyPaymentEffects(o,p){
    setStatus(o,p.status==='Payment held'?'Initial payment held':'Initial payment completed');
    setStatus(o,'Paid — awaiting retailer purchase');
    if(o.quote)o.quote.status='Accepted';
-   logMsg(o.ref,'Payment received','Email',o.customer.email,'We have received '+money(p.amount)+' for '+o.ref+'. The retailer purchase will now be placed. Zimbabwe shipping will be charged separately once the parcel is weighed.');
+   // The one email everybody keeps. Shipping is already inside what they paid,
+   // and the collection code is the only thing that gets the goods handed over.
+   logMsg(o.ref,'Payment received','Email',o.customer.email,
+     'We have received '+money(p.amount)+' for '+o.ref+', shipping included, and the retailer purchase will now be placed. '+
+     'Your collection code is '+o.collectCode+'. Keep it safe: whoever collects in Harare brings this code and photo ID in the name of '+
+     (o.recipient.name||o.customer.name)+'. We cannot hand the order over without both. The code is also on your tracking page.');
  } else if(p.type==='cargo'){
    setStatus(o,'Cargo payment received');setStatus(o,'Ready for cargo');
    logMsg(o.ref,'Cargo payment received','Email',o.customer.email,'Thank you, your Zimbabwe shipping payment of '+money(p.amount)+' has been received. Your parcel will go on the next shipment.');

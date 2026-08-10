@@ -2686,12 +2686,6 @@ function viewQuote(ref,token){
      <div class="l"><span>Product value</span><span class="v">${money(q.productTotal)}</span></div>
      <div class="l"><span>UK retailer delivery${q.groups.length>1?' ('+q.groups.length+' shops, charged separately)':''}</span><span class="v">${money(q.deliveryTotal)}</span></div>
      <div class="l"><span>Procurement fee <span class="tiny muted">(${S.settings.procurementPct}% of product value, min ${money(S.settings.procurementMin)})</span></span><span class="v">${money(q.fee)}</span></div>
-     ${q.cargoEst===q.cargoAuto
-       // Split so the customer can check the sum. If we have overridden the
-       // figure by hand the parts no longer add up to it, so show one line.
-       ? `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.mode==='air'?q.cargoKg+' kg at '+money(q.cargoRate)+' per kg':esc(q.seaTier)+', up to '+q.sea.tierMaxL+' litres'}</span></span><span class="v">${money(q.cargoFreight)}</span></div>
-          <div class="l"><span>Customs clearance</span><span class="v">${money(q.cargoClearance)}</span></div>`
-       : `<div class="l"><span>Zimbabwe shipping <span class="tiny muted">${q.cargoKg} kg, quoted by hand</span></span><span class="v">${money(q.cargoEst)}</span></div>`}
      ${q.adjustments.map(a=>`<div class="l"><span>${esc(a.reason)}</span><span class="v">${a.delta<0?'-':''}${money(Math.abs(a.delta))}</span></div>`).join('')}
      <div class="l total"><span>Before shipping</span><span class="v">${money(goods)}</span></div>
    </div>

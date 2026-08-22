@@ -173,6 +173,9 @@ summary::-webkit-details-marker{display:none}
 summary::marker{content:""}
 .faq-list summary::marker{content:""}
 details[open] > summary{border-bottom:1px solid var(--line)}
+/* .stack-s sets display:flex, which beats the browser's own hiding of a closed
+   details, so the bookmarklet panel stayed laid out on top of the form. */
+details:not([open]) > :not(summary){display:none !important}
 .collect-card{border-color:var(--ochre)}
 .collect-code{font-size:clamp(30px,7vw,42px);font-weight:700;letter-spacing:.10em;line-height:1.1;
   padding:12px 14px;border:1px dashed var(--ochre);border-radius:var(--r);text-align:center;

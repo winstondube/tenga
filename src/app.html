@@ -97,7 +97,10 @@ svg{display:block}
 /* An icon-only button is a tap target, not a glyph. 22px is too small to hit
    on a phone, and this one removes an item from the basket. */
 .btn-xs:has(> svg:only-child){min-width:34px;min-height:34px;justify-content:center;padding:6px}
-@media (pointer:coarse){.btn-xs:has(> svg:only-child){min-width:40px;min-height:40px}}
+@media (pointer:coarse){.btn-xs:has(> svg:only-child){min-width:40px;min-height:40px}
+  /* the staff bar and the status picker were 24-27px on a phone */
+  .topbar .btn,.topbar-in .btn{min-height:34px}
+  select[data-act="forceStatus"]{min-height:34px}}
 .btn-ghost{border-color:transparent;background:transparent}
 .btn-ghost:hover{background:var(--surface-2)}
 .btn-block{width:100%;justify-content:center}

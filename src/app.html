@@ -1071,6 +1071,12 @@ async function enrich(p){
  return merged;
 }
 
+/* A link the customer gives us has to survive being opened by a person later.
+   extract() already knows what a real product link looks like, so reuse it. */
+function looksLikeProductLink(v){ return !v || extract(v).ok }
+/* Deliberately loose: enough to catch a typo, not enough to reject a valid
+   address we have not thought of. */
+function looksLikeEmail(v){ return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(String(v||'').trim()) }
 function restrictedHits(text){
  const t=String(text||'').toLowerCase();
  return S.restricted.filter(k=>t.includes(k.toLowerCase()));
@@ -2027,6 +2033,8 @@ function addPending(){
     const dr=draft(),p=dr.pending;if(!p)return false;
     const name=val('pName');
     if(!name){toast('Please give the product a name so we buy the right thing');return false}
+    if(val('pSubs')==='link'&&val('pSubsUrl')&&!looksLikeProductLink(val('pSubsUrl'))){
+      toast('That substitute link does not look like a product page');return false}
     const it=newItem({url:p.url,retailerId:p.retailerId,retailerName:p.retailerName,name,
       category:val('pCat')||detectCategory(name,p.retailerName).k,
       attrs:collectAttrs(val('pCat')||detectCategory(name,p.retailerName).k),
@@ -3091,7 +3099,7 @@ function paneCargo(o){
     ${Math.abs(diff)<=st.cargoTolerance
       ? note(`Rounding only, inside ${money(st.cargoTolerance)}. Nothing to settle.`,'accent','check')
       : diff>0
-        ? `<div class="row wrap"><button class="btn btn-s" data-act="mkPayCustom" data-ref="${o.ref}">${icon('pound',15)}Request the ${money(diff)} difference</button><span class="tiny muted" style="padding-top:8px">Or absorb it and record why.</span></div>`
+        ? `<div class="row wrap"><button class="btn btn-s" data-act="mkPayCustom" data-ref="${o.ref}" data-amt="${diff}" data-why="Your parcel measured larger than we estimated, so there is a shipping difference to settle.">${icon('pound',15)}Request the ${money(diff)} difference</button><span class="tiny muted" style="padding-top:8px">Or absorb it and record why.</span></div>`
         : `<div class="row wrap"><button class="btn btn-s" data-act="cargoRefund" data-ref="${o.ref}" data-amt="${-diff}">${icon('refresh',15)}Refund ${money(-diff)} to the customer</button></div>`}
    </div></div>`:''}
   <div class="card">
@@ -3572,6 +3580,14 @@ document.addEventListener('click',e=>{
       ['customer.name','your name'],['customer.email','your email'],['customer.whatsapp','your WhatsApp number'],
       ['recipient.name','the recipient name'],['recipient.phone','the recipient phone']
     ].filter(([k])=>{const [a,b]=k.split('.');return !dr[a][b]});
+    // The collection code is emailed. A typo here and they never get it.
+    if(!need.length&&!looksLikeEmail(dr.customer.email)){
+      toast('That email address does not look right. We send your collection code to it.');
+      const el=document.querySelector('[data-bind="customer.email"]');
+      if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.focus();
+        el.style.borderColor='var(--warn)';setTimeout(()=>{el.style.borderColor=''},2200);}
+      return;
+    }
     if(need.length){
       toast('Please add '+need.map(x=>x[1]).join(', '));
       const el=document.querySelector('[data-bind="'+need[0][0]+'"]');
@@ -3708,8 +3724,12 @@ document.addEventListener('click',e=>{
     save();rerender(true);toast('Payment request created')
   },
   mkPayCustom(){
-    const amt=Number(prompt('Additional payment amount in £','0'));if(!amt)return;
-    const why=prompt('Reason shown to the customer','Retailer price increased after your payment')||'';
+    // The button already knows the figure. Defaulting the box to 0 made the
+    // operator retype it, and pressing OK on that 0 silently did nothing.
+    const suggested=d.amt?round2(Number(d.amt)):'';
+    const amt=Number(prompt('Additional payment amount in £',suggested===''?'':String(suggested)));
+    if(!amt||!isFinite(amt)){if(amt===0)toast('No amount entered, nothing requested');return}
+    const why=prompt('Reason shown to the customer',d.why||'Retailer price increased after your payment')||'';
     o.payments.push({id:uid('p'),type:'additional',provider:'PayPal',amount:round2(amt),currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false,reason:why});
     setStatus(o,'Additional payment required',why);
     logAudit(o.ref,'Additional payment requested','',money(amt),why);

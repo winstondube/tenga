@@ -1,0 +1,17 @@
+name = "tenga-api"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Free tier: 100k requests a day, and D1 gives 5GB of storage. At Tenga's
+# volumes this costs nothing, and the site itself stays on GitHub Pages.
+[[d1_databases]]
+binding = "DB"
+database_name = "tenga"
+database_id = "PUT_THE_ID_HERE_AFTER_wrangler_d1_create_tenga"
+
+[vars]
+SITE_ORIGIN = "https://winstondube.github.io"
+PAYPAL_ENV = "sandbox"
+
+# Secrets are set with `wrangler secret put NAME`, never committed:
+#   PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, RESEND_KEY, STAFF_SEED_PW

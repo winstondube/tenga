@@ -1,0 +1,218 @@
+/* Tenga API.
+ *
+ * The site stays static on GitHub Pages. This adds the three things a static
+ * page cannot do: keep orders somewhere both of us can see them, send the
+ * messages the app currently only pretends to send, and be told by PayPal
+ * directly that money arrived rather than taking the buyer's word for it.
+ */
+import { json, bad, now, toPence, collectCode, token, hashPw, verifyPw,
+         looksLikeEmail, audit, mayReadOrder, publicView, sha256Hex } from './lib.js';
+
+const CORS = origin => ({
+  'access-control-allow-origin': origin,
+  'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
+  'access-control-allow-headers': 'content-type,authorization',
+  'access-control-allow-credentials': 'true',
+  'vary': 'origin'
+});
+
+export default {
+  async fetch(req, env, ctx) {
+    const url = new URL(req.url);
+    const origin = req.headers.get('origin') || '';
+    // Only our own site may call this from a browser.
+    const allowed = origin === env.SITE_ORIGIN || origin.startsWith('http://localhost');
+    const cors = CORS(allowed ? origin : env.SITE_ORIGIN);
+
+    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    if (origin && !allowed) return json({ error: 'origin not allowed' }, 403, cors);
+
+    try {
+      const r = await route(req, env, url, ctx);
+      for (const [k, v] of Object.entries(cors)) r.headers.set(k, v);
+      return r;
+    } catch (e) {
+      console.error(e && e.stack || e);
+      return json({ error: 'server error' }, 500, cors);
+    }
+  }
+};
+
+async function route(req, env, url, ctx) {
+  const p = url.pathname.replace(/\/+$/, '') || '/';
+  const m = req.method;
+
+  if (p === '/' || p === '/health') return json({ ok: true, service: 'tenga-api', time: now() });
+
+  if (p === '/orders' && m === 'POST')       return createOrder(req, env);
+  if (p === '/orders' && m === 'GET')        return listOrders(req, env, url);
+  if (p === '/orders/lookup' && m === 'POST') return lookupOrder(req, env);
+
+  const one = p.match(/^\/orders\/([A-Za-z0-9-]+)$/);
+  if (one && m === 'GET')   return getOrder(req, env, url, one[1]);
+  if (one && m === 'PATCH') return patchOrder(req, env, one[1]);
+
+  if (p === '/staff/login'  && m === 'POST') return login(req, env);
+  if (p === '/staff/logout' && m === 'POST') return logout(req, env);
+  if (p === '/staff/me'     && m === 'GET')  return me(req, env);
+
+  return bad('not found', 404);
+}
+
+/* ---------- staff auth ---------- */
+
+async function currentStaff(req, env) {
+  const cookie = req.headers.get('cookie') || '';
+  const sid = (cookie.match(/(?:^|;\s*)tenga_s=([^;]+)/) || [])[1];
+  if (!sid) return null;
+  const row = await env.DB.prepare(
+    `SELECT s.email, s.expires_at, st.name, st.role FROM sessions s
+     JOIN staff st ON st.email = s.email WHERE s.id = ?`).bind(sid).first();
+  if (!row || row.expires_at < now()) return null;
+  return { email: row.email, name: row.name, role: row.role, sid };
+}
+
+async function login(req, env) {
+  const { email, password } = await req.json().catch(() => ({}));
+  if (!email || !password) return bad('email and password required');
+  const row = await env.DB.prepare('SELECT * FROM staff WHERE email = ?')
+    .bind(String(email).toLowerCase().trim()).first();
+  // Same work whether or not the account exists, so timing says nothing.
+  const ok = row ? await verifyPw(password, row.pw_hash)
+                 : await verifyPw(password, '00'.repeat(16) + '$' + '00'.repeat(32));
+  if (!row || !ok) {
+    await audit(env, { action: 'Staff sign in failed', after: String(email).slice(0, 60),
+                       actor: 'anonymous', ip: req.headers.get('cf-connecting-ip') });
+    return bad('those details do not match', 401);
+  }
+  const sid = token() + token();
+  const expires = now() + 12 * 60 * 60 * 1000;
+  await env.DB.prepare('INSERT INTO sessions (id,email,created_at,expires_at) VALUES (?,?,?,?)')
+    .bind(sid, row.email, now(), expires).run();
+  await env.DB.prepare('UPDATE staff SET last_seen = ? WHERE email = ?').bind(now(), row.email).run();
+  await audit(env, { action: 'Staff signed in', actor: row.email, ip: req.headers.get('cf-connecting-ip') });
+  return json({ email: row.email, name: row.name, role: row.role }, 200, {
+    'set-cookie': `tenga_s=${sid}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=43200`
+  });
+}
+
+async function logout(req, env) {
+  const s = await currentStaff(req, env);
+  if (s) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(s.sid).run();
+  return json({ ok: true }, 200, {
+    'set-cookie': 'tenga_s=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0'
+  });
+}
+
+async function me(req, env) {
+  const s = await currentStaff(req, env);
+  return s ? json(s) : json({ error: 'not signed in' }, 401);
+}
+
+/* ---------- orders ---------- */
+
+async function nextRef(env) {
+  const row = await env.DB.prepare(
+    `SELECT ref FROM orders ORDER BY created_at DESC LIMIT 1`).first();
+  const last = row ? parseInt(String(row.ref).replace(/\D/g, ''), 10) : 1040;
+  return 'TU-' + (Number.isFinite(last) ? last + 1 : 1041);
+}
+
+async function createOrder(req, env) {
+  const body = await req.json().catch(() => null);
+  if (!body || !body.customer || !Array.isArray(body.items) || !body.items.length)
+    return bad('an order needs a customer and at least one item');
+  if (!looksLikeEmail(body.customer.email)) return bad('that email address does not look right');
+  if (!body.customer.name || !body.recipient || !body.recipient.name || !body.recipient.phone)
+    return bad('name, recipient name and recipient phone are required');
+  if (body.items.length > 40) return bad('that is too many items for one order');
+
+  const ref = await nextRef(env);
+  const doc = {
+    ...body,
+    ref,
+    // Never trust these from the browser.
+    status: 'Request submitted',
+    payments: [], refunds: [], cargo: {},
+    timeline: [{ status: 'Request submitted', at: now(), note: '', actor: 'Customer' }]
+  };
+  const tok = token(), code = collectCode();
+  await env.DB.prepare(
+    `INSERT INTO orders (ref,token,collect_code,email,phone,recipient,status,ship_mode,
+      total_pence,paid_pence,doc,created_at,updated_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
+  ).bind(ref, tok, code,
+    String(body.customer.email).toLowerCase().trim(),
+    body.customer.whatsapp || '', body.recipient.phone || '',
+    'Request submitted', body.shipMode === 'air' ? 'air' : 'sea',
+    toPence(body.quotedTotal), 0, JSON.stringify(doc), now(), now()).run();
+
+  await audit(env, { ref, action: 'Request submitted', after: String(body.items.length) + ' items',
+                     actor: 'customer', ip: req.headers.get('cf-connecting-ip') });
+  return json({ ref, token: tok }, 201);
+}
+
+async function listOrders(req, env, url) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return json({ error: 'staff only' }, 401);
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 100, 500);
+  const status = url.searchParams.get('status');
+  const q = status
+    ? env.DB.prepare('SELECT * FROM orders WHERE status = ? ORDER BY created_at DESC LIMIT ?').bind(status, limit)
+    : env.DB.prepare('SELECT * FROM orders ORDER BY created_at DESC LIMIT ?').bind(limit);
+  const { results } = await q.all();
+  return json({ orders: results.map(r => ({ ...JSON.parse(r.doc), ref: r.ref, token: r.token,
+    collectCode: r.collect_code, status: r.status, shipMode: r.ship_mode })) });
+}
+
+async function getOrder(req, env, url, ref) {
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE ref = ?').bind(ref).first();
+  if (!row) return bad('not found', 404);
+  const staff = await currentStaff(req, env);
+  if (!mayReadOrder({ ...row, recipient_phone: row.recipient }, { staff, token: url.searchParams.get('token') }))
+    return bad('not found', 404);   // same answer as a missing order, so it cannot be probed
+  return json(staff ? { ...JSON.parse(row.doc), ref: row.ref, token: row.token,
+                        collectCode: row.collect_code, status: row.status }
+                    : publicView(row));
+}
+
+/* Reference alone is guessable, so this needs a contact on the order too. */
+async function lookupOrder(req, env) {
+  const { ref, who } = await req.json().catch(() => ({}));
+  if (!ref || !who) return bad('reference and contact required');
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE UPPER(ref) = ?')
+    .bind(String(ref).trim().toUpperCase()).first();
+  const ip = req.headers.get('cf-connecting-ip');
+  if (!row || !mayReadOrder({ ...row, recipient_phone: row.recipient }, { who })) {
+    await audit(env, { ref: row ? row.ref : String(ref).slice(0, 20), action: 'Lookup failed',
+                       actor: 'anonymous', ip });
+    return bad('we cannot match that', 404);
+  }
+  await audit(env, { ref: row.ref, action: 'Order opened by lookup', actor: 'customer', ip });
+  return json({ ref: row.ref, token: row.token });
+}
+
+async function patchOrder(req, env, ref) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return json({ error: 'staff only' }, 401);
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE ref = ?').bind(ref).first();
+  if (!row) return bad('not found', 404);
+  const body = await req.json().catch(() => null);
+  if (!body || !body.doc) return bad('doc required');
+
+  const doc = body.doc;
+  // The server owns money and identity; the client may not rewrite them.
+  doc.ref = row.ref;
+  const paid = (doc.payments || []).filter(p => /completed|held/i.test(p.status || ''))
+    .reduce((a, p) => a + toPence(p.amount), 0);
+
+  await env.DB.prepare(
+    `UPDATE orders SET status=?, ship_mode=?, total_pence=?, paid_pence=?, doc=?, updated_at=? WHERE ref=?`
+  ).bind(doc.status || row.status, doc.shipMode === 'air' ? 'air' : 'sea',
+         toPence(body.total ?? 0), paid, JSON.stringify(doc), now(), ref).run();
+
+  if (doc.status && doc.status !== row.status)
+    await audit(env, { ref, action: 'Status changed', before: row.status, after: doc.status,
+                       actor: staff.email, ip: req.headers.get('cf-connecting-ip') });
+  return json({ ok: true, ref });
+}

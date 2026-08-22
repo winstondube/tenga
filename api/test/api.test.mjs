@@ -80,6 +80,23 @@ if (authed) {
   ok('staff see an order without a token', r.status === 200 && r.body.collectCode);
 }
 
+console.log('\nmessages');
+if (authed) {
+  r = await call(`/orders/${ref}/messages`, { headers: { cookie } });
+  ok('the request confirmation was recorded', r.status === 200 && r.body.messages.length >= 1,
+     JSON.stringify(r.body).slice(0, 120));
+  const first = r.body.messages[0] || {};
+  ok('it names the customer as the recipient', first.recipient === ORDER.customer.email, first.recipient);
+  ok('with no provider key it is queued, not silently lost',
+     /Queued|Delivered/.test(first.status || ''), first.status);
+  r = await call(`/orders/${ref}/messages`, { method: 'POST', headers: { cookie },
+    body: JSON.stringify({ type: 'Payment received' }) });
+  ok('staff can send a specific message', r.status === 200 && !!r.body.id, JSON.stringify(r.body));
+  r = await call(`/orders/${ref}/messages`, { method: 'POST',
+    body: JSON.stringify({ type: 'Payment received' }) });
+  ok('a stranger cannot send messages as us', r.status === 401);
+}
+
 console.log('\ncross origin');
 const bad = await fetch(BASE + '/orders', { method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'application/json' }, body: '{}' });
 ok('another site is refused', bad.status === 403, String(bad.status));

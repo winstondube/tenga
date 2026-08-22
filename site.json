@@ -4,7 +4,8 @@
   "url": "https://winstondube.github.io",
   "base": "/tenga/",
 
-  "_whenTheDomainIsLive": "Set url to https://tenga.uk (no trailing slash), set base to /, add the domain to a CNAME file at the repo root, then set indexable to true.",
+  "domain": "tengauk.com",
+  "_whenTheDomainIsLive": "Run: node golive.mjs   It sets url to https://tengauk.com, base to /, writes the CNAME file and flips indexable. Do it only once DNS resolves, because base=/ breaks the github.io copy.",
 
   "indexable": false,
   "_indexable": "false emits <meta name='robots' content='noindex'> and a Disallow-all robots.txt. Keep it false while the demo carries fake customer data. Flip to true the day you launch.",
@@ -12,6 +13,6 @@
   "name": "Tenga UK",
   "tagline": "Buy-for-me and Zimbabwe forwarding",
   "locale": "en_GB",
-  "contactEmail": "help@tenga.uk",
+  "contactEmail": "help@tengauk.com",
   "contactWhatsapp": "+44 7700 900000"
 }

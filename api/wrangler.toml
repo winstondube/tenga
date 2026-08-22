@@ -10,8 +10,10 @@ database_name = "tenga"
 database_id = "PUT_THE_ID_HERE_AFTER_wrangler_d1_create_tenga"
 
 [vars]
-SITE_ORIGIN = "https://winstondube.github.io"
+# Both, so the switch to the real domain does not need an API deploy.
+SITE_ORIGINS = "https://tengauk.com,https://www.tengauk.com,https://winstondube.github.io"
+MAIL_FROM = "Tenga UK <help@tengauk.com>"
 PAYPAL_ENV = "sandbox"
 
 # Secrets are set with `wrangler secret put NAME`, never committed:
-#   PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, RESEND_KEY, STAFF_SEED_PW
+#   PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, RESEND_KEY

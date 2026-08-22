@@ -5,8 +5,9 @@
  * messages the app currently only pretends to send, and be told by PayPal
  * directly that money arrived rather than taking the buyer's word for it.
  */
-import { json, bad, now, toPence, collectCode, token, hashPw, verifyPw,
-         looksLikeEmail, audit, mayReadOrder, publicView, sha256Hex } from './lib.js';
+import { json, bad, now, toPence, fromPence, collectCode, token, verifyPw,
+         looksLikeEmail, audit, mayReadOrder, publicView } from './lib.js';
+import { send } from './mail.js';
 
 const CORS = origin => ({
   'access-control-allow-origin': origin,
@@ -20,9 +21,12 @@ export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const origin = req.headers.get('origin') || '';
-    // Only our own site may call this from a browser.
-    const allowed = origin === env.SITE_ORIGIN || origin.startsWith('http://localhost');
-    const cors = CORS(allowed ? origin : env.SITE_ORIGIN);
+    // Only our own sites may call this from a browser. Listed rather than
+    // wildcarded, and it covers both hosts so moving to the real domain does
+    // not need an API deploy.
+    const origins = String(env.SITE_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+    const allowed = origins.includes(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin) || /^http:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
+    const cors = CORS(allowed ? origin : (origins[0] || ''));
 
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (origin && !allowed) return json({ error: 'origin not allowed' }, 403, cors);
@@ -51,6 +55,10 @@ async function route(req, env, url, ctx) {
   const one = p.match(/^\/orders\/([A-Za-z0-9-]+)$/);
   if (one && m === 'GET')   return getOrder(req, env, url, one[1]);
   if (one && m === 'PATCH') return patchOrder(req, env, one[1]);
+
+  const msgs = p.match(/^\/orders\/([A-Za-z0-9-]+)\/messages$/);
+  if (msgs && m === 'GET')  return listMessages(req, env, msgs[1]);
+  if (msgs && m === 'POST') return sendMessage(req, env, msgs[1]);
 
   if (p === '/staff/login'  && m === 'POST') return login(req, env);
   if (p === '/staff/logout' && m === 'POST') return logout(req, env);
@@ -149,6 +157,9 @@ async function createOrder(req, env) {
 
   await audit(env, { ref, action: 'Request submitted', after: String(body.items.length) + ' items',
                      actor: 'customer', ip: req.headers.get('cf-connecting-ip') });
+  // Confirm it immediately. The one thing worse than a slow quote is silence.
+  await send(env, { ref, type: 'Request received', to: doc.customer.email,
+                    order: { ...doc, token: tok, collectCode: code } });
   return json({ ref, token: tok }, 201);
 }
 
@@ -215,4 +226,33 @@ async function patchOrder(req, env, ref) {
     await audit(env, { ref, action: 'Status changed', before: row.status, after: doc.status,
                        actor: staff.email, ip: req.headers.get('cf-connecting-ip') });
   return json({ ok: true, ref });
+}
+
+
+/* ---------- messages ---------- */
+
+async function listMessages(req, env, ref) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return json({ error: 'staff only' }, 401);
+  const { results } = await env.DB.prepare(
+    'SELECT id,type,channel,recipient,body,status,error,created_at FROM messages WHERE ref = ? ORDER BY created_at DESC'
+  ).bind(ref).all();
+  return json({ messages: results });
+}
+
+async function sendMessage(req, env, ref) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return json({ error: 'staff only' }, 401);
+  const { type, vars } = await req.json().catch(() => ({}));
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE ref = ?').bind(ref).first();
+  if (!row) return bad('not found', 404);
+  const doc = JSON.parse(row.doc);
+  const order = { ...doc, ref: row.ref, token: row.token, collectCode: row.collect_code };
+  const out = await send(env, { ref, type, to: row.email, order,
+    vars: vars || { total: '£' + fromPence(row.total_pence).toFixed(2),
+                    amount: '£' + fromPence(row.paid_pence).toFixed(2),
+                    mins: 60 } });
+  await audit(env, { ref, action: 'Message sent', after: type,
+                     actor: staff.email, reason: out.sent ? 'delivered' : 'queued' });
+  return json(out);
 }

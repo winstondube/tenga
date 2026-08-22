@@ -8,7 +8,7 @@
     "db:create": "wrangler d1 create tenga",
     "db:init": "wrangler d1 execute tenga --file=./schema.sql",
     "db:init:local": "wrangler d1 execute tenga --local --file=./schema.sql",
-    "test": "node test/api.test.mjs"
+    "test": "node test/paypal.test.mjs && node test/api.test.mjs"
   },
   "devDependencies": { "wrangler": "^4.0.0" }
 }

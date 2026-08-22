@@ -97,6 +97,16 @@ if (authed) {
   ok('a stranger cannot send messages as us', r.status === 401);
 }
 
+console.log('\npayments, before any credentials exist');
+r = await call(`/orders/${ref}/paypal`, { method: 'POST', body: JSON.stringify({ token: tok }) });
+ok('says so plainly rather than erroring', r.status === 503, r.status + ' ' + JSON.stringify(r.body));
+r = await call('/paypal/webhook', { method: 'POST', body: JSON.stringify({
+  event_type: 'PAYMENT.CAPTURE.COMPLETED',
+  resource: { id: 'FORGED-1', custom_id: `${ref}:initial`, amount: { value: '157.48' } } }) });
+ok('a forged webhook is refused', r.status === 200 && r.body.ok === false, JSON.stringify(r.body));
+r = await call(`/orders/${ref}?token=${tok}`);
+ok('and the order is still unpaid', !r.body.collectCode, String(r.body.collectCode));
+
 console.log('\ncross origin');
 const bad = await fetch(BASE + '/orders', { method: 'POST', headers: { origin: 'https://evil.example', 'content-type': 'application/json' }, body: '{}' });
 ok('another site is refused', bad.status === 403, String(bad.status));

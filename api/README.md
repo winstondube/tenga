@@ -59,10 +59,35 @@ cannot be used to discover which references exist.
 **Lookup needs the reference and a contact on the order.** References run in
 sequence, so a reference alone is a guess away from someone else's order.
 
+## PayPal
+
+The rule the code exists to enforce: **the browser never decides that money
+arrived, and never decides how much.**
+
+- We create the PayPal order with the amount from our own database. A browser
+  asking to pay £1 for a £150 order gets a PayPal order for £150.
+- The buyer's browser reporting a successful capture changes nothing.
+- An order is marked paid **only** by `PAYMENT.CAPTURE.COMPLETED` arriving on
+  the webhook, with its signature verified by PayPal's own API.
+- The capture id is unique in the database, so a replayed webhook is a no-op
+  rather than a second payment.
+- With no `PAYPAL_WEBHOOK_ID` set, verification fails closed: every webhook is
+  refused. It cannot be accidentally left open.
+
+### Setting it up, in this order
+
+1. A PayPal **Business** account.
+2. developer.paypal.com, signed in with it, Apps & Credentials, create an app.
+   Take the **Client ID** and **Secret** from the Sandbox tab first.
+3. `npm run deploy` so the API has a public URL.
+4. Back in the dashboard, Webhooks, add one pointing at
+   `https://<your-worker>.workers.dev/paypal/webhook`, subscribed to
+   `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.DENIED` and
+   `PAYMENT.CAPTURE.REFUNDED`. Take the **Webhook ID**.
+5. Set the three secrets, then repeat 2 and 4 with the Live tab when you are
+   ready to take real money, and set `PAYPAL_ENV = "live"`.
+
 ## Still to build
 
-- PayPal: create order, capture, and the webhook that is the only thing allowed
-  to mark an order paid
-- Email and WhatsApp sending, with the message row updated to what actually
-  happened
 - The app talking to this instead of localStorage
+- WhatsApp sending (email is done)

@@ -8,6 +8,7 @@
 import { json, bad, now, toPence, fromPence, collectCode, token, verifyPw,
          looksLikeEmail, audit, mayReadOrder, publicView } from './lib.js';
 import { send } from './mail.js';
+import { createPayPalOrder, capturePayPalOrder, verifyWebhook, applyWebhook } from './paypal.js';
 
 const CORS = origin => ({
   'access-control-allow-origin': origin,
@@ -59,6 +60,10 @@ async function route(req, env, url, ctx) {
   const msgs = p.match(/^\/orders\/([A-Za-z0-9-]+)\/messages$/);
   if (msgs && m === 'GET')  return listMessages(req, env, msgs[1]);
   if (msgs && m === 'POST') return sendMessage(req, env, msgs[1]);
+
+  const pay = p.match(/^\/orders\/([A-Za-z0-9-]+)\/paypal$/);
+  if (pay && m === 'POST') return startPayPal(req, env, url, pay[1]);
+  if (p === '/paypal/webhook' && m === 'POST') return paypalWebhook(req, env);
 
   if (p === '/staff/login'  && m === 'POST') return login(req, env);
   if (p === '/staff/logout' && m === 'POST') return logout(req, env);
@@ -255,4 +260,59 @@ async function sendMessage(req, env, ref) {
   await audit(env, { ref, action: 'Message sent', after: type,
                      actor: staff.email, reason: out.sent ? 'delivered' : 'queued' });
   return json(out);
+}
+
+
+/* ---------- paypal ---------- */
+
+/* The amount comes from our database. A browser asking to pay £1 for a £150
+   order gets a PayPal order for £150. */
+async function startPayPal(req, env, url, ref) {
+  if (!env.PAYPAL_CLIENT_ID) return bad('payments are not configured yet', 503);
+  const body = await req.json().catch(() => ({}));
+  const { kind = 'initial', token: t } = body;
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE ref = ?').bind(ref).first();
+  if (!row) return bad('not found', 404);
+
+  const staff = await currentStaff(req, env);
+  if (!mayReadOrder({ ...row, recipient_phone: row.recipient }, { staff, token: t }))
+    return bad('not found', 404);
+
+  const owed = row.total_pence - row.paid_pence;
+  if (kind === 'initial' && owed <= 0) return bad('this order is already paid');
+  // The body can only be read once, and for an initial payment the amount is
+  // ours to decide anyway.
+  const amountPence = kind === 'initial' ? owed : toPence(body.amount || 0);
+  if (amountPence <= 0) return bad('nothing to pay');
+
+  const site = String(env.SITE_ORIGINS || '').split(',')[0] || '';
+  const order = await createPayPalOrder(env, {
+    ref, amountPence, kind, returnTo: `${site}/#/track/${ref}/${row.token}`
+  });
+  await audit(env, { ref, action: 'PayPal order created',
+                     after: '£' + fromPence(amountPence).toFixed(2), actor: 'customer', reason: order.id });
+  return json({ paypalOrderId: order.id, amount: fromPence(amountPence) });
+}
+
+/* PayPal telling us directly. This is the only thing that marks an order paid. */
+async function paypalWebhook(req, env) {
+  const raw = await req.text();
+  const check = await verifyWebhook(env, req, raw);
+  if (!check.verified) {
+    await audit(env, { action: 'PayPal webhook rejected', reason: String(check.reason).slice(0, 80),
+                       actor: 'paypal', ip: req.headers.get('cf-connecting-ip') });
+    // 200 so PayPal stops retrying something we will never accept.
+    return json({ ok: false, reason: 'signature not verified' }, 200);
+  }
+  let event; try { event = JSON.parse(raw) } catch { return json({ ok: false }, 200) }
+  const out = await applyWebhook(env, event);
+
+  if (out.applied === 'paid') {
+    const row = await env.DB.prepare('SELECT * FROM orders WHERE ref = ?').bind(out.ref).first();
+    const doc = JSON.parse(row.doc);
+    await send(env, { ref: out.ref, type: 'Payment received', to: row.email,
+      order: { ...doc, ref: row.ref, token: row.token, collectCode: row.collect_code },
+      vars: { amount: '£' + Number(out.amount).toFixed(2) } });
+  }
+  return json({ ok: true, ...out });
 }

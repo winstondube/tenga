@@ -547,14 +547,14 @@ export function buildPages(api) {
   /* ---- contact ---- */
   pages.push({
     path: 'contact/',
-    title: 'Contact Tenga UK',
+    title: 'Contact us',
     description: 'WhatsApp or email a person about an order, a quote, or whether we can buy something. Replies within a working day.',
     h1: 'Talk to a person',
     lede: 'No ticket system and no bot. One of us reads it and answers.',
     crumbs: [['Contact', 'contact/']],
     body: `
       <div class="steps cols-3">
-        <div class="step"><b>WhatsApp</b><span class="small muted">${esc(api.site.contactWhatsapp)}<br>Fastest, and the one most people use.</span></div>
+        <div class="step"><b>WhatsApp</b><span class="small muted"><a href="https://wa.me/${esc(String(api.site.contactWhatsapp).replace(/[^0-9]/g,''))}">${esc(api.site.contactWhatsapp)}</a><br>Fastest, and the one most people use. Tap to open a chat.</span></div>
         <div class="step"><b>Email</b><span class="small muted"><a href="mailto:${esc(api.site.contactEmail)}">${esc(api.site.contactEmail)}</a><br>Best if you are sending several links.</span></div>
         <div class="step zw"><b>About an existing order</b><span class="small muted">Use your private tracking link first. It shows exactly where the order is without anyone having to reply.</span></div>
       </div>

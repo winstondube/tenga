@@ -2011,9 +2011,10 @@ function heroSection(dq){
 function viewLookup(){
  return `<div class="narrow-s"><div class="stack">
   <h2>Track an order</h2>
-  <p class="muted small">Enter the reference we sent you, for example TU-1041.</p>
+  <p class="muted small">Enter the reference we sent you, and the email or phone number you ordered with.</p>
   <div class="card card-p stack">
     <label class="f">Order reference<input type="text" id="lookupRef" placeholder="TU-1041" autocomplete="off"></label>
+    <label class="f">Email or phone number<span class="hint">the one on the order</span><input type="text" id="lookupWho" placeholder="you@example.com or +263 77 123 4567" autocomplete="off"></label>
     <button class="btn btn-primary" data-act="lookup">${icon('search',16)}Find my order</button>
     <div id="lookupMsg"></div>
   </div>
@@ -3615,11 +3616,24 @@ document.addEventListener('click',e=>{
     S.draft=null;save();go('#/submitted/'+o.ref);
   },
   lookup(){
-    const r=val('lookupRef').toUpperCase();
-    const o=S.orders.find(x=>x.ref.toUpperCase()===r);
+    // References run in sequence, so a reference alone is a guess away from
+    // somebody else's order, their recipient, what they bought and their
+    // collection code. Ask for something only the customer has.
+    const r=val('lookupRef').trim().toUpperCase();
+    const who=val('lookupWho').trim().toLowerCase();
     const box=document.getElementById('lookupMsg');
-    if(o)go('#/track/'+o.ref+'/'+o.token);
-    else if(box)box.innerHTML=note('We cannot find that reference. Check the email we sent you.','danger','alert');
+    const fail=()=>{if(box)box.innerHTML=note('We cannot match that. Check the reference and the email or phone number you ordered with.','danger','alert')};
+    if(!r||!who)return fail();
+    const digits=x=>String(x||'').replace(/[^0-9]/g,'');
+    const o=S.orders.find(x=>{
+      if(x.ref.toUpperCase()!==r)return false;
+      const email=String(x.customer.email||'').toLowerCase();
+      const phones=[digits(x.customer.whatsapp),digits(x.recipient.phone)].filter(Boolean);
+      const asked=digits(who);
+      return email&&email===who || (asked.length>=6&&phones.some(p=>p.endsWith(asked)||asked.endsWith(p)));
+    });
+    if(o){logAudit(o.ref,'Order opened by reference lookup','','',who);go('#/track/'+o.ref+'/'+o.token)}
+    else fail();
   },
 
   /* customer payment */

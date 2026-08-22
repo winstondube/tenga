@@ -677,12 +677,12 @@ body > *{min-width:0}
  </section>
  <section class="ship-band"><div class="ship-in">
    <div class="ship-count">
-     <span class="ship-num">16</span>
+     <span class="ship-num">34</span>
      <span class="ship-unit">days<br>until the<br>next shipment</span>
    </div>
    <div class="ship-detail">
-     <b>Sea leaves once a month, and the crossing takes 6 to 7 weeks.</b> Order by <b>Saturday 15 August</b> to catch the Tuesday 25 August sailing, collectable in Harare around <b>Tuesday 6 October</b>. In a hurry? Air is 5 to 7 days.
-     <div class="ship-cut "><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Pay by <b>Saturday 15 August</b> to be on it.</span></div>
+     <b>Sea leaves once a month, and the crossing takes 6 to 7 weeks.</b> Order by <b>Tuesday 15 September</b> to catch the Friday 25 September sailing, collectable in Harare around <b>Friday 6 November</b>. In a hurry? Air is 5 to 7 days.
+     <div class="ship-cut "><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.5v6l3.5 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>Pay by <b>Tuesday 15 September</b> to be on it.</span></div>
    </div>
    <a class="btn btn-primary" href="#/request">Get on this shipment</a>
  </div></section>
@@ -770,7 +770,7 @@ body > *{min-width:0}
  
  <div class="floatcta" id="floatCta">
    <div class="floatcta-in">
-     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included · pay by Saturday 15 August for the next shipment</span></div>
+     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included · pay by Tuesday 15 September for the next shipment</span></div>
      <a class="btn" href="#/request"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6"/></svg><span class="long">Send a link</span><span class="short">Get my price</span></a>
    </div>
  </div></div>
@@ -1012,8 +1012,19 @@ function titleCase(s){return s.replace(/\b[a-z]/g,c=>c.toUpperCase())}
 function extract(url){
  const out={ok:false,url:url,retailerId:null,retailerName:'',name:'',price:null,wasPrice:null,size:'',variant:'',availability:'Unknown',reason:''};
  let u;
- try{u=new URL(url.trim().match(/^https?:\/\//i)?url.trim():'https://'+url.trim())}catch(e){out.reason='That does not look like a web address.';return out}
+ const raw=String(url||'').trim();
+ // new URL() is far more forgiving than a shopper is. It happily accepts
+ // "not a web address at all" as the host "not", and any scheme you like, so
+ // a customer typing nonsense used to get a product card built from it.
+ try{u=new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)?raw:'https://'+raw)}
+ catch(e){out.reason='That does not look like a web address.';return out}
+ if(!/^https?:$/i.test(u.protocol)){out.reason='That link needs to start with http or https.';return out}
  const host=u.hostname.replace(/^www\./,'').toLowerCase();
+ // a real shop domain: labels separated by dots, and a letters-only ending
+ if(!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(host)||host.startsWith('-')){
+  out.reason='That does not look like a shop web address. Copy the link from the address bar of the product page.';return out}
+ if(!u.pathname||u.pathname==='/'){
+  out.reason='That is the shop\'s home page. Open the product itself and copy that link.';return out}
  const r=S.retailers.find(x=>x.domains.some(d=>host===d||host.endsWith('.'+d)));
  out.host=host;
  // Any UK shop. The retailer list is shops whose delivery rules we have

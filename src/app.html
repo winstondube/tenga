@@ -772,8 +772,19 @@ function titleCase(s){return s.replace(/\b[a-z]/g,c=>c.toUpperCase())}
 function extract(url){
  const out={ok:false,url:url,retailerId:null,retailerName:'',name:'',price:null,wasPrice:null,size:'',variant:'',availability:'Unknown',reason:''};
  let u;
- try{u=new URL(url.trim().match(/^https?:\/\//i)?url.trim():'https://'+url.trim())}catch(e){out.reason='That does not look like a web address.';return out}
+ const raw=String(url||'').trim();
+ // new URL() is far more forgiving than a shopper is. It happily accepts
+ // "not a web address at all" as the host "not", and any scheme you like, so
+ // a customer typing nonsense used to get a product card built from it.
+ try{u=new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(raw)?raw:'https://'+raw)}
+ catch(e){out.reason='That does not look like a web address.';return out}
+ if(!/^https?:$/i.test(u.protocol)){out.reason='That link needs to start with http or https.';return out}
  const host=u.hostname.replace(/^www\./,'').toLowerCase();
+ // a real shop domain: labels separated by dots, and a letters-only ending
+ if(!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(host)||host.startsWith('-')){
+  out.reason='That does not look like a shop web address. Copy the link from the address bar of the product page.';return out}
+ if(!u.pathname||u.pathname==='/'){
+  out.reason='That is the shop\'s home page. Open the product itself and copy that link.';return out}
  const r=S.retailers.find(x=>x.domains.some(d=>host===d||host.endsWith('.'+d)));
  out.host=host;
  // Any UK shop. The retailer list is shops whose delivery rules we have

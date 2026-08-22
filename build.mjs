@@ -51,7 +51,7 @@ globalThis.location = { hash: '#/', origin: ORIGIN, pathname: BASE };
 const api = eval(APP_JS + `
 ;({ S, settings: S.settings, retailers: S.retailers, restricted: S.restricted,
     viewHome, shell, quoteCalc, money, retailerById, newItem, note, icon, esc,
-    HOME_FAQ, shipSchedule, nextShipment, fmtDay, seaRate, seaRateGross, usableLitres, seaBoxFor, boxCapacityL, estimateItemKg, estimateItemL, boxLitres, estimateCargo, CAT_L, CAT_KG })`);
+    HOME_FAQ, shipSchedule, nextShipment, fmtDay, airDoorToDoor, seaRate, seaRateGross, usableLitres, seaBoxFor, boxCapacityL, estimateItemKg, estimateItemL, boxLitres, estimateCargo, CAT_L, CAT_KG })`);
 
 api.site = site;   // pages.mjs needs the contact details
 

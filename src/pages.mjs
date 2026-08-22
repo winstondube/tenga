@@ -168,7 +168,7 @@ export function buildPages(api) {
       `,
       faq: [
         [`Can I buy from ${r.name} with a Zimbabwean card?`, `Not directly. ${r.name} needs a UK billing address and most Zimbabwean cards are declined at their checkout. You pay us instead, and we pay them with a UK card.`],
-        [`How long does a ${r.name} order take to reach Zimbabwe?`, `Two to three days for ${r.name} to reach our UK address, then we check it in. By sea it waits for the monthly sailing and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so allow ${Math.round(s.seaTransitMinDays / 7)} weeks if you order by the ${s.orderByDay}th and nearer ${Math.round((s.seaTransitMaxDays + 30) / 7)} if you miss it. By air it is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days.`],
+        [`How long does a ${r.name} order take to reach Zimbabwe?`, `${s.ukLeadMinDays} to ${s.ukLeadMaxDays} days for ${r.name} to reach our UK address, then we check it in. By sea it waits for the monthly sailing and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so allow ${Math.round(s.seaTransitMinDays / 7)} weeks if you order by the ${s.orderByDay}th and nearer ${Math.round((s.seaTransitMaxDays + 30) / 7)} if you miss it. By air it is ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from paying.`],
         [`What if the price changes after I pay?`, `Small rises up to ${api.money(s.absorbIncrease)} we absorb. Anything larger and we come back to you with options before we buy: pay the difference, change the item, reduce the quantity or get a refund.`],
         [`What if it is out of stock when you go to buy it?`, `We contact you. You can wait for restock, accept a substitute you have already approved, pick something else, or take a refund on that item. We never substitute without your say-so unless you gave us a backup link up front.`]
       ]
@@ -207,7 +207,7 @@ export function buildPages(api) {
     lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
     crumbs: [['Collection', 'collection/']],
     body: `
-      <p>Sea leaves once a month and air goes as soon as your goods are with us. When it clears, we message you and your order is ready to collect in Harare.</p>
+      <p>Sea leaves once a month. Air goes as soon as your goods reach us, which makes it ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from paying. When it clears, we message you and your order is ready to collect in Harare.</p>
 
       <h2>Bring two things</h2>
       <p><b>Your collection code</b> and <b>photo ID in the recipient's name.</b> The code is a six-character code we send you the moment your payment goes through, and it sits on your tracking page for the whole journey, so you cannot lose it. We hand nothing over without both.</p>
@@ -333,8 +333,8 @@ export function buildPages(api) {
         </tbody>
       </table></div>
       <p>Bigger boxes cost less per litre, so one order beats three. <b>Your box is labelled with your name and handed over as a unit</b>, which is why nothing of yours travels loose in with somebody else's.</p>
-      <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}.</p>
-      <p>That means <b>which route is cheaper depends on how heavy your order is for its size</b>. Air charges by weight, so a small light order flies for very little and arrives in ${s.airTransitMinDays} to ${s.airTransitMaxDays} days rather than months. Sea charges for space, so it wins as soon as you are sending something dense: bottles, jars, anything liquid, and it wins by a lot. A box packed with skincare can be less than half the air price.</p>
+      <p>Air freight is bought by the kilo, at ${api.money(s.airRate)}, and takes ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from the moment you pay. That is ${s.ukLeadMinDays} to ${s.ukLeadMaxDays} days for the shop to deliver to our UK address, then ${s.airTransitMinDays} to ${s.airTransitMaxDays} days in the air.</p>
+      <p>That means <b>which route is cheaper depends on how heavy your order is for its size</b>. Air charges by weight, so a small light order flies for very little and arrives in ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days rather than months. Sea charges for space, so it wins as soon as you are sending something dense: bottles, jars, anything liquid, and it wins by a lot. A box packed with skincare can be less than half the air price.</p>
 
       ${(() => {
         // Worked from the live model rather than typed in, so it cannot drift
@@ -365,19 +365,19 @@ export function buildPages(api) {
 
       <h2>We cannot insure your order, and we will not pretend otherwise</h2>
       <p>Consumer goods going into Zimbabwe are not insurable on any terms worth having. That is a function of where the goods are going rather than anything about your order, and it applies to everyone shipping this route.</p>
-      <p>What we can tell you is the record. Our shipping partner has run this route for <b>five years without a single major incident</b>. Shipments have been delayed, sometimes by weeks. Nothing has been lost and nothing has arrived damaged beyond use. That is a track record rather than a guarantee, and we would rather you hear the difference from us than discover it later.</p>
+      <p>What we can tell you is the record. Our shipping partner has run this route <b>since 2007 without a single major incident</b>. Shipments have been delayed, sometimes by weeks. Nothing has been lost and nothing has arrived damaged beyond use. That is a track record rather than a guarantee, and we would rather you hear the difference from us than discover it later.</p>
       <p><b>Both routes are tracked.</b> Sea and air each give you a reference you can follow, and your order page updates at every stage from our UK address to the collection point in Harare.</p>
 
       <h2>Which is why we suggest air for anything expensive</h2>
-      <p>Not for the speed. If nothing is insured, the sensible thing to do with an expensive order is to reduce how long it spends in the system and how many times it is handled. Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days and a short chain of custody. Sea is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks of crossing, plus the wait for a sailing, through a longer one.</p>
+      <p>Not for the speed. If nothing is insured, the sensible thing to do with an expensive order is to reduce how long it spends in the system and how many times it is handled. Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days in the air and a short chain of custody. Sea is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks of crossing, plus the wait for a sailing, through a longer one.</p>
       <p>On an order over about ${api.money(s.adviseAirOver)}, the extra shipping is small next to what you would be carrying yourself if something went wrong. On a small order it is usually not worth it, and often air is cheaper anyway. We will tell you which we would pick and why, and then it is your call.</p>
 
       ${api.note(`<b>Sea sails once a month.</b> We hand the goods over on the ${s.handoverDay}th, so they must be with us by the ${s.goodsByDay}th, which means ordering by the ${s.orderByDay}th. Miss that and you are on the following month's boat. Air does not wait for anything.`, 'accent', 'clock')}`,
     faq: [
-      ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has five years on it without a major incident, which is a record rather than a promise. Both sea and air are tracked, so you always know where your order is.'],
+      ['Is my order insured?', 'No. Consumer goods into Zimbabwe cannot be insured on terms worth having, and that is true of everyone shipping this route. Our partner has run it since 2007 without a major incident, which is a record rather than a promise. Both sea and air are tracked, so you always know where your order is.'],
       ['Which is cheaper, sea or air?', `It depends on density, not on size or price. Sea sells labelled boxes from ${api.money(s.seaBoxes[0].price)}, air charges for weight at ${api.money(s.airRate)} a kilo. Cosmetics and liquids go cheaper by sea; clothing, shoes and wigs usually go cheaper by air. We show you both.`],
       ['Can I track it?', 'Yes, sea and air are both tracked. You get a reference and your order page updates at every stage.'],
-      ['How long does each take?', `Air is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days once your goods are with us. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
+      ['How long does each take?', `Air is ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from the moment you pay: ${s.ukLeadMinDays} to ${s.ukLeadMaxDays} days for the shop to reach our UK address, then ${s.airTransitMinDays} to ${s.airTransitMaxDays} days in the air. Sea sails on the ${s.handoverDay}th of the month and the crossing takes ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks, so order by the ${s.orderByDay}th to catch it.`],
       ['Why would I ever pick sea then?', 'Because as soon as your order has any weight to it, sea is dramatically cheaper. A full box of bottles can cost less than half what the same box would cost to fly. If you are stocking up rather than replacing one thing, and you can wait, sea is the one to take.']
     ]
   });
@@ -497,7 +497,7 @@ export function buildPages(api) {
       ['Is my money safe if you cannot buy the item?', 'You are refunded. Every refund is recorded against your order with a reference and a reason.']
     ]],
     ['Getting it to Zimbabwe', [
-      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take two to five days to reach our UK address. By sea it then joins the monthly sailing, closing on the ${s.orderByDay}th, and the crossing is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks. By air it is ${s.airTransitMinDays} to ${s.airTransitMaxDays} days.`],
+      ['How long does the whole thing take?', `We quote within ${s.responseHours} hours. Shops take ${s.ukLeadMinDays} to ${s.ukLeadMaxDays} days to reach our UK address. By sea it then joins the monthly sailing, closing on the ${s.orderByDay}th, and the crossing is ${Math.round(s.seaTransitMinDays / 7)} to ${Math.round(s.seaTransitMaxDays / 7)} weeks. By air the whole thing is ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from when you pay.`],
       ['Where do I collect it?', 'Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet.'],
       ['Do you deliver to my address?', 'Not yet, anywhere in Zimbabwe. If you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.'],
       ['Can someone else collect for me?', 'Yes. Tell us their name before they come and they bring their own photo ID plus your collection code. The code does not change. Do not send someone without telling us first, because we will turn them away.'],

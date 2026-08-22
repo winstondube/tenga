@@ -696,6 +696,9 @@ const DEFAULT_SETTINGS={
  // Six weeks on the water, and departures are six weeks apart, so the total
  // wait is 6 to 12 weeks depending on which shipment you catch.
  seaTransitMinDays:42, seaTransitMaxDays:49, airTransitMinDays:5, airTransitMaxDays:7,
+ // The shop has to reach our UK address before anything can fly, so the number
+ // a customer actually experiences is this plus the air days.
+ ukLeadMinDays:2, ukLeadMaxDays:5,
  // Sea sails monthly. The partner needs the goods by the 25th, so they must
  // reach us by the 20th, which means customers must order by the 15th.
  handoverDay:25, goodsByDay:20, orderByDay:15,
@@ -1368,8 +1371,13 @@ function shipSchedule(count){
  }
  return out;
 }
-/* Air does not wait for a boat. It leaves once the goods are with us and
-   checked, so the only lead time is the retailer's own delivery. */
+/* Air does not wait for a boat, but the shop still has to reach us first, so
+   what a customer experiences from paying is both legs added together. */
+function airDoorToDoor(){
+ const st=S.settings;
+ return {min:(Number(st.ukLeadMinDays)||2)+(Number(st.airTransitMinDays)||5),
+         max:(Number(st.ukLeadMaxDays)||5)+(Number(st.airTransitMaxDays)||7)};
+}
 function airEta(){
  const st=S.settings;
  return {min:Date.now()+(3+(Number(st.airTransitMinDays)||5))*DAY,
@@ -1712,7 +1720,7 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
         <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaBoxes[0].price)}<span style="font-size:13px;font-weight:400">/box</span></div><div class="tiny muted">By sea, per labelled box, up to ${money(st.seaBoxes[st.seaBoxes.length-1].price)} for a full one. Air ${money(st.airRate)}/kg</div></div>
       </div>
-      ${note(`<b>You pay once, and both routes are tracked.</b> Shipping is included in your total. Sea travels in a labelled box of its own, air is charged by weight, and we show you both prices before you choose. Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. Our shipping partner has run this route for five years without a major incident.`,'accent','check')}
+      ${note(`<b>You pay once, and both routes are tracked.</b> Shipping is included in your total. Sea travels in a labelled box of its own, air is charged by weight, and we show you both prices before you choose. Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. Our shipping partner has run this route since 2007 without a major incident.`,'accent','check')}
     </div>
    </section>
 
@@ -1764,7 +1772,7 @@ function shipBand(n){
      <span class="ship-unit">day${n.daysAway===1?'':'s'}<br>until the<br>next shipment</span>
    </div>
    <div class="ship-detail">
-     <b>Sea leaves once a month, and the crossing takes ${Math.round(S.settings.seaTransitMinDays/7)} to ${Math.round(S.settings.seaTransitMaxDays/7)} weeks.</b> Order by <b>${fmtDay(n.cutoff)}</b> to catch the ${fmtDay(n.departs)} sailing, collectable in Harare around <b>${fmtDay(n.arrives)}</b>. In a hurry? Air is ${S.settings.airTransitMinDays} to ${S.settings.airTransitMaxDays} days.
+     <b>Sea leaves once a month, and the crossing takes ${Math.round(S.settings.seaTransitMinDays/7)} to ${Math.round(S.settings.seaTransitMaxDays/7)} weeks.</b> Order by <b>${fmtDay(n.cutoff)}</b> to catch the ${fmtDay(n.departs)} sailing, collectable in Harare around <b>${fmtDay(n.arrives)}</b>. In a hurry? Air is ${airDoorToDoor().min} to ${airDoorToDoor().max} days from paying.
      <div class="ship-cut ${late?'late':''}">${icon('clock',14)}<span>${n.cutoffDays<=0?'Payment for this shipment has closed. Order now and you are on the one after.':`Pay by <b>${fmtDay(n.cutoff)}</b> to be on it${late?', which is soon':''}.`}</span></div>
    </div>
    <a class="btn btn-primary" href="#/request">Get on this shipment</a>
@@ -1798,7 +1806,7 @@ function trustSection(){
 function HOME_FAQ(){
  const st=S.settings;
  return [
-  ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and shipping. Sea is charged on the space your order takes in the container box, about ${money(round2(seaRate()*(1+(st.cargoSafetyPct||0)/100)))} a litre; air is ${money(round2(st.airRate*(1+(st.cargoSafetyPct||0)/100)))} a kilo. Plus ${money(st.clearance)} clearance. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
+  ['How much does it cost in total?',`Product at cost, UK delivery at cost, our fee of ${st.procurementPct}% with a ${money(st.procurementMin)} minimum, and shipping. Sea is charged on the space your order takes in the container box, about ${money(round2(seaRate()*(1+(st.cargoSafetyPct||0)/100)))} a litre; air is ${money(round2(st.airRate*(1+(st.cargoSafetyPct||0)/100)))} a kilo and ${airDoorToDoor().min} to ${airDoorToDoor().max} days. Plus ${money(st.clearance)} clearance. All of it in one payment, with every line shown before you pay. Minimum order is ${money(st.minSpend)} of product value.`],
   ['Which UK shops can you buy from?','Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it.'],
   ['Where do I collect it?','Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after.']
  ];
@@ -2185,7 +2193,7 @@ function shipChooser(d,q){
   <div class="ship-opts">
    ${opt('sea','Sea',q.sea.amount,`Order by ${fmtDay(n.cutoff)}, collect around ${fmtDay(n.arrives)}`,
         `${esc(q.sea.tier)}, up to ${q.sea.tierMaxL} litres`)}
-   ${opt('air','Air',q.air.amount,`${st.airTransitMinDays} to ${st.airTransitMaxDays} days once we have it`,
+   ${opt('air','Air',q.air.amount,`${airDoorToDoor().min} to ${airDoorToDoor().max} days from paying, including the shop reaching us`,
         `${q.air.kg} kg by weight`)}
   </div>
   ${cheaper==='air'&&mode!=='air'
@@ -2531,7 +2539,7 @@ function viewQuote(ref,token){
        <div class="rc-line"><span>${k==='sea'?esc(r.seaTier)+' box, up to '+r.sea.tierMaxL+' L':r.cargoKg+' kg by weight'}</span><span class="mono">${money(r.cargoEst)}</span></div>
        <div class="rc-when">${k==='sea'
           ? 'Order by '+fmtDay(nextShipment().cutoff)+', collect around '+fmtDay(nextShipment().arrives)
-          : S.settings.airTransitMinDays+' to '+S.settings.airTransitMaxDays+' days once we have it'}</div>
+          : airDoorToDoor().min+' to '+airDoorToDoor().max+' days from paying, shop delivery included'}</div>
        <button class="btn ${r.total<=Math.min(sea.total,air.total)?'btn-primary':''} btn-block" data-act="pay" data-ref="${o.ref}" data-mode="${k}" ${expired?'disabled':''}>Pay ${money(r.total)} by ${label.toLowerCase()}</button>
      </div>`).join('')}
    </div>

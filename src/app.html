@@ -680,10 +680,10 @@ const DEFAULT_SETTINGS={
  // Card costs are ex VAT at low quantity and roughly halve at 100+ bundles.
  cellMmL:220, cellMmW:120, cellMmH:160, cellsPerArchiveBox:12, boxFillPct:80,
  seaBoxes:[
-  {id:'s', name:'Small', mm:[220,120,160], cells:1,  price:16,  card:0.26, from:'ProPackaging'},
-  {id:'l', name:'Layer', mm:[450,350,80],  cells:3,  price:42,  card:1.23, from:'Stampbourne'},
-  {id:'h', name:'Half',  mm:[440,340,144], cells:6,  price:78,  card:1.10, from:'Priory Direct'},
-  {id:'f', name:'Full',  mm:[453,366,326], cells:12, price:150, card:5.99, from:'Safestore'}
+  {id:'s', name:'Small', mm:[220,120,160], cells:1,  price:16,  card:0.26, from:'ProPackaging', holds:'about six perfumes, or four face creams'},
+  {id:'l', name:'Layer', mm:[450,350,80],  cells:3,  price:42,  card:1.23, from:'Stampbourne', holds:'a shelf of skincare, or three pairs of jeans'},
+  {id:'h', name:'Half',  mm:[440,340,144], cells:6,  price:78,  card:1.10, from:'Priory Direct', holds:'a big beauty haul, or six pairs of jeans'},
+  {id:'f', name:'Full',  mm:[453,366,326], cells:12, price:150, card:5.99, from:'Safestore', holds:'the lot, to yourself'}
  ],
  airRate:12.5, airMin:8, adviseAirOver:250,
  clearance:6, localDelivery:0, volDivisor:5000, packagingKg:0.3,
@@ -1252,6 +1252,10 @@ function boxCapacityL(b){
  const st=S.settings, i=b.mm.map(x=>x-6);
  return round2(i[0]*i[1]*i[2]/1e6*(st.boxFillPct||80)/100);
 }
+function boxHolds(name){
+ const b=(S.settings.seaBoxes||[]).find(x=>x.name===String(name||'').split(' ')[0]);
+ return b&&b.holds?b.holds:'';
+}
 function seaBoxFor(litres){
  const st=S.settings, boxes=(st.seaBoxes||[]).slice().sort((a,b)=>a.cells-b.cells);
  if(!boxes.length)return {name:'Box',price:st.seaBoxPrice,cells:8,count:1,capacity:0,headroom:0};
@@ -1650,7 +1654,7 @@ function floatCta(){
  const st=S.settings, n=nextShipment();
  return `<div class="floatcta" id="floatCta">
    <div class="floatcta-in">
-     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included${n.cutoffDays>0?` · pay by ${fmtDay(n.cutoff)} for the next shipment`:''}</span></div>
+     <div class="txt"><b>Get a price on anything from the UK</b><span class="sub">One payment, shipping included${n.cutoffDays>0?` · pay by ${fmtDay(n.cutoff)} for the next shipment`:''} · in a hurry, choose air: ${st.airTransitMinDays} to ${st.airTransitMaxDays} days from when we receive it</span></div>
      <a class="btn" href="#/request">${icon('link',16)}<span class="long">Send a link</span><span class="short">Get my price</span></a>
    </div>
  </div>`;
@@ -1718,7 +1722,7 @@ function viewHome(){
         <div class="stack-s"><div class="tiny muted">Minimum spend</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.minSpend)}</div><div class="tiny muted">Product value, per order</div></div>
         <div class="stack-s"><div class="tiny muted">Our fee</div><div class="mono" style="font-size:21px;font-weight:700">${st.procurementPct}%</div><div class="tiny muted">Of product value, minimum ${money(st.procurementMin)}</div></div>
         <div class="stack-s"><div class="tiny muted">UK delivery</div><div class="mono" style="font-size:21px;font-weight:700">At cost</div><div class="tiny muted">Per shop, no mark up</div></div>
-        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaBoxes[0].price)}<span style="font-size:13px;font-weight:400">/box</span></div><div class="tiny muted">By sea, per labelled box, up to ${money(st.seaBoxes[st.seaBoxes.length-1].price)} for a full one. Air ${money(st.airRate)}/kg</div></div>
+        <div class="stack-s"><div class="tiny muted">To Zimbabwe</div><div class="mono" style="font-size:21px;font-weight:700">${money(st.seaBoxes[0].price)}<span style="font-size:13px;font-weight:400">/box</span></div><div class="tiny muted">A small box by sea, about the size of a shoebox and enough for six perfumes. Up to ${money(st.seaBoxes[st.seaBoxes.length-1].price)} for a whole box to yourself. <a class="link" href="sea-or-air/">See the sizes</a></div></div>
       </div>
       ${note(`<b>You pay once, and both routes are tracked.</b> Shipping is included in your total. Sea travels in a labelled box of its own, air is charged by weight, and we show you both prices before you choose. Nothing we ship can be insured, because cover is not available for consumer goods going into Zimbabwe. Our shipping partner has run this route since 2007 without a major incident.`,'accent','check')}
     </div>
@@ -2192,7 +2196,7 @@ function shipChooser(d,q){
   <div class="tiny muted" style="letter-spacing:.06em;text-transform:uppercase">How it travels</div>
   <div class="ship-opts">
    ${opt('sea','Sea',q.sea.amount,`Order by ${fmtDay(n.cutoff)}, collect around ${fmtDay(n.arrives)}`,
-        `${esc(q.sea.tier)}, up to ${q.sea.tierMaxL} litres`)}
+        `${esc(q.sea.tier)} box · ${esc(boxHolds(q.sea.tier))}`)}
    ${opt('air','Air',q.air.amount,`${airDoorToDoor().min} to ${airDoorToDoor().max} days from paying, including the shop reaching us`,
         `${q.air.kg} kg by weight`)}
   </div>
@@ -2536,7 +2540,7 @@ function viewQuote(ref,token){
      <div class="route-card ${k}">
        <div class="rc-h"><b>${label}</b>${r.total<=Math.min(sea.total,air.total)?pill('Cheaper','accent'):''}</div>
        <div class="rc-amt mono">${money(r.total)}</div>
-       <div class="rc-line"><span>${k==='sea'?esc(r.seaTier)+' box, up to '+r.sea.tierMaxL+' L':r.cargoKg+' kg by weight'}</span><span class="mono">${money(r.cargoEst)}</span></div>
+       <div class="rc-line"><span>${k==='sea'?esc(r.seaTier)+' box · '+esc(boxHolds(r.seaTier)):r.cargoKg+' kg by weight'}</span><span class="mono">${money(r.cargoEst)}</span></div>
        <div class="rc-when">${k==='sea'
           ? 'Order by '+fmtDay(nextShipment().cutoff)+', collect around '+fmtDay(nextShipment().arrives)
           : airDoorToDoor().min+' to '+airDoorToDoor().max+' days from paying, shop delivery included'}</div>

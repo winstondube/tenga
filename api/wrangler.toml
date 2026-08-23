@@ -7,7 +7,7 @@ compatibility_date = "2026-08-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "tenga"
-database_id = "PUT_THE_ID_HERE_AFTER_wrangler_d1_create_tenga"
+database_id = "e946c9a5-84db-4942-9de8-351710fc23ab"
 
 [vars]
 # Both, so the switch to the real domain does not need an API deploy.

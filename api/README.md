@@ -91,3 +91,24 @@ arrived, and never decides how much.**
 
 - The app talking to this instead of localStorage
 - WhatsApp sending (email is done)
+
+## Why PBKDF2 is at 100k, not 600k
+
+A Worker on the free tier gets 10ms of CPU per request. 210,000 PBKDF2 rounds
+costs about 16ms, so login returned a 500 in production while passing locally,
+where no such limit exists. It is now 100,000 rounds, about 7.7ms.
+
+The iteration count is what protects a **guessable** password in a leaked
+database. Staff passwords here are generated, 24 random characters, so the
+search space does the work instead: no iteration count makes that crackable,
+and none would save "summer2026". `seed.mjs` enforces a 16-character floor,
+which is the assumption this rests on.
+
+If staff accounts ever get human-chosen passwords, raise the rounds and move
+the Worker to the paid plan.
+
+## Live
+
+- API: `https://tenga-api.winstondube.workers.dev`
+- Database: D1 `tenga`, region WEUR
+- Email: verified from `tengauk.com`, send-only key scoped to that domain

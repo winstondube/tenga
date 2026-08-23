@@ -5,7 +5,8 @@ import { spawn } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const BASE = process.env.API || 'http://127.0.0.1:8787';
-const ORIGIN = 'https://winstondube.github.io';
+const ORIGIN = process.env.ORIGIN || 'https://tengauk.com';
+const STAFF = process.env.SEED_EMAIL || 'ops@tengauk.com';
 let pass = 0, fail = 0;
 const ok = (label, cond, extra='') => { cond ? pass++ : fail++;
   console.log(`  ${cond ? 'ok  ' : 'FAIL'}  ${label}${extra && !cond ? '  -> ' + extra : ''}`); };
@@ -67,9 +68,9 @@ r = await call('/orders/lookup', { method: 'POST', body: JSON.stringify({ ref, w
 ok('the recipient phone opens it', r.status === 200);
 
 console.log('\nstaff');
-r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ email: 'ops@tenga.uk', password: 'wrong' }) });
+r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ email: STAFF, password: 'wrong' }) });
 ok('a wrong password is refused', r.status === 401);
-r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ email: 'ops@tenga.uk', password: process.env.SEED_PW || 'test-password-123' }) });
+r = await call('/staff/login', { method: 'POST', body: JSON.stringify({ email: STAFF, password: process.env.SEED_PW || 'test-password-123' }) });
 const authed = r.status === 200;
 ok('seeded staff can sign in', authed, r.status + ' ' + JSON.stringify(r.body));
 const cookie = (r.cookie || '').split(';')[0];

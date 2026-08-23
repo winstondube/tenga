@@ -24,13 +24,22 @@ export function collectCode() {
 export const token = () => 't_' + [...crypto.getRandomValues(new Uint8Array(16))]
   .map(n => n.toString(36)).join('').slice(0, 22);
 
-/* Passwords and session ids. PBKDF2 because Workers give us WebCrypto and
-   nothing else worth using; the iteration count is the security. */
+/* Passwords and session ids.
+ *
+ * 100k PBKDF2 rounds, not the 600k OWASP suggests, because a Worker on the
+ * free tier gets 10ms of CPU and 210k rounds alone costs 16ms. The iteration
+ * count is what protects a GUESSABLE password in a leaked database. These
+ * passwords are generated, 22 random characters, so the search space does the
+ * work instead: no iteration count makes that crackable, and none saves a
+ * password like "summer2026". Hence the length floor in seed.mjs, which is the
+ * assumption this rests on. If staff accounts ever get human-chosen passwords,
+ * this number has to go up and the Worker has to move to the paid plan. */
+const PBKDF2_ROUNDS = 100000;
 export async function hashPw(pw, saltHex) {
   const salt = saltHex ? hexToBytes(saltHex) : crypto.getRandomValues(new Uint8Array(16));
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 210000, hash: 'SHA-256' }, key, 256);
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ROUNDS, hash: 'SHA-256' }, key, 256);
   return bytesToHex(salt) + '$' + bytesToHex(new Uint8Array(bits));
 }
 export async function verifyPw(pw, stored) {

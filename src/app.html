@@ -722,7 +722,14 @@ const DEFAULT_RESTRICTED=['bleach','peroxide','developer','aerosol','pressurised
 /* ---------------- store ---------------- */
 const KEY='tenga_uk_v1';
 let S=null;
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* Anything that changed the order we are looking at goes to the server too.
+   Every admin action already funnels through save(), so hooking it here means
+   no action can be added later that forgets to sync. */
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+ // and push the order currently open, coalesced so a keystroke is not a request
+ if(API.on&&S.session==='admin'){ const o=curOrder(); if(o&&o.ref)syncOrder(o) }
+}
 function load(){
  try{
   const raw=localStorage.getItem(KEY);
@@ -1090,6 +1097,101 @@ function looksLikeProductLink(v){ return !v || extract(v).ok }
 /* Deliberately loose: enough to catch a typo, not enough to reject a valid
    address we have not thought of. */
 function looksLikeEmail(v){ return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(String(v||'').trim()) }
+function loadingPanel(msg){
+  return `<div class="narrow-s"><div class="card card-p stack" style="align-items:center;text-align:center">
+    <i class="spin"></i><div class="small muted">${esc(msg)}…</div></div></div>`;
+}
+/* Fetch an order this device has never seen, once, then re-render. The guard
+   matters because render() runs on every hashchange and would otherwise fire a
+   request per paint. */
+const FETCHED=new Set();
+function fetchOrderOnce(ref,token){
+  const k=ref+'/'+token;
+  if(FETCHED.has(k))return; FETCHED.add(k);
+  API.getOrder(ref,token)
+    .then(o=>{ if(!o||!o.ref)throw new Error('empty');
+      S.orders=S.orders.filter(x=>x.ref!==o.ref).concat([o]); save(); rerender(true) })
+    .catch(()=>{ FETCHED.delete(k);
+      const el=document.querySelector('#app');
+      if(el)el.innerHTML=shell(note('That link is not valid. Check the link we sent you, or <a class="link" href="#/lookup">look up your reference</a>.','danger','lock')) });
+}
+
+/* Replace what this browser thinks it knows with what the server says, which
+   is the point of having a server: two people, one list. */
+async function loadOrdersFromServer(){
+  if(!API.on || S.session!=='admin') return;
+  try{
+    const res=await API.listOrders();
+    if(Array.isArray(res.orders)){
+      S.orders=res.orders;
+      S.serverLoadedAt=Date.now();
+      save(); rerender(true);
+    }
+  }catch(e){
+    if(e.status===401){ S.session=null; S.staff=null; save(); rerender(true) }
+    else toast('Could not load orders: '+e.message);
+  }
+}
+
+/* A cookie outlives a page refresh, so ask the server who we are rather than
+   trusting a flag in localStorage. */
+async function restoreSession(){
+  if(!API.on) return;
+  try{
+    const who=await API.me();
+    S.session='admin'; S.staff=who; save();
+    await loadOrdersFromServer();
+  }catch(e){
+    if(S.session==='admin'){ S.session=null; S.staff=null; save(); rerender(true) }
+  }
+}
+
+/* ---------------- the server ----------------
+   With no API configured the whole app runs in this browser on localStorage,
+   which is the demo. Configured, orders are created on the server, staff sign
+   in with a real password, and both of you see the same list.
+
+   Every call fails soft: if the network is down the customer still sees their
+   order, because losing what they just typed is worse than being out of date. */
+const API = {
+  base: (typeof window !== 'undefined' && window.TENGA_API) || '',
+  get on(){ return !!this.base },
+  async call(path, opts = {}) {
+    const r = await fetch(this.base + path, {
+      method: opts.method || 'GET',
+      credentials: 'include',                 // the staff session cookie
+      headers: { 'content-type': 'application/json' },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+    let body = null; try { body = await r.json() } catch (e) {}
+    if (!r.ok) throw Object.assign(new Error((body && body.error) || ('http ' + r.status)), { status: r.status, body });
+    return body;
+  },
+  createOrder(o){ return this.call('/orders', { method:'POST', body:o }) },
+  getOrder(ref, tok){ return this.call('/orders/' + encodeURIComponent(ref) + (tok ? '?token=' + encodeURIComponent(tok) : '')) },
+  lookup(ref, who){ return this.call('/orders/lookup', { method:'POST', body:{ ref, who } }) },
+  listOrders(){ return this.call('/orders') },
+  saveOrder(o){ return this.call('/orders/' + encodeURIComponent(o.ref), { method:'PATCH', body:{ doc:o, total: quoteCalc(o).total } }) },
+  login(email, password){ return this.call('/staff/login', { method:'POST', body:{ email, password } }) },
+  logout(){ return this.call('/staff/logout', { method:'POST' }) },
+  me(){ return this.call('/staff/me') },
+  sendMessage(ref, type){ return this.call('/orders/' + encodeURIComponent(ref) + '/messages', { method:'POST', body:{ type } }) }
+};
+
+/* Pushing a changed order back, coalesced. Editing a price fires an input
+   event per keystroke, and each one re-renders; without this every keystroke
+   would be a request. */
+const PENDING_SAVES = new Map();
+function syncOrder(o){
+  if (!API.on || !o || !o.ref || S.session !== 'admin') return;
+  clearTimeout(PENDING_SAVES.get(o.ref));
+  PENDING_SAVES.set(o.ref, setTimeout(async () => {
+    PENDING_SAVES.delete(o.ref);
+    try { await API.saveOrder(o) }
+    catch (e) { toast('Could not save to the server: ' + e.message) }
+  }, 700));
+}
+
 function restrictedHits(text){
  const t=String(text||'').toLowerCase();
  return S.restricted.filter(k=>t.includes(k.toLowerCase()));
@@ -1674,14 +1776,25 @@ function lockedPanel(){
 }
 
 function signinPanel(){
+ // With a server configured, staff sign in for real. Without one this is still
+ // the demo's role switch, so the prototype keeps working offline.
+ const real = API.on;
  return `<div class="modal-bg" data-act="closeSignin">
   <div class="modal">
    <div class="card-h"><b>Sign in</b><button class="btn btn-xs btn-ghost" data-act="closeSignin" aria-label="Close">${icon('x',14)}</button></div>
    <div class="card-b stack">
-     ${note('<b>No accounts in this build yet.</b> Choose which side you want to look at. In the finished product customers sign in here and staff use a separate operations login.','info','shield')}
-     <button class="btn btn-primary btn-block btn-lg" data-act="signinAs" data-v="customer">${icon('user',17)}Continue as a customer</button>
-     <button class="btn btn-block btn-lg" data-act="signinAs" data-v="admin">${icon('lock',17)}Staff sign in, operations</button>
-     <div class="tiny muted center">Customers will not need an account to order or to track. Sign in is for saved recipients and repeat orders.</div>
+     ${real ? `
+       ${note('Customers do not need an account. Your tracking link is all you need, and <a class="link" href="#/lookup">looking up an order</a> needs the reference and the email or phone you used.','info','user')}
+       <div class="eyebrow">Staff sign in</div>
+       <label class="f">Email<input type="email" id="siEmail" autocomplete="username" placeholder="you@tengauk.com"></label>
+       <label class="f">Password<input type="password" id="siPw" autocomplete="current-password"></label>
+       <button class="btn btn-primary btn-block btn-lg" data-act="signinSubmit">${icon('lock',17)}Sign in</button>
+       <div id="siMsg"></div>
+     ` : `
+       ${note('<b>No server configured, so this build has no accounts.</b> Choose which side you want to look at.','info','shield')}
+       <button class="btn btn-primary btn-block btn-lg" data-act="signinAs" data-v="customer">${icon('user',17)}Continue as a customer</button>
+       <button class="btn btn-block btn-lg" data-act="signinAs" data-v="admin">${icon('lock',17)}Staff sign in, operations</button>
+     `}
    </div>
   </div>
  </div>`;
@@ -2391,6 +2504,9 @@ function customerStatusLine(o){
 
 function viewTrack(ref,token){
  const o=getOrder(ref);
+ // The link was emailed, so it will often be opened on a phone that has never
+ // seen this order. Fetch it rather than claim it does not exist.
+ if(!o&&API.on){ fetchOrderOnce(ref,token); return loadingPanel('Finding your order') }
  if(!o||o.token!==token)return `<div class="narrow-s">${note('That tracking link is not valid. Check the link we sent you, or <a class="link" href="#/lookup">look up your reference</a>.','danger','lock')}</div>`;
  const t=payTotals(o), q=o.quote?quoteCalc(o):null, cur=JOURNEY_RANK[o.status]!=null?JOURNEY_RANK[o.status]:0;
  const s=customerStatusLine(o);
@@ -2489,6 +2605,7 @@ function viewTrack(ref,token){
 
 function viewQuote(ref,token){
  const o=getOrder(ref);
+ if(!o&&API.on){ fetchOrderOnce(ref,token); return loadingPanel('Finding your quote') }
  if(!o||o.token!==token)return `<div class="narrow-s">${note('That link is not valid.','danger','lock')}</div>`;
  if(!o.quote||!o.quote.sentAt)return `<div class="narrow-s">${note('Your quote is not ready yet. We will email you as soon as it is.','info','clock')}</div>`;
  const q=quoteCalc(o), expired=quoteExpired(o), t=payTotals(o);
@@ -3536,12 +3653,28 @@ document.addEventListener('click',e=>{
   menu(){ S.menuOpen=!S.menuOpen; save(); rerender(true) },
   closeMenu(){ S.menuOpen=false; save(); },
   signin(){ S.signinOpen=true; S.menuOpen=false; save(); rerender(true) },
+  async signinSubmit(){
+    const email=val('siEmail'), pw=val('siPw');
+    const box=document.getElementById('siMsg');
+    const fail=m=>{ if(box)box.innerHTML=note(esc(m),'danger','alert') };
+    if(!email||!pw)return fail('Enter your email and password.');
+    try{
+      const who=await API.login(email,pw);
+      S.session='admin'; S.staff=who; S.signinOpen=false; save();
+      toast('Signed in as '+who.name);
+      await loadOrdersFromServer();
+      go('#/admin');
+    }catch(e){
+      fail(e.status===401 ? 'Those details do not match.' : 'Could not sign in: '+e.message);
+    }
+  },
   closeSignin(){ if(el.classList.contains('modal-bg') && e.target.closest('.modal') && !e.target.closest('[data-act="closeSignin"][class*=btn]')) return;
     S.signinOpen=false; save(); rerender(true) },
   signinAs(){ S.session=d.v; S.signinOpen=false; save();
     logAudit('', d.v==='admin'?'Operations sign in':'Customer sign in','','demo session');
     location.hash = d.v==='admin' ? '#/admin' : '#/'; rerender(); },
-  signout(){ S.session=null; save(); location.hash='#/'; rerender(); toast('Signed out') },
+  signout(){
+    if(API.on){ API.logout().catch(()=>{}); S.staff=null; } S.session=null; save(); location.hash='#/'; rerender(); toast('Signed out') },
   reset(){ if(confirm('Clear all demo data and start again with the seeded example orders?')){localStorage.removeItem(KEY);fresh();location.hash='#/';render();toast('Demo reset')} },
   tab(){ VIEW.adminTab=d.v; rerender(true); },
   openOrder(){ VIEW.adminTab='review'; go('#/admin/order/'+d.ref); },
@@ -3636,6 +3769,26 @@ document.addEventListener('click',e=>{
     logAudit(o.ref,'Request submitted','',o.items.length+' items','');
     logMsg(o.ref,'Request received','Email',o.customer.email,'We have received your request. We are checking the current product price, availability and UK delivery cost. You will receive a final quote before payment.');
     S.draft=null;save();go('#/submitted/'+o.ref);
+    // The order is now on this device. Put it on the server too, and take the
+    // server's reference, token and collection code as the real ones, because
+    // a reference invented in a browser could collide with somebody else's.
+    if(API.on){
+      API.createOrder(Object.assign({}, o, {quotedTotal: quoteCalc(o).total}))
+        .then(res=>{
+          const local=o.ref;
+          o.ref=res.ref; o.token=res.token; if(res.collectCode)o.collectCode=res.collectCode;
+          o.timeline.forEach(t=>{ if(t.ref)t.ref=res.ref });
+          S.messages.filter(m=>m.ref===local).forEach(m=>m.ref=res.ref);
+          S.audit.filter(a=>a.ref===local).forEach(a=>a.ref=res.ref);
+          save();
+          if(location.hash.includes(local))go('#/submitted/'+o.ref); else rerender(true);
+          syncOrder(o);
+        })
+        .catch(e=>{
+          o.notSynced=true; save();
+          toast('Saved on this device. We could not reach the server: '+e.message);
+        });
+    }
   },
   lookup(){
     // References run in sequence, so a reference alone is a guess away from
@@ -3647,6 +3800,12 @@ document.addEventListener('click',e=>{
     const fail=()=>{if(box)box.innerHTML=note('We cannot match that. Check the reference and the email or phone number you ordered with.','danger','alert')};
     if(!r||!who)return fail();
     const digits=x=>String(x||'').replace(/[^0-9]/g,'');
+    if(API.on){
+      API.lookup(r,who)
+        .then(res=>{ go('#/track/'+res.ref+'/'+res.token) })
+        .catch(()=>fail());
+      return;
+    }
     const o=S.orders.find(x=>{
       if(x.ref.toUpperCase()!==r)return false;
       const email=String(x.customer.email||'').toLowerCase();
@@ -3970,4 +4129,6 @@ function applyPaymentEffects(o,p){
 if(!load())fresh();
 if(!S.batches)S.batches=[];
 render();
+// After the first paint, so a slow network never delays the page.
+restoreSession();
 </script>

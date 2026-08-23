@@ -4,6 +4,9 @@
   "base": "/",
   "domain": "tengauk.com",
   "_whenTheDomainIsLive": "Run: node golive.mjs   It sets url to https://tengauk.com, base to /, writes the CNAME file and flips indexable. Do it only once DNS resolves, because base=/ breaks the github.io copy.",
+  "apiUrl": "https://tenga-api.winstondube.workers.dev",
+  "_apiUrl": "Empty string means the app runs entirely in the browser on localStorage, which is the demo. Set, and orders are created on the server, staff sign in with a real password, and the two of you see the same list.",
+
   "indexable": true,
   "_indexable": "false emits <meta name='robots' content='noindex'> and a Disallow-all robots.txt. Keep it false while the demo carries fake customer data. Flip to true the day you launch.",
   "name": "Tenga UK",

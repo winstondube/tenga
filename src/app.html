@@ -649,7 +649,7 @@ const JOURNEY=[
  {k:'Handed to cargo company',label:'Handed to the cargo company',desc:'Packed and booked onto a shipment.',leg:'zw'},
  {k:'In transit to Zimbabwe',label:'In transit to Zimbabwe',desc:'On its way.',leg:'zw'},
  {k:'Arrived in Zimbabwe',label:'Arrived in Zimbabwe',desc:'Through customs clearance and on its way to the collection point.',leg:'zw'},
- {k:'Delivered',label:'Collected',desc:'Picked up from our Harare collection point.',leg:'zw'}
+ {k:'Delivered',label:'Collected',desc:'Picked up from '+[ 'Mbare Grillz','9 Williams Avenue','Ardbennie','Harare' ].join(', ')+'.',leg:'zw'}
 ];
 const JOURNEY_RANK={};
 (function(){
@@ -1182,6 +1182,13 @@ async function restoreSession(){
 
    Every call fails soft: if the network is down the customer still sees their
    order, because losing what they just typed is worse than being out of date. */
+/* The one place we hand orders over. Injected at build time from site.json so
+   the site and the app can never disagree about where to send someone. */
+const COLLECT = (typeof window!=='undefined' && window.TENGA_COLLECT) || {
+  name:'Mbare Grillz', street:'9 Williams Avenue', area:'Ardbennie', city:'Harare', hours:''
+};
+const collectLine = () => [COLLECT.name, COLLECT.street, COLLECT.area, COLLECT.city].filter(Boolean).join(', ');
+
 const API = {
   base: (typeof window !== 'undefined' && window.TENGA_API) || '',
   get on(){ return !!this.base },
@@ -2226,7 +2233,7 @@ function goToStep(id,focus){
 
 function draft(){
  if(!S.draft)S.draft={items:[],pending:null,customer:{name:'',email:'',whatsapp:'',country:'Zimbabwe'},
-   recipient:{name:'',phone:'',town:'Harare',address:'',collection:'Harare collection point',instructions:''},partOfLargerOrder:false,notes:''};
+   recipient:{name:'',phone:'',town:'Harare',address:'',collection:collectLine(),instructions:''},partOfLargerOrder:false,notes:''};
  return S.draft;
 }
 function viewRequest(){
@@ -2277,7 +2284,7 @@ function viewRequest(){
        <label class="f">Recipient name<input type="text" data-bind="recipient.name" value="${esc(d.recipient.name)}"></label>
        <label class="f">Recipient phone<input type="tel" data-bind="recipient.phone" placeholder="+263" value="${esc(d.recipient.phone)}"></label>
      </div>
-     ${note('<b>Collected in Harare.</b> Every order is picked up from our Harare collection point, so there is no delivery address to give. Once you pay we send you a collection code, and whoever collects brings that code plus photo ID in the name above. We hand nothing over without both.','ochre','pin')}
+     ${note('<b>Collected in Harare.</b> Every order is picked up from <b>'+esc(collectLine())+'</b>, so there is no delivery address to give. Once you pay we send you a collection code, and whoever collects brings that code plus photo ID in the name above. We hand nothing over without both.','ochre','pin')}
      <label class="f">Anything we should know<textarea data-bind="notes" placeholder="Delivery notes, timing, who to call">${esc(d.notes)}</textarea></label>
      <label class="check"><input type="checkbox" data-bind="partOfLargerOrder" ${d.partOfLargerOrder?'checked':''}><span>This is part of a larger order I am putting together, please hold it for consolidation.</span></label>
    </div>
@@ -2522,7 +2529,7 @@ function customerStatusLine(o){
  // The whole Zimbabwe leg used to fall past this point to the "your quote is on
  // its way" default, which is the wrong thing to tell someone whose parcel has
  // already landed. Each stage says where the parcel actually is.
- if(o.status==='Ready for collection')return {tone:'accent',ic:'pin',text:'Your order is in Harare and ready to collect. Bring your collection code and photo ID.',cta:{label:'Where to collect',href:'collection/'}};
+ if(o.status==='Ready for collection')return {tone:'accent',ic:'pin',text:'Your order is ready to collect at '+collectLine()+'. Bring your collection code and photo ID.',cta:{label:'Where to collect',href:'collection/'}};
  if(o.status==='Out for delivery')return {tone:'ochre',ic:'truck',text:'Out for delivery in Harare today.',cta:null};
  if(/Arrived in Zimbabwe|Customs clearance/i.test(o.status))return {tone:'ochre',ic:'plane',text:'Landed in Zimbabwe and clearing customs. We message you the moment it is ready to collect.',cta:null};
  if(/In transit to Zimbabwe|Handed to cargo company/i.test(o.status))return {tone:'ochre',ic:'plane',text:'On the water to Zimbabwe. Nothing more to pay.',cta:null};
@@ -2559,7 +2566,7 @@ function viewTrack(ref,token){
    <div class="card-h"><b>Your collection code</b>${o.status==='Delivered'?pill('Collected','accent'):o.status==='Ready for collection'?pill('Ready now','ochre'):pill('Keep this safe','mute')}</div>
    <div class="card-b stack">
      <div class="collect-code mono">${esc(o.collectCode)}</div>
-     <div class="small">Bring this code and <b>photo ID in the name of ${esc(o.recipient.name||o.customer.name)}</b> to our Harare collection point. We hand nothing over without both.</div>
+     <div class="small">Bring this code and <b>photo ID in the name of ${esc(o.recipient.name||o.customer.name)}</b> to <b>'+esc(collectLine())+'</b>. We hand nothing over without both.</div>
      <div class="tiny muted">If someone else is collecting, tell us their name first and they bring their own ID. The code stays the same.</div>
    </div>
   </div>`:''}

@@ -13,5 +13,14 @@
   "tagline": "Buy-for-me and Zimbabwe forwarding",
   "locale": "en_GB",
   "contactEmail": "help@tengauk.com",
-  "contactWhatsapp": "+44 7700 900000"
+  "contactWhatsapp": "+44 7700 900000",
+
+  "collection": {
+    "name": "Mbare Grillz",
+    "street": "9 Williams Avenue",
+    "area": "Ardbennie",
+    "city": "Harare",
+    "hours": ""
+  },
+  "_collection": "One place, named once. hours is still blank: fill it in and it appears on the collection page, the tracking page and the arrival message."
 }

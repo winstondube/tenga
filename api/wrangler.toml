@@ -13,6 +13,8 @@ database_id = "e946c9a5-84db-4942-9de8-351710fc23ab"
 # Both, so the switch to the real domain does not need an API deploy.
 SITE_ORIGINS = "https://tengauk.com,https://www.tengauk.com,https://winstondube.github.io"
 MAIL_FROM = "Tenga UK <help@tengauk.com>"
+# Where orders are handed over. Named here so the emails and the site agree.
+COLLECT_AT = "Mbare Grillz, 9 Williams Avenue, Ardbennie, Harare"
 PAYPAL_ENV = "sandbox"
 
 # Secrets are set with `wrangler secret put NAME`, never committed:

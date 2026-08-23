@@ -179,7 +179,8 @@ async function createOrder(req, env) {
                      actor: 'customer', ip: req.headers.get('cf-connecting-ip') });
   // Confirm it immediately. The one thing worse than a slow quote is silence.
   await send(env, { ref, type: 'Request received', to: doc.customer.email,
-                    order: { ...doc, token: tok, collectCode: code } });
+                    order: { ...doc, token: tok, collectCode: code },
+                    vars: { where: env.COLLECT_AT } });
   // The code must come back, or the browser keeps the one it invented and the
   // customer arrives at the counter with a code that is not the one we hold.
   return json({ ref, token: tok, collectCode: code }, 201);
@@ -271,9 +272,9 @@ async function sendMessage(req, env, ref) {
   const doc = JSON.parse(row.doc);
   const order = { ...doc, ref: row.ref, token: row.token, collectCode: row.collect_code };
   const out = await send(env, { ref, type, to: row.email, order,
-    vars: vars || { total: '£' + fromPence(row.total_pence).toFixed(2),
-                    amount: '£' + fromPence(row.paid_pence).toFixed(2),
-                    mins: 60 } });
+    vars: Object.assign({ total: '£' + fromPence(row.total_pence).toFixed(2),
+                          amount: '£' + fromPence(row.paid_pence).toFixed(2),
+                          mins: 60, where: env.COLLECT_AT }, vars || {}) });
   await audit(env, { ref, action: 'Message sent', after: type,
                      actor: staff.email, reason: out.sent ? 'delivered' : 'queued' });
   return json(out);
@@ -329,7 +330,7 @@ async function paypalWebhook(req, env) {
     const doc = JSON.parse(row.doc);
     await send(env, { ref: out.ref, type: 'Payment received', to: row.email,
       order: { ...doc, ref: row.ref, token: row.token, collectCode: row.collect_code },
-      vars: { amount: '£' + Number(out.amount).toFixed(2) } });
+      vars: { amount: '£' + Number(out.amount).toFixed(2), where: env.COLLECT_AT } });
   }
   return json({ ok: true, ...out });
 }

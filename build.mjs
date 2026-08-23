@@ -264,7 +264,7 @@ ${head({
 </head>
 <body>
 ${SRC.split('<div id="app"></div>')[0].replace(/<title>[\s\S]*?<\/title>/, '').replace(/<style>[\s\S]*?<\/style>/, '')}
-<script>window.TENGA_API=${JSON.stringify(site.apiUrl || '')}</script>
+<script>window.TENGA_API=${JSON.stringify(site.apiUrl || '')};window.TENGA_COLLECT=${JSON.stringify(site.collection || {})}</script>
 <div id="app">${homeInner}</div>
 ${SRC.split('<div id="app"></div>')[1]}
 <footer class="site-foot"><div class="site-foot-in">

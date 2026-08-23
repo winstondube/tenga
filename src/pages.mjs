@@ -130,6 +130,10 @@ function shipTable(api) {
 /* ---------- page builders ---------- */
 
 export function buildPages(api) {
+  // Named once in site.json, so no page can invent a different address.
+  const C = (api.site && api.site.collection) || {};
+  const collectLine = [C.name, C.street, C.area, C.city].filter(Boolean).join(', ');
+
   const s = api.settings;
   const pages = [];
   // Not a whitelist. These are the shops whose delivery rules we have on file.
@@ -204,10 +208,12 @@ export function buildPages(api) {
     title: 'Collect your UK order in Harare',
     description: 'Order from any UK shop and collect it in Harare. One price including shipping and clearance, agreed before you pay.',
     h1: 'Collect it in Harare',
-    lede: 'Everything we bring in is collected in Harare. One collection point, no delivery leg, and nothing to pay when you arrive.',
+    lede: `Everything we bring in is collected from ${collectLine}. One place, no delivery leg, and nothing to pay when you arrive.`,
     crumbs: [['Collection', 'collection/']],
     body: `
       <p>Sea leaves once a month. Air goes as soon as your goods reach us, which makes it ${api.airDoorToDoor().min} to ${api.airDoorToDoor().max} days from paying. When it clears, we message you and your order is ready to collect in Harare.</p>
+
+      ${api.note(`<b>${esc(collectLine)}</b><br>Bring your collection code and photo ID in the recipient's name.${C.hours ? '<br>Open ' + esc(C.hours) + '.' : ''}`, 'accent', 'pin')}
 
       <h2>Bring two things</h2>
       <p><b>Your collection code</b> and <b>photo ID in the recipient's name.</b> The code is a six-character code we send you the moment your payment goes through, and it sits on your tracking page for the whole journey, so you cannot lose it. We hand nothing over without both.</p>
@@ -233,7 +239,7 @@ export function buildPages(api) {
       <h2>How it works</h2>
       ${steps(api, '{{BASE}}#/request')}`,
     faq: [
-      ['Do you deliver to my address in Harare?', 'Not yet. Every order is collected from our Harare collection point. We would rather say that plainly than take your money and improvise.'],
+      ['Do you deliver to my address in Harare?', `Not yet. Every order is collected from ${collectLine}. We would rather say that plainly than take your money and improvise.`],
       ['Do you deliver to Bulawayo, Mutare or anywhere else?', 'Not yet. You can still order from anywhere in Zimbabwe, but the parcel is collected in Harare and onward transport is yours to arrange. We will tell you that before you pay, not after.'],
       ['Do I pay anything at collection?', `No. Shipping and clearance are inside the price you agreed before we bought anything. If the parcel weighs more than we estimated we tell you before it ships, never at the counter. If it weighs less, you get the difference back.`],
       ['Can someone else collect for me?', 'Yes. Tell us their name before they come and they bring their own photo ID plus your collection code. The code does not change. Do not send someone without telling us first, because we will turn them away.'],
@@ -571,7 +577,7 @@ export function buildPages(api) {
       <p>You do not need to write a long message. A link and a size is enough to get a price.</p>
 
       <h2>Where you collect</h2>
-      <p>Orders are collected in Harare, with your collection code and photo ID. We confirm the exact collection point and opening hours when your shipment lands, so you are not making a wasted trip on an estimate.</p>
+      <p>Orders are collected from <b>${esc(collectLine)}</b>, with your collection code and photo ID.${C.hours ? ' Open ' + esc(C.hours) + '.' : ' We confirm opening hours when your shipment lands, so you are not making a wasted trip on an estimate.'}</p>
 
       <h2>Before you message</h2>
       <p>Most first questions are answered on <a href="{{BASE}}faqs/">the questions page</a>, particularly cost, timings and what cannot be flown. If yours is not there, ask.</p>

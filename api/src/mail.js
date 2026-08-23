@@ -53,15 +53,15 @@ export const TEMPLATES = {
     subject: `Payment received for ${o.ref} · keep your collection code`,
     html: wrap({ heading: 'Thank you, that is paid',
       lines: [`We have received ${esc(x.amount)} and we will now place the order with the shop.`,
-              `Whoever collects in Harare brings this code <b>and photo ID in the name of ${esc(o.recipient && o.recipient.name)}</b>. We cannot hand the order over without both.`],
+              `Whoever collects brings this code <b>and photo ID in the name of ${esc(o.recipient && o.recipient.name)}</b> to <b>${esc(x.where || 'our Harare collection point')}</b>. We cannot hand the order over without both.`],
       code: o.collectCode,
       action: { label: 'Track this order', href: `${site}/#/track/${o.ref}/${o.token}` } })
   }),
-  'Ready for collection': (o, site) => ({
+  'Ready for collection': (o, site, x) => ({
     subject: `${o.ref} has arrived in Harare`,
     html: wrap({ heading: 'Ready to collect',
-      lines: ['Your order has landed and is ready at our Harare collection point.',
-              `Bring this code and photo ID in the name of ${esc(o.recipient && o.recipient.name)}.`],
+      lines: [`Your order has landed and is ready at <b>${esc(x.where || 'our Harare collection point')}</b>.`,
+              `Bring this code and photo ID in the name of ${esc(o.recipient && o.recipient.name)}. We cannot hand it over without both.`],
       code: o.collectCode,
       action: { label: 'Where to collect', href: `${site}/collection/` } })
   })

@@ -1097,6 +1097,35 @@ function looksLikeProductLink(v){ return !v || extract(v).ok }
 /* Deliberately loose: enough to catch a typo, not enough to reject a valid
    address we have not thought of. */
 function looksLikeEmail(v){ return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(String(v||'').trim()) }
+/* Anything arriving from the server is merged onto a complete shape first.
+   A single order missing a field broke the whole operations screen, because
+   the queue counts walk every order, so one bad row took out the page for
+   every other one. The app must never trust that a payload is complete. */
+function hydrateOrder(o){
+  if(!o||typeof o!=='object')return o;
+  const item=it=>Object.assign(newItem({url:it.url||'',retailerId:it.retailerId||null,
+    retailerName:it.retailerName||'',name:it.name||''}), it,
+    {attrs:it.attrs||{}, restricted:Array.isArray(it.restricted)?it.restricted:[],
+     issues:Array.isArray(it.issues)?it.issues:[]});
+  return Object.assign({
+    ref:o.ref, token:o.token||'', collectCode:o.collectCode||'',
+    createdAt:o.createdAt||Date.now(), status:o.status||'Request submitted',
+    shipMode:o.shipMode==='air'?'air':'sea',
+    customer:{name:'',email:'',whatsapp:'',country:'United Kingdom'},
+    recipient:{name:'',phone:'',town:'',address:'',collection:'',instructions:''},
+    partOfLargerOrder:false, customerNotes:'', batchId:null
+  }, o, {
+    items:(o.items||[]).map(item),
+    quote:o.quote||null,
+    payments:Array.isArray(o.payments)?o.payments:[],
+    refunds:Array.isArray(o.refunds)?o.refunds:[],
+    holds:Array.isArray(o.holds)?o.holds:[],
+    cargo:o.cargo||{},
+    timeline:Array.isArray(o.timeline)&&o.timeline.length?o.timeline
+      :[{status:o.status||'Request submitted',at:o.createdAt||Date.now(),note:'',actor:'System'}]
+  });
+}
+
 function loadingPanel(msg){
   return `<div class="narrow-s"><div class="card card-p stack" style="align-items:center;text-align:center">
     <i class="spin"></i><div class="small muted">${esc(msg)}…</div></div></div>`;
@@ -1110,7 +1139,7 @@ function fetchOrderOnce(ref,token){
   if(FETCHED.has(k))return; FETCHED.add(k);
   API.getOrder(ref,token)
     .then(o=>{ if(!o||!o.ref)throw new Error('empty');
-      S.orders=S.orders.filter(x=>x.ref!==o.ref).concat([o]); save(); rerender(true) })
+      S.orders=S.orders.filter(x=>x.ref!==o.ref).concat([hydrateOrder(o)]); save(); rerender(true) })
     .catch(()=>{ FETCHED.delete(k);
       const el=document.querySelector('#app');
       if(el)el.innerHTML=shell(note('That link is not valid. Check the link we sent you, or <a class="link" href="#/lookup">look up your reference</a>.','danger','lock')) });
@@ -1123,7 +1152,7 @@ async function loadOrdersFromServer(){
   try{
     const res=await API.listOrders();
     if(Array.isArray(res.orders)){
-      S.orders=res.orders;
+      S.orders=res.orders.map(hydrateOrder);
       S.serverLoadedAt=Date.now();
       save(); rerender(true);
     }

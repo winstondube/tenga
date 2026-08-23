@@ -141,9 +141,24 @@ async function createOrder(req, env) {
   if (body.items.length > 40) return bad('that is too many items for one order');
 
   const ref = await nextRef(env);
+  // Store a complete order or none. A client that posts a partial item should
+  // not be able to leave a row that breaks the operations screen for everyone.
+  const items = body.items.map((it, i) => Object.assign({
+    id: 'i_' + crypto.randomUUID().slice(0, 8), url: '', retailerId: null, retailerName: '',
+    name: '', category: 'other', attrs: {}, qty: 1,
+    displayedPrice: null, confirmedPrice: null, wasPrice: null, priceSource: '',
+    image: null, availability: 'To be confirmed', extractOk: false,
+    subsAllowed: 'no', subsUrl: '', subsSize: '', subsPrice: null, subsNotes: '',
+    customerNotes: '', adminNotes: '', cancelIfUnavailable: false,
+    restricted: [], restrictedCleared: false, itemStatus: 'Awaiting review',
+    issues: [], purchase: null, received: null
+  }, it));
   const doc = {
     ...body,
+    items,
     ref,
+    quote: null, batchId: null, holds: [], partOfLargerOrder: !!body.partOfLargerOrder,
+    customerNotes: body.customerNotes || '',
     // Never trust these from the browser.
     status: 'Request submitted',
     payments: [], refunds: [], cargo: {},
@@ -165,7 +180,9 @@ async function createOrder(req, env) {
   // Confirm it immediately. The one thing worse than a slow quote is silence.
   await send(env, { ref, type: 'Request received', to: doc.customer.email,
                     order: { ...doc, token: tok, collectCode: code } });
-  return json({ ref, token: tok }, 201);
+  // The code must come back, or the browser keeps the one it invented and the
+  // customer arrives at the counter with a code that is not the one we hold.
+  return json({ ref, token: tok, collectCode: code }, 201);
 }
 
 async function listOrders(req, env, url) {

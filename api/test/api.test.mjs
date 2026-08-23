@@ -35,7 +35,9 @@ ok('the service answers', r.status === 200 && r.body.ok, JSON.stringify(r.body))
 console.log('\ncreating an order');
 r = await call('/orders', { method: 'POST', body: JSON.stringify(ORDER) });
 ok('accepts a good order', r.status === 201 && !!r.body.ref, JSON.stringify(r.body));
-const ref = r.body.ref, tok = r.body.token;
+ok('returns the collection code it generated', /^[A-Z0-9]{3}-[A-Z0-9]{3}$/.test(r.body.collectCode || ''),
+   'got ' + r.body.collectCode + ' — without this the browser keeps its own and the codes disagree');
+const ref = r.body.ref, tok = r.body.token, code = r.body.collectCode;
 
 for (const [label, patch] of [
   ['refuses a bad email',       { customer: { ...ORDER.customer, email: 'not-an-email' } }],

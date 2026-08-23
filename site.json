@@ -1,15 +1,11 @@
 {
   "_comment": "SET url AND base BEFORE LAUNCH. Everything canonical, every sitemap entry and every internal link is generated from these two values. Getting them wrong is the single most damaging SEO mistake available, because canonical tags pointing at the wrong host tell Google the real site is a duplicate.",
-
-  "url": "https://winstondube.github.io",
-  "base": "/tenga/",
-
+  "url": "https://tengauk.com",
+  "base": "/",
   "domain": "tengauk.com",
   "_whenTheDomainIsLive": "Run: node golive.mjs   It sets url to https://tengauk.com, base to /, writes the CNAME file and flips indexable. Do it only once DNS resolves, because base=/ breaks the github.io copy.",
-
-  "indexable": false,
+  "indexable": true,
   "_indexable": "false emits <meta name='robots' content='noindex'> and a Disallow-all robots.txt. Keep it false while the demo carries fake customer data. Flip to true the day you launch.",
-
   "name": "Tenga UK",
   "tagline": "Buy-for-me and Zimbabwe forwarding",
   "locale": "en_GB",

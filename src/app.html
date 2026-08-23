@@ -174,6 +174,10 @@ details:not([open]) > :not(summary){display:none !important}
 .route-card .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2);
   border-top:1px solid var(--line);padding-top:7px}
 .route-card .rc-when{font-size:12px;color:var(--ink-3);flex:1}
+.btn.wa{border-color:#1FA855;color:#0d7a3c}
+.btn.wa:hover{background:color-mix(in srgb,#25D366 12%,transparent);border-color:#128C4A}
+.btn.wa svg{stroke:#128C4A}
+@media (prefers-color-scheme:dark){.btn.wa{color:#7BE3A4;border-color:#1FA855}.btn.wa svg{stroke:#7BE3A4}}
 .ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
   border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
@@ -554,6 +558,11 @@ body:has(.floatcta.on){padding-bottom:56px}
 "use strict";
 /* ---------------- icons (flat line, inherit currentColor) ---------------- */
 const ICONS={
+ // The brand mark. A carton with the label strap across it: what we actually
+ // hand over. Kept separate from `box` so the plain icon can change without
+ // changing the logo.
+ mark:'M3.5 8.2 12 4.5l8.5 3.7v7.6L12 19.5l-8.5-3.7Z M3.5 8.2 12 11.9l8.5-3.7 M12 11.9v7.6 M9.2 6.4 17.6 10',
+ whatsapp:'M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.6-4.5A8.4 8.4 0 1 1 20.5 11.6Z M8.9 8.6c.2-.5.4-.5.7-.5h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.4.5c-.1.2-.3.3-.1.6a6 6 0 0 0 2.9 2.5c.3.1.5.1.7-.1l.5-.6c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.4.5v.5c0 .5-.4 1-1 1.2-.5.2-1.2.2-2 0a9.6 9.6 0 0 1-6-5.5c-.3-.9-.3-1.7 0-2.3Z',
  link:'M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6',
  box:'M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12m0 0 8.5-4.5M12 12v9',
  check:'M4.5 12.5 9.5 17.5 19.5 6.5',
@@ -1189,6 +1198,31 @@ const COLLECT = (typeof window!=='undefined' && window.TENGA_COLLECT) || {
 };
 const collectLine = () => [COLLECT.name, COLLECT.street, COLLECT.area, COLLECT.city].filter(Boolean).join(', ');
 
+/* WhatsApp is how this market actually passes things around, so sharing is a
+   first-class button rather than a link somebody has to copy by hand.
+   wa.me opens the app on a phone and Web WhatsApp on a desktop. */
+function waHref(text){ return 'https://wa.me/?text=' + encodeURIComponent(text) }
+function siteRoot(){
+  const base = String(location.pathname || '/').replace(/index\.html$/,'');
+  return (location.origin || '') + (base.endsWith('/') ? base : base + '/');
+}
+/* Everything the person collecting needs, in one message they can act on. */
+function collectShareText(o){
+  return [
+    'Tenga order ' + o.ref + ' is ready to collect.',
+    '',
+    'Collection code: ' + o.collectCode,
+    'Collect from: ' + collectLine(),
+    'Bring photo ID in the name of ' + ((o.recipient && o.recipient.name) || o.customer.name) + '.',
+    '',
+    'Track it here: ' + siteRoot() + '#/track/' + o.ref + '/' + o.token
+  ].join('\n');
+}
+function trackShareText(o){
+  return 'Following my Tenga order ' + o.ref + ' here: ' +
+         siteRoot() + '#/track/' + o.ref + '/' + o.token;
+}
+
 const API = {
   base: (typeof window !== 'undefined' && window.TENGA_API) || '',
   get on(){ return !!this.base },
@@ -1741,8 +1775,8 @@ function shell(body,isAdmin){
  return `
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
-     <span class="mark">${icon('plane',14)}</span>
-     <span>tenga<span class="tld">.uk</span></span>
+     <span class="mark">${icon('mark',14)}</span>
+     <span>tenga<span class="tld">uk</span></span>
    </a>
    ${S.session
     ? `<div class="seg" style="margin-left:auto">
@@ -2568,6 +2602,7 @@ function viewTrack(ref,token){
      <div class="collect-code mono">${esc(o.collectCode)}</div>
      <div class="small">Bring this code and <b>photo ID in the name of ${esc(o.recipient.name||o.customer.name)}</b> to <b>'+esc(collectLine())+'</b>. We hand nothing over without both.</div>
      <div class="tiny muted">If someone else is collecting, tell us their name first and they bring their own ID. The code stays the same.</div>
+     <a class="btn btn-block wa" href="${esc(waHref(collectShareText(o)))}" target="_blank" rel="noopener">${icon('whatsapp',17)}Send this to whoever is collecting</a>
    </div>
   </div>`:''}
 

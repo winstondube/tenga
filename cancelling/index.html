@@ -16,7 +16,7 @@
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://tengauk.com/cancelling/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%225%22%20fill%3D%22%230B2620%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23F0F3F0%22%20stroke-width%3D%221.7%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M4.6%208.8%2012%205.6l7.4%203.2v6.6L12%2018.6l-7.4-3.2Z%22%2F%3E%3Cpath%20d%3D%22M4.6%208.8%2012%2012l7.4-3.2%22%2F%3E%3Cpath%20d%3D%22M12%2012v6.6%22%2F%3E%3Cpath%20d%3D%22M9.9%207%2017.2%2010.2%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tengauk.com/"},{"@type":"ListItem","position":2,"name":"Cancelling and refunds","item":"https://tengauk.com/cancelling/"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I cancel after I have paid?","acceptedAnswer":{"@type":"Answer","text":"Yes, while the goods are still in the UK. Tell us at least 2 working days before the shipment leaves and within 28 days of us buying it. After the shipment leaves the UK we cannot take anything back."}},{"@type":"Question","name":"Can I return it once I have collected it in Harare?","acceptedAnswer":{"@type":"Answer","text":"No. By sea the crossing alone takes 6 to 7 weeks, so the shop's return window has closed well before you receive it. If the item is faulty or not what we were asked to buy, that is a different matter and you should tell us."}},{"@type":"Question","name":"Is perfume returnable?","acceptedAnswer":{"@type":"Answer","text":"Usually not, anywhere. Fragrance and sealed cosmetics are commonly excluded from returns by the shops themselves. Check the policy of the shop you are ordering from before you send us the link."}},{"@type":"Question","name":"What do you charge to cancel something?","acceptedAnswer":{"@type":"Answer","text":"5% of the item with a £6.00 minimum, plus anything the shop keeps as a return fee. Our 20% fee is not refunded because the work was already done."}},{"@type":"Question","name":"Do I get the Zimbabwe shipping back?","acceptedAnswer":{"@type":"Answer","text":"If nothing is left on your order, yes, in full. If other items are still shipping, your parcel is just lighter, and that saving comes back to you when it is weighed."}}]}</script>
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -195,6 +195,10 @@ details:not([open]) > :not(summary){display:none !important}
 .route-card .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2);
   border-top:1px solid var(--line);padding-top:7px}
 .route-card .rc-when{font-size:12px;color:var(--ink-3);flex:1}
+.btn.wa{border-color:#1FA855;color:#0d7a3c}
+.btn.wa:hover{background:color-mix(in srgb,#25D366 12%,transparent);border-color:#128C4A}
+.btn.wa svg{stroke:#128C4A}
+@media (prefers-color-scheme:dark){.btn.wa{color:#7BE3A4;border-color:#1FA855}.btn.wa svg{stroke:#7BE3A4}}
 .ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
   border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
@@ -617,7 +621,7 @@ body > *{min-width:0}
 </head>
 <body>
 <header class="site-head"><div class="site-head-in">
-  <a class="brand" href="/"><span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span><span>tenga<span class="tld">.uk</span></span></a>
+  <a class="brand" href="/"><span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.2 12 4.5l8.5 3.7v7.6L12 19.5l-8.5-3.7Z M3.5 8.2 12 11.9l8.5-3.7 M12 11.9v7.6 M9.2 6.4 17.6 10"/></svg></span><span>tenga<span class="tld">uk</span></span></a>
   <nav class="site-nav"><a href="/how-it-works/">How it works</a><a href="/what-it-costs/">What it costs</a><a href="/shop/">Shops</a><a href="/collection/">Collection</a><a href="/what-we-cannot-send/">What we cannot send</a><a href="/sea-or-air/">Sea or air</a><a href="/cancelling/">Cancelling</a><a href="/faqs/">Questions</a><a href="/contact/">Contact</a></nav>
 </div></header>
 <main class="page">

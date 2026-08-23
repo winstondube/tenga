@@ -16,7 +16,7 @@
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://tengauk.com/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%224%22%20fill%3D%22%230B5D4E%22%2F%3E%3Cpath%20d%3D%22M11%204.5a1.3%201.3%200%200%201%202.6%200l.2%205.2%206.4%203.6v2l-6.4-2-.3%203.6%202.2%201.6v1.3L12%2019l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4%202v-2L10%209.7z%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.3%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Crect%20width%3D%2224%22%20height%3D%2224%22%20rx%3D%225%22%20fill%3D%22%230B2620%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23F0F3F0%22%20stroke-width%3D%221.7%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M4.6%208.8%2012%205.6l7.4%203.2v6.6L12%2018.6l-7.4-3.2Z%22%2F%3E%3Cpath%20d%3D%22M4.6%208.8%2012%2012l7.4-3.2%22%2F%3E%3Cpath%20d%3D%22M12%2012v6.6%22%2F%3E%3Cpath%20d%3D%22M9.9%207%2017.2%2010.2%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Tenga UK","url":"https://tengauk.com/","description":"Buy-for-me and Zimbabwe forwarding","email":"help@tengauk.com","areaServed":["ZW","GB"],"logo":"https://tengauk.com/"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does it cost in total?","acceptedAnswer":{"@type":"Answer","text":"Product at cost, UK delivery at cost, our fee of 20% with a £10.00 minimum, and shipping. Sea is charged on the space your order takes in the container box, about £3.26 a litre; air is £13.75 a kilo and 7 to 12 days. Plus £6.00 clearance. All of it in one payment, with every line shown before you pay. Minimum order is £40.00 of product value."}},{"@type":"Question","name":"Which UK shops can you buy from?","acceptedAnswer":{"@type":"Answer","text":"Any of them. We order most often from Boots, Superdrug, ASOS, LookFantastic and Cult Beauty, so we already know their delivery rules, but you are not limited to a list. Send a link from any UK shop and we will price it."}},{"@type":"Question","name":"Where do I collect it?","acceptedAnswer":{"@type":"Answer","text":"Every order is collected in Harare. We are not running a delivery leg inside Zimbabwe yet, so if you are outside Harare you can still order, but onward transport is yours to arrange. We say that before you pay rather than after."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"UK buy-for-me and Zimbabwe forwarding","provider":{"@type":"Organization","name":"Tenga UK"},"areaServed":{"@type":"Country","name":"Zimbabwe"},"description":"Send a link to a product in a UK shop. We buy it, check it and ship it to Zimbabwe for one agreed price including shipping.","offers":{"@type":"Offer","priceCurrency":"GBP","description":"20% procurement fee, minimum £10.00, on a minimum order of £40.00"}}</script>
@@ -196,6 +196,10 @@ details:not([open]) > :not(summary){display:none !important}
 .route-card .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2);
   border-top:1px solid var(--line);padding-top:7px}
 .route-card .rc-when{font-size:12px;color:var(--ink-3);flex:1}
+.btn.wa{border-color:#1FA855;color:#0d7a3c}
+.btn.wa:hover{background:color-mix(in srgb,#25D366 12%,transparent);border-color:#128C4A}
+.btn.wa svg{stroke:#128C4A}
+@media (prefers-color-scheme:dark){.btn.wa{color:#7BE3A4;border-color:#1FA855}.btn.wa svg{stroke:#7BE3A4}}
 .ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);
   border-radius:var(--r);background:var(--surface);cursor:pointer;font:inherit;color:inherit}
@@ -636,8 +640,8 @@ body > *{min-width:0}
 <div id="app">
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
-     <span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3.5a1.4 1.4 0 0 1 2.8 0l.2 5.6 6.9 3.9v2.1l-6.9-2.1-.3 3.9 2.4 1.7v1.4L12 19l-4.1 1v-1.4l2.4-1.7-.3-3.9L3.1 15v-2.1L10 9z"/></svg></span>
-     <span>tenga<span class="tld">.uk</span></span>
+     <span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.2 12 4.5l8.5 3.7v7.6L12 19.5l-8.5-3.7Z M3.5 8.2 12 11.9l8.5-3.7 M12 11.9v7.6 M9.2 6.4 17.6 10"/></svg></span>
+     <span>tenga<span class="tld">uk</span></span>
    </a>
    <nav class="top-nav">
         <a href="how-it-works/">How it works</a>
@@ -795,6 +799,11 @@ body > *{min-width:0}
 "use strict";
 /* ---------------- icons (flat line, inherit currentColor) ---------------- */
 const ICONS={
+ // The brand mark. A carton with the label strap across it: what we actually
+ // hand over. Kept separate from `box` so the plain icon can change without
+ // changing the logo.
+ mark:'M3.5 8.2 12 4.5l8.5 3.7v7.6L12 19.5l-8.5-3.7Z M3.5 8.2 12 11.9l8.5-3.7 M12 11.9v7.6 M9.2 6.4 17.6 10',
+ whatsapp:'M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.6-4.5A8.4 8.4 0 1 1 20.5 11.6Z M8.9 8.6c.2-.5.4-.5.7-.5h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.4.5c-.1.2-.3.3-.1.6a6 6 0 0 0 2.9 2.5c.3.1.5.1.7-.1l.5-.6c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.4.5v.5c0 .5-.4 1-1 1.2-.5.2-1.2.2-2 0a9.6 9.6 0 0 1-6-5.5c-.3-.9-.3-1.7 0-2.3Z',
  link:'M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6',
  box:'M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5zM3.5 7.5 12 12m0 0 8.5-4.5M12 12v9',
  check:'M4.5 12.5 9.5 17.5 19.5 6.5',
@@ -1430,6 +1439,31 @@ const COLLECT = (typeof window!=='undefined' && window.TENGA_COLLECT) || {
 };
 const collectLine = () => [COLLECT.name, COLLECT.street, COLLECT.area, COLLECT.city].filter(Boolean).join(', ');
 
+/* WhatsApp is how this market actually passes things around, so sharing is a
+   first-class button rather than a link somebody has to copy by hand.
+   wa.me opens the app on a phone and Web WhatsApp on a desktop. */
+function waHref(text){ return 'https://wa.me/?text=' + encodeURIComponent(text) }
+function siteRoot(){
+  const base = String(location.pathname || '/').replace(/index\.html$/,'');
+  return (location.origin || '') + (base.endsWith('/') ? base : base + '/');
+}
+/* Everything the person collecting needs, in one message they can act on. */
+function collectShareText(o){
+  return [
+    'Tenga order ' + o.ref + ' is ready to collect.',
+    '',
+    'Collection code: ' + o.collectCode,
+    'Collect from: ' + collectLine(),
+    'Bring photo ID in the name of ' + ((o.recipient && o.recipient.name) || o.customer.name) + '.',
+    '',
+    'Track it here: ' + siteRoot() + '#/track/' + o.ref + '/' + o.token
+  ].join('\n');
+}
+function trackShareText(o){
+  return 'Following my Tenga order ' + o.ref + ' here: ' +
+         siteRoot() + '#/track/' + o.ref + '/' + o.token;
+}
+
 const API = {
   base: (typeof window !== 'undefined' && window.TENGA_API) || '',
   get on(){ return !!this.base },
@@ -1982,8 +2016,8 @@ function shell(body,isAdmin){
  return `
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
-     <span class="mark">${icon('plane',14)}</span>
-     <span>tenga<span class="tld">.uk</span></span>
+     <span class="mark">${icon('mark',14)}</span>
+     <span>tenga<span class="tld">uk</span></span>
    </a>
    ${S.session
     ? `<div class="seg" style="margin-left:auto">
@@ -2809,6 +2843,7 @@ function viewTrack(ref,token){
      <div class="collect-code mono">${esc(o.collectCode)}</div>
      <div class="small">Bring this code and <b>photo ID in the name of ${esc(o.recipient.name||o.customer.name)}</b> to <b>'+esc(collectLine())+'</b>. We hand nothing over without both.</div>
      <div class="tiny muted">If someone else is collecting, tell us their name first and they bring their own ID. The code stays the same.</div>
+     <a class="btn btn-block wa" href="${esc(waHref(collectShareText(o)))}" target="_blank" rel="noopener">${icon('whatsapp',17)}Send this to whoever is collecting</a>
    </div>
   </div>`:''}
 

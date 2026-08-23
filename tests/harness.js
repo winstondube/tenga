@@ -5,6 +5,6 @@ global.LISTENERS={input:[],change:[],click:[]};
 global.document={addEventListener(t,fn){(LISTENERS[t]=LISTENERS[t]||[]).push(fn)},querySelector(s){return s==='#app'?{set innerHTML(v){lastHTML=v},get innerHTML(){return lastHTML}}:null},
  getElementById(){return null},querySelectorAll(){return []},createElement(){return Object.assign({},fakeEl)},body:{appendChild(){}}};
 global.window={addEventListener(){},scrollY:0,scrollTo(){}};
-global.location={hash:''};
+global.location={hash:'',pathname:'/',origin:'https://tengauk.com',href:'https://tengauk.com/'};
 global.confirm=()=>true; global.prompt=()=>'test';
 global.getHTML=()=>lastHTML;

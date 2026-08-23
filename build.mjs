@@ -70,8 +70,11 @@ const NAV = [
 
 const FAVICON = 'data:image/svg+xml,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
-  '<rect width="24" height="24" rx="4" fill="#0B5D4E"/>' +
-  '<path d="M11 4.5a1.3 1.3 0 0 1 2.6 0l.2 5.2 6.4 3.6v2l-6.4-2-.3 3.6 2.2 1.6v1.3L12 19l-3.8.9v-1.3l2.2-1.6-.3-3.6-6.4 2v-2L10 9.7z" fill="none" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg>');
+  '<rect width="24" height="24" rx="5" fill="#0B2620"/>' +
+  '<g fill="none" stroke="#F0F3F0" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">' +
+  '<path d="M4.6 8.8 12 5.6l7.4 3.2v6.6L12 18.6l-7.4-3.2Z"/>' +
+  '<path d="M4.6 8.8 12 12l7.4-3.2"/><path d="M12 12v6.6"/>' +
+  '<path d="M9.9 7 17.2 10.2"/></g></svg>');
 
 const RESET = `*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;min-height:100dvh}img,svg,video{display:block;max-width:100%}
@@ -174,7 +177,7 @@ function crumbLd(crumbs) {
 
 function chrome(inner, { skipNav } = {}) {
   return `<header class="site-head"><div class="site-head-in">
-  <a class="brand" href="${BASE}"><span class="mark">${api.icon('plane', 14)}</span><span>tenga<span class="tld">.uk</span></span></a>
+  <a class="brand" href="${BASE}"><span class="mark">${api.icon('mark', 14)}</span><span>tenga<span class="tld">uk</span></span></a>
   <nav class="site-nav">${NAV.map(([l, p]) => `<a href="${BASE}${p}">${l}</a>`).join('')}</nav>
 </div></header>
 ${inner}

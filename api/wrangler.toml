@@ -15,7 +15,9 @@ SITE_ORIGINS = "https://tengauk.com,https://www.tengauk.com,https://winstondube.
 MAIL_FROM = "Tenga UK <help@tengauk.com>"
 # Where orders are handed over. Named here so the emails and the site agree.
 COLLECT_AT = "Mbare Grillz, 9 Williams Avenue, Ardbennie, Harare"
-PAYPAL_ENV = "sandbox"
+# These are LIVE credentials: they authenticate against api-m.paypal.com and
+# the sandbox rejects them. Real money moves through this setting.
+PAYPAL_ENV = "live"
 
 # Secrets are set with `wrangler secret put NAME`, never committed:
 #   PAYPAL_CLIENT_ID, PAYPAL_SECRET, PAYPAL_WEBHOOK_ID, RESEND_KEY

@@ -100,9 +100,25 @@ if (authed) {
   ok('a stranger cannot send messages as us', r.status === 401);
 }
 
-console.log('\npayments, before any credentials exist');
+console.log('\npayments');
+// Live credentials are configured, so this reaches PayPal for real. It only
+// creates an unpaid order: no money moves until a buyer approves it.
 r = await call(`/orders/${ref}/paypal`, { method: 'POST', body: JSON.stringify({ token: tok }) });
-ok('says so plainly rather than erroring', r.status === 503, r.status + ' ' + JSON.stringify(r.body));
+const configured = r.status !== 503;
+ok('either PayPal answers, or we say plainly that it is not configured',
+   configured ? r.status === 200 && !!r.body.paypalOrderId : true,
+   r.status + ' ' + JSON.stringify(r.body));
+if (configured) {
+  const owed = r.body.amount;
+  ok('the amount is a real figure, not zero', owed > 0, String(owed));
+  // The whole point of pricing server-side: a browser cannot name its own price.
+  r = await call(`/orders/${ref}/paypal`, { method: 'POST',
+    body: JSON.stringify({ token: tok, amount: 1 }) });
+  ok('a browser asking to pay £1 still gets billed the full amount',
+     r.body.amount === owed, `asked £1, got £${r.body.amount} against £${owed}`);
+  r = await call(`/orders/${ref}/paypal`, { method: 'POST', body: JSON.stringify({}) });
+  ok('a stranger with no token cannot open a payment', r.status === 404, String(r.status));
+}
 r = await call('/paypal/webhook', { method: 'POST', body: JSON.stringify({
   event_type: 'PAYMENT.CAPTURE.COMPLETED',
   resource: { id: 'FORGED-1', custom_id: `${ref}:initial`, amount: { value: '157.48' } } }) });

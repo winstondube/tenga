@@ -162,17 +162,22 @@ console.log('\nthe reply signature');
 
   await replyToThread(env, { threadKey: 'TU-1041', to: 'buyer@example.com', subject: 'Re: hello',
     text: 'Yes, we can get that.', ref: 'TU-1041', staff: { name: 'Gerald', email: 'g@x.com' } });
-  ok('signed with the person who wrote it', /Gerald/.test(sent.html), sent.html.slice(-260));
+  ok('signed as the team', /Tenga UK Team/.test(sent.html), sent.html.slice(-300));
+  ok('never names the individual', !/Gerald/.test(sent.html));
   ok('no strapline describing ourselves', !/buy-for-me and Zimbabwe forwarding/.test(sent.html));
-  ok('gives a way to reply', /help@tengauk\.com/.test(sent.html));
-  ok('and a number', /\+44 7337 524515/.test(sent.html));
-  ok('the address is not the whole From header', !/Tenga UK &lt;/.test(sent.html));
+  ok('WhatsApp is a button, not a printed number',
+     /wa\.me\/447337524515/.test(sent.html) && !/\+44 7337 524515/.test(sent.html), sent.html.slice(-300));
+  ok('the button carries inline styles, since email has no stylesheet',
+     /background:#1FA855/.test(sent.html));
+  ok('and says replying works too', /reply to this email/i.test(sent.html));
 
-  await replyToThread(env, { threadKey: 'x', to: 'b@e.com', subject: 's', text: 't',
-    staff: { name: 'Operations' } });
-  ok('the old shared account name is not signed', !/Operations/.test(sent.html), sent.html.slice(-200));
   await replyToThread(env, { threadKey: 'x2', to: 'b@e.com', subject: 's', text: 't', staff: null });
-  ok('no staff name still produces a valid signature', /Tenga UK/.test(sent.html) && !/undefined/.test(sent.html));
+  ok('no staff at all still signs correctly', /Tenga UK Team/.test(sent.html) && !/undefined/.test(sent.html));
+
+  const noWa = { ...env, CONTACT_WHATSAPP: '', DB: makeDB() };
+  await replyToThread(noWa, { threadKey: 'x3', to: 'b@e.com', subject: 's', text: 't', staff: null });
+  ok('with no number configured the button is omitted, not broken',
+     !/wa\.me/.test(sent.html) && /Tenga UK Team/.test(sent.html), sent.html.slice(-200));
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);

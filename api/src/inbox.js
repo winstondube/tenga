@@ -184,17 +184,24 @@ export async function replyToThread(env, { threadKey, to, subject, text, ref, in
   const id = crypto.randomUUID();
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  // Sign it with the person who wrote it. A reply from a named human reads
-  // like a reply; a strapline describing our own business model does not.
-  const who = (staff && staff.name && staff.name !== 'Operations') ? staff.name : '';
-  // MAIL_FROM is "Tenga UK <help@tengauk.com>"; the signature wants the address.
-  const from = (String(env.MAIL_FROM || '').match(/<([^>]+)>/) || [])[1]
-             || String(env.MAIL_FROM || 'help@tengauk.com');
+  // Signed as the team rather than the individual, which is Winston's call.
+  // The reply already comes from help@, so a name would add nothing the
+  // customer can act on.
   const wa = env.CONTACT_WHATSAPP || '';
+  // wa.me wants digits only. A button beats a printed number: nobody dials a
+  // mobile from a laptop, and this market opens WhatsApp before anything else.
+  const waDigits = String(wa).replace(/[^0-9]/g, '');
   const html = `<div style="white-space:pre-wrap;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">${esc(text)}</div>
     <p style="margin:22px 0 0;font:13px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">
-      ${who ? esc(who) + '<br>' : ''}<span style="color:#6B7C75">Tenga UK</span><br>
-      <a href="mailto:${esc(from)}" style="color:#0B5D4E;text-decoration:none">${esc(from)}</a>${wa ? `<span style="color:#6B7C75"> · ${esc(wa)}</span>` : ''}
+      Thanks,<br><b>Tenga UK Team</b>
+    </p>
+    ${wa ? `<p style="margin:12px 0 0">
+      <a href="https://wa.me/${waDigits}" style="display:inline-block;background:#1FA855;color:#ffffff;
+         text-decoration:none;padding:10px 16px;border-radius:7px;font:600 13px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+        Message us on WhatsApp</a>
+    </p>` : ''}
+    <p style="margin:10px 0 0;font:12px/1.6 -apple-system,sans-serif;color:#6B7C75">
+      Or just reply to this email. It reaches the same place.
     </p>`;
 
   let providerId = null, ok = false, error = null;

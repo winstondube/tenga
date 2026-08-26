@@ -196,9 +196,12 @@ details:not([open]) > :not(summary){display:none !important}
 .route-card .rc-line{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink-2);
   border-top:1px solid var(--line);padding-top:7px}
 .route-card .rc-when{font-size:12px;color:var(--ink-3);flex:1}
-.btn.wa{border-color:#1FA855;color:#0d7a3c}
-.btn.wa:hover{background:color-mix(in srgb,#25D366 12%,transparent);border-color:#128C4A}
-.btn.wa svg{stroke:#128C4A}
+/* One WhatsApp button, used on the contact page and on the collection share.
+   Solid rather than outlined: on both screens it is the thing we actually
+   want pressed, and this market reaches for WhatsApp before anything else. */
+.btn.wa{background:#1FA855;border-color:#1FA855;color:#fff;font-weight:600;text-decoration:none}
+.btn.wa:hover{background:#188F47;border-color:#188F47;color:#fff}
+.btn.wa svg{stroke:#fff}
 @media (prefers-color-scheme:dark){.btn.wa{color:#7BE3A4;border-color:#1FA855}.btn.wa svg{stroke:#7BE3A4}}
 .ship-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ship-opt{display:flex;flex-direction:column;gap:3px;text-align:left;padding:11px 12px;border:1px solid var(--line-2);

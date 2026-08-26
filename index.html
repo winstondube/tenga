@@ -235,7 +235,7 @@ details:not([open]) > :not(summary){display:none !important}
 /* ---------- admin shell ---------- */
 .admin{display:grid;grid-template-columns:232px minmax(0,1fr);gap:22px;align-items:start}
 .admin > *{min-width:0}
-.rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px;min-height:calc(100vh - 84px)}
+.rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px;max-height:calc(100vh - 76px);overflow-y:auto;overscroll-behavior:contain}
 .rail-grp{display:flex;flex-direction:column;gap:1px}
 .rail-grp > .eyebrow{padding:0 8px 6px}
 .rail a{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:3px;text-decoration:none;font-size:13.5px;color:var(--ink-2)}
@@ -246,13 +246,18 @@ details:not([open]) > :not(summary){display:none !important}
 .rail a .cnt.hot{background:var(--danger-soft);color:var(--danger)}
 /* The tour sits at the bottom of the rail, pushed there rather than ordered
    there, so it stays put however many queues appear above it. */
-.rail-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+/* Sticky, not just last. The queue list is taller than most screens, so
+   'bottom of the rail' would otherwise mean 'below the fold'. This keeps the
+   tour on screen while the queues scroll behind it. */
+.rail-foot{margin-top:auto;position:sticky;bottom:0;padding-top:14px;
+ border-top:1px solid var(--line);background:var(--bg)}
 .rail a.rail-guide{align-items:flex-start;gap:9px;padding:9px 8px;line-height:1.35}
 .rail-guide span{display:flex;flex-direction:column;gap:1px;min-width:0}
 .rail-guide em{font-style:normal;font-size:11px;color:var(--ink-3)}
 .rail-guide svg{flex:none;margin-top:1px}
 .guide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.guide-card{position:relative;display:block;text-decoration:none;color:inherit;background:var(--surface);
+.guide-card{position:relative;display:block;width:100%;text-align:left;cursor:pointer;font:inherit;
+ text-decoration:none;color:inherit;background:var(--surface);
  border:1px solid var(--line);border-radius:10px;padding:14px 14px 14px 44px}
 .guide-card:hover{border-color:var(--accent);box-shadow:0 1px 0 var(--line)}
 .guide-n{position:absolute;left:14px;top:14px;width:20px;height:20px;border-radius:100px;
@@ -262,6 +267,24 @@ details:not([open]) > :not(summary){display:none !important}
 .rowlink{cursor:pointer}
 .rowlink:hover{background:var(--surface-2)}
 tr.unread td{font-weight:600}
+/* The tour. One box with a very large spread shadow: the box is the hole and
+   the shadow is everything else. pointer-events stay off so the page under it
+   is still live, and only the card itself takes clicks. */
+#tourLayer{position:fixed;inset:0;z-index:80;pointer-events:none}
+.tour-mask{position:fixed;border-radius:8px;box-shadow:0 0 0 9999px rgba(10,18,15,.62);
+ outline:2px solid var(--gold);outline-offset:0;transition:top .18s,left .18s,width .18s,height .18s}
+.tour-nohole{inset:0;border-radius:0;box-shadow:none;background:rgba(10,18,15,.62);outline:none}
+.tour-pop{position:fixed;pointer-events:auto;background:var(--surface);border:1px solid var(--line);
+ border-radius:12px;padding:14px;box-shadow:0 18px 40px rgba(10,18,15,.28);display:flex;flex-direction:column;gap:8px}
+.tour-mid{top:50%;left:50%;transform:translate(-50%,-50%);width:min(360px,calc(100vw - 24px))}
+.tour-t{font-weight:650;letter-spacing:-.01em}
+.tour-b{font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.tour-tip{display:flex;gap:6px;align-items:flex-start;font-size:12px;line-height:1.45;color:var(--ochre)}
+.tour-tip svg{flex:none;margin-top:2px}
+.tour-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px;border-top:1px solid var(--line)}
+.tour-count{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+/* Deliberately NOT overflow:hidden. The spotlight follows scroll, and a step
+   whose target is below the fold has to be able to scroll to it. */
 
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column;gap:3px}
@@ -572,10 +595,6 @@ body:has(.floatcta.on){padding-bottom:56px}
 @media (min-width:601px) and (max-width:880px){
   .admin{grid-template-columns:1fr}
   .rail{position:static;flex-direction:row;overflow-x:auto;gap:14px;padding-bottom:8px;border-bottom:1px solid var(--line);min-height:0}
-  /* Sideways on a phone, so bottom-of-the-rail means end-of-the-row. */
-  .rail-foot{margin-top:0;margin-left:auto;padding-top:0;padding-left:14px;border-top:none;border-left:1px solid var(--line);flex:none}
-  .rail a.rail-guide{padding:5px 8px;white-space:nowrap}
-  .rail-guide em{display:none}
   .rail-grp{flex-direction:row;gap:2px;flex:none}
   .rail-grp > .eyebrow{display:none}
   .rail a{white-space:nowrap}
@@ -584,10 +603,24 @@ body:has(.floatcta.on){padding-bottom:56px}
 @media (max-width:600px){
   .admin{grid-template-columns:1fr}
   .rail{position:static;flex-direction:row;overflow-x:auto;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .rail{min-height:0;max-height:none;overflow-y:visible}
   .rail-grp{flex-direction:row;gap:2px;flex:none}
   .rail-grp > .eyebrow{display:none}
   .rail a{white-space:nowrap}
   .shell{padding:16px 14px 70px}
+}
+
+/* The rail lies down below 880px, in two separate blocks. Anything true of
+   both lives here, once, rather than being copied into each and drifting.
+   The queue list is thousands of pixels wide when horizontal, so 'last in the
+   row' puts the tour off screen: stick it to the right edge instead. */
+@media (max-width:880px){
+  .rail{min-height:0;max-height:none;overflow-y:visible}
+  .rail-foot{margin-top:0;margin-left:auto;position:sticky;right:0;bottom:auto;
+   padding:0 0 0 10px;border-top:none;border-left:1px solid var(--line);
+   background:var(--bg);flex:none;display:flex;align-items:center}
+  .rail a.rail-guide{padding:5px 8px;white-space:nowrap;align-items:center}
+  .rail-guide em{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -2078,6 +2111,9 @@ function render(){
  if(document.getElementById('linkUrl'))runLinkbar();
  watchCta();
  window.scrollTo(0,VIEW.keepScroll?window.scrollY:0);VIEW.keepScroll=false;
+ // The tour points at an element that this render just replaced, so the
+ // coach mark has to be redrawn against the new one, not the old reference.
+ if(TOUR.on)setTimeout(paintTour,0);
 }
 function shell(body,isAdmin){
  return `
@@ -3166,13 +3202,13 @@ function viewAdmin(parts,q){
  const cur=page==='orders'?(q.q||'all'):'';
  return `<div class="shell"><div class="admin">
   <nav class="rail">
-   ${QUEUES.map(g=>`<div class="rail-grp"><div class="eyebrow">${g[0]}</div>
+   ${QUEUES.map((g,gi)=>`<div class="rail-grp" ${gi===0?'data-tour="queues"':''}><div class="eyebrow">${g[0]}</div>
      ${g[1].map(x=>{const c=qCount(x[0]);const hot=['review','decision','qexpired','issues','cargopay'].includes(x[0])&&c>0;
        return `<a href="#/admin/orders?q=${x[0]}" class="${cur===x[0]?'on':''}">${esc(x[1])}<span class="cnt ${hot?'hot':''}">${c}</span></a>`}).join('')}
    </div>`).join('')}
    <div class="rail-grp"><div class="eyebrow">Manage</div>
      <a href="#/admin" class="${page==='dash'?'on':''}">${icon('chart',15)}Dashboard</a>
-     <a href="#/admin/inbox" class="${page==='inbox'?'on':''}">${icon('inbox',15)}Inbox<span class="cnt ${INBOX.unread?'hot':''}">${INBOX.unread||0}</span></a>
+     <a href="#/admin/inbox" data-tour="nav-inbox" class="${page==='inbox'?'on':''}">${icon('inbox',15)}Inbox<span class="cnt ${INBOX.unread?'hot':''}">${INBOX.unread||0}</span></a>
      <a href="#/admin/finance" class="${page==='finance'?'on':''}">${icon('pound',15)}Finance</a>
      <a href="#/admin/reports" class="${page==='reports'?'on':''}">${icon('chart',15)}Reports</a>
      <a href="#/admin/batches" class="${page==='batches'?'on':''}">${icon('layers',15)}Cargo batches</a>
@@ -3205,7 +3241,7 @@ function adminDash(){
     <div class="stack-s"><div class="eyebrow">Operations</div><h2 style="font-size:24px">Today</h2></div>
     <div class="row"><a class="btn btn-s" href="#/request">${icon('plus',15)}Log a request</a></div>
   </div>
-  <div class="kpis">
+  <div class="kpis" data-tour="kpis">
     <div class="kpi stripe-a"><span class="v num">${open.length}</span><span class="l">Open orders</span></div>
     <div class="kpi stripe-w"><span class="v num">${qCount('tobuy')}</span><span class="l">Paid, waiting to be bought</span></div>
     <div class="kpi stripe-o"><span class="v num">${qCount('cargopay')}</span><span class="l">Awaiting cargo payment</span></div>
@@ -3284,7 +3320,7 @@ function adminOrders(qk){
       <button class="btn btn-s" data-act="search">${icon('search',15)}</button>
     </div>
   </div>
-  <div class="card">${orderTable(list)}</div>
+  <div class="card" data-tour="orders-table">${orderTable(list)}</div>
   <div class="tiny muted">${list.length} order${list.length===1?'':'s'}. Search covers order reference, customer and recipient name, phone, email, retailer order number, payment reference and cargo batch.</div>
  </div>`;
 }
@@ -3315,7 +3351,7 @@ function adminOrder(ref){
  else pane=paneHistory(o);
  return `<div class="stack">
   <div class="row" style="gap:8px"><a class="btn btn-xs btn-ghost" href="#/admin/orders?q=all"><span style="display:inline-block;transform:rotate(180deg)">${icon('arrow',13)}</span>All orders</a></div>
-  <div class="spread wrap" style="align-items:flex-start">
+  <div class="spread wrap" data-tour="order-summary" style="align-items:flex-start">
    <div class="stack-s">
      <div class="row wrap" style="gap:8px"><span class="mono" style="font-size:23px;font-weight:700">${esc(o.ref)}</span>${pill(o.status,statusTone(o.status))}${o.partOfLargerOrder?pill('Consolidate','info'):''}</div>
      <div class="small muted">${esc(o.customer.name)} · ${esc(o.customer.email)} · ${esc(o.customer.whatsapp)} · submitted ${fmtFull(o.createdAt)}</div>
@@ -3324,7 +3360,7 @@ function adminOrder(ref){
    <div class="col" style="align-items:flex-end;gap:6px">
      <div class="mono" style="font-size:20px;font-weight:700">${money(q.total)}</div>
      <div class="tiny muted">${t.initialPaid?'Paid '+money(t.initialPaid):'Not paid'}${t.cargoPaid?' · cargo '+money(t.cargoPaid):''}</div>
-     ${o.quote&&!o.quote.sentAt&&!t.initialPaid?`<button class="btn btn-primary" data-act="approveQuote" data-ref="${o.ref}">${icon('check',16)}Approve and send ${money(q.total)}</button>`:''}
+     ${o.quote&&!o.quote.sentAt&&!t.initialPaid?`<button class="btn btn-primary" data-tour="approve" data-act="approveQuote" data-ref="${o.ref}">${icon('check',16)}Approve and send ${money(q.total)}</button>`:''}
      ${t.initialPaid?`<div class="row tiny" style="gap:6px;align-items:center;color:var(--ink-2)">${icon('lock',12)}<span>Collection code <b class="mono" style="font-size:13.5px;letter-spacing:.06em">${esc(o.collectCode)}</b></span></div>`:''}
      <div class="row" style="gap:6px">
        <a class="btn btn-xs" href="#/track/${o.ref}/${o.token}" target="_blank">${icon('ext',13)}Customer view</a>
@@ -3729,7 +3765,7 @@ function adminRetailers(){
   <div class="spread wrap"><div class="stack-s"><div class="eyebrow">Configuration</div><h2 style="font-size:22px">Approved retailers</h2></div>
    <button class="btn btn-s" data-act="addRetailer">${icon('plus',15)}Add retailer</button></div>
   ${note('Links from retailers that are not approved never proceed to a quote automatically. The customer is told the retailer is not approved and the link is queued for manual review.','info','shield')}
-  <div class="card"><div class="scroll-x"><table class="t">
+  <div class="card" data-tour="retailers"><div class="scroll-x"><table class="t">
    <thead><tr><th>Retailer</th><th>Domains</th><th>Status</th><th>Delivery</th><th>Free over</th><th>Auto read</th><th>Known rules</th></tr></thead>
    <tbody>${S.retailers.map(r=>`<tr>
      <td><b class="small">${esc(r.name)}</b></td>
@@ -3760,7 +3796,7 @@ function adminSettings(){
  const f=(k,label,hint,step)=>`<label class="f">${label}${hint?`<span class="hint">${hint}</span>`:''}<input type="number" step="${step||'0.01'}" data-set="${k}" value="${s[k]}"></label>`;
  return `<div class="stack">
   <div class="stack-s"><div class="eyebrow">Configuration</div><h2 style="font-size:22px">Business rules</h2></div>
-  <div class="card"><div class="card-h"><b>Pricing</b></div><div class="card-b field-grid">
+  <div class="card" data-tour="settings"><div class="card-h"><b>Pricing</b></div><div class="card-b field-grid">
     ${f('minSpend','Minimum product spend £','Per submitted order')}
     ${f('procurementPct','Procurement fee %','Of product value','1')}
     ${f('procurementMin','Procurement fee minimum £')}
@@ -3821,7 +3857,7 @@ function adminSettings(){
 function adminBatches(){
  const ready=S.orders.filter(QMAP.tobatch.fn);
  return `<div class="stack">
-  <div class="spread wrap"><div class="stack-s"><div class="eyebrow">Cargo</div><h2 style="font-size:22px">Shipment batches</h2></div>
+  <div class="spread wrap" data-tour="batches"><div class="stack-s"><div class="eyebrow">Cargo</div><h2 style="font-size:22px">Shipment batches</h2></div>
    <button class="btn btn-s" data-act="addBatch">${icon('plus',15)}New batch</button></div>
   ${ready.length?note(`<b>${ready.length} order${ready.length>1?'s are':' is'} paid and ready for a batch.</b> ${ready.map(o=>`<a class="link mono" href="#/admin/order/${o.ref}">${o.ref}</a>`).join(', ')}`,'ochre','box'):''}
   ${S.batches.length?S.batches.map(b=>`<div class="card">
@@ -3856,7 +3892,7 @@ function adminFinance(){
  const disputes=S.orders.flatMap(o=>o.payments.filter(p=>/dispute|reversed/i.test(p.status)).map(p=>({o,p})));
  return `<div class="stack">
   <div class="stack-s"><div class="eyebrow">Finance</div><h2 style="font-size:22px">Money in and out</h2></div>
-  <div class="kpis">
+  <div class="kpis" data-tour="finance">
    <div class="kpi stripe-a"><span class="v num">${money(tot.init)}</span><span class="l">Initial payments</span></div>
    <div class="kpi stripe-o"><span class="v num">${money(tot.cargo)}</span><span class="l">Cargo payments</span></div>
    <div class="kpi stripe-d"><span class="v num">${money(tot.ref)}</span><span class="l">Refunds</span></div>
@@ -3935,7 +3971,7 @@ function adminReports(){
 function adminAudit(){
  return `<div class="stack">
   <div class="stack-s"><div class="eyebrow">Compliance</div><h2 style="font-size:22px">Audit log</h2></div>
-  <div class="card"><div class="scroll-x"><table class="t">
+  <div class="card" data-tour="audit"><div class="scroll-x"><table class="t">
    <thead><tr><th>When</th><th>Order</th><th>Action</th><th>Before</th><th>After</th><th>Reason</th><th>By</th></tr></thead>
    <tbody>${S.audit.map(a=>`<tr><td class="tiny muted nowrap">${fmtFull(a.at)}</td>
      <td>${a.ref?`<a class="link mono tiny" href="#/admin/order/${a.ref}">${a.ref}</a>`:'<span class="tiny muted">—</span>'}</td>
@@ -3952,7 +3988,7 @@ function adminAudit(){
 function adminInbox(key){
  if(!API.on) return `<div class="stack">
    <div class="stack-s"><div class="eyebrow">Conversations</div><h2 style="font-size:22px">Inbox</h2></div>
-   ${note('<b>The inbox needs the server.</b> This build is running on its own in your browser, so there is no mail to show.','info','shield')}
+   <div data-tour="inbox-list">${note('<b>The inbox needs the server.</b> This build is running on its own in your browser, so there is no mail to show.','info','shield')}</div>
   </div>`;
 
  loadInbox();
@@ -3966,6 +4002,7 @@ function adminInbox(key){
       <button class="btn btn-s" data-act="inboxRefresh">${icon('arrow',14)}Refresh</button>
     </div>
   </div>
+  <div data-tour="inbox-list" class="stack">
   ${INBOX.unread?note('<b>'+INBOX.unread+' message'+(INBOX.unread>1?'s':'')+' you have not opened yet.</b> Opening a conversation marks it read.','ochre','chat'):''}
   ${!INBOX.loaded&&INBOX.loading?`<div class="card card-p"><div class="tiny muted">Loading…</div></div>`:''}
   ${INBOX.loaded&&!rows.length?`<div class="card card-p"><div class="empty">
@@ -3985,6 +4022,7 @@ function adminInbox(key){
       <td class="tiny muted nowrap">${ago(t.lastAt)}</td>
      </tr>`}).join('')}
   </tbody></table></div></div>`:''}
+  </div>
  </div>`;
 }
 
@@ -4027,59 +4065,188 @@ function inboxThread(key){
 }
 
 /* ---------------- guided tour ----------------
-   Written for someone opening this for the first time. Every page, what it is
-   for, and the one thing most likely to trip them up on it. */
-const GUIDE=[
- {t:'Dashboard', h:'#/admin', i:'chart',
-  w:'What needs doing today, and nothing else. Orders waiting on a decision are counted at the top.',
-  tip:'The red counts in the left rail are the same numbers. If they are all zero there is genuinely nothing waiting.'},
- {t:'Inbox', h:'#/admin/inbox', i:'inbox',
-  w:'Every email sent to help@tengauk.com, and every reply we send back. If the customer quoted an order number it is attached to that order automatically.',
-  tip:'A copy of each message also goes to Winston’s personal inbox as the alert. Answer it here, not there, so the reply is on file.'},
- {t:'The order queues', h:'#/admin/orders?q=all', i:'box',
-  w:'The groups at the top of the rail are the same orders sliced by what they are waiting for: needing review, quoted, paid, to purchase, arrived.',
-  tip:'"Manual review" means the system would not price it on its own, usually a restricted item or a shop we do not know.'},
- {t:'One order', h:'#/admin/orders?q=all', i:'note',
-  w:'Open any order to see what was asked for, what we quoted, what was paid and every message sent. Prices are amended here, and approving is what sends the quote.',
-  tip:'Nothing reaches the customer until you press approve. You can change a price as many times as you like first.'},
- {t:'Finance', h:'#/admin/finance', i:'pound',
-  w:'What has come in, what is held, and anything disputed or reversed by PayPal.',
-  tip:'Money is only ever marked paid by PayPal telling us directly, never by someone pressing a button here.'},
- {t:'Cargo batches', h:'#/admin/batches', i:'layers',
-  w:'Paid orders grouped into the shipment they travel in. Sea sails monthly; air goes as it comes.',
-  tip:'An order has to be paid before it can join a batch.'},
- {t:'Retailers', h:'#/admin/retailers', i:'shield',
-  w:'The shops we buy from, their UK delivery charges, and what we will not carry.',
-  tip:'Changing a delivery charge here changes every future quote, not past ones.'},
- {t:'Settings', h:'#/admin/settings', i:'cog',
-  w:'Prices: the air rate per kilo, the sea box prices, the handling fee and the shipping dates.',
-  tip:'This is the one page where a wrong number quietly costs money on every order. Change it deliberately.'},
- {t:'Reports', h:'#/admin/reports', i:'chart',
-  w:'How the business is actually doing: orders, revenue and what each route earns.',
-  tip:'Air earns less than sea. That is the model, not a bug.'},
- {t:'Audit log', h:'#/admin/audit', i:'note',
-  w:'Every change, who made it and when. Append only, nothing can be edited or deleted.',
-  tip:'This is why everyone has their own login rather than a shared one.'}
+   A list of cards is a contents page, not a tour. This drives the real
+   admin: each step navigates to the page it is describing, finds a real
+   element on it and cuts a hole in a dimmed overlay around it.
+
+   The overlay never blocks clicks. It is one absolutely positioned box with
+   an enormous spread box-shadow, so the "hole" is simply the box itself and
+   everything outside it is dark. pointer-events stay off it, which means the
+   page underneath is still live and someone can wander off mid-tour.
+
+   Anchors are data-tour attributes on the real markup rather than CSS paths,
+   because a class name is free to change and a stated anchor is not. */
+const TOUR = { on:false, i:0 };
+const TOUR_STEPS = [
+ { t:'This is operations',
+   h:'#/admin', a:'kpis',
+   b:'Everything you need to run Tenga lives behind this one sign-in. The row across the top is today at a glance: how many orders are open, what is waiting, what has been paid.',
+   tip:'Nothing here is visible to customers.' },
+ { t:'The queues are your to-do list',
+   h:'#/admin', a:'queues',
+   b:'Down the left, orders sliced by what they are waiting for. The number beside each one is how many are sitting in it, and it turns red when something needs a person.',
+   tip:'If every count is zero, there is genuinely nothing waiting on you.' },
+ { t:'Every order, searchable',
+   h:'#/admin/orders?q=all', a:'orders-table',
+   b:'The full list. Search covers the reference, both names, phone, email, the shop’s own order number, the payment reference and the cargo batch, so you can find an order from whatever the customer happens to quote at you.',
+   tip:'Click any row to open it.' },
+ { t:'Approving is what sends the quote',
+   h:'ORDER', a:['approve','order-summary'],
+   b:'Inside an order you can change any price, weight or delivery charge, as many times as you like. The customer sees none of it until you press this button. That press is what emails them and asks for payment.',
+   tip:'If this button is not here, the quote has already gone or the order is paid.' },
+ { t:'Email, answered from the order',
+   h:'#/admin/inbox', a:'inbox-list',
+   b:'Mail sent to help@tengauk.com arrives here, and if the customer quoted an order number it attaches itself to that order. You reply from inside the conversation, and the reply is filed with it.',
+   tip:'A copy still goes to Winston’s personal inbox as the alert. Answer it here, so the reply is on file rather than in one person’s sent items.' },
+ { t:'Money in and out',
+   h:'#/admin/finance', a:'finance',
+   b:'What has come in, what has been refunded, what is on hold and what the business actually earned after the shop and the freight are paid.',
+   tip:'An order is only ever marked paid by PayPal telling us directly. Nobody can mark one paid by pressing a button here.' },
+ { t:'Shipments',
+   h:'#/admin/batches', a:'batches',
+   b:'Paid orders are grouped into the shipment they travel in. Sea sails monthly; air goes as it comes. Setting a batch to arrived is what releases the collection codes.',
+   tip:'An order has to be paid before it can join a batch.' },
+ { t:'The shops we buy from',
+   h:'#/admin/retailers', a:'retailers',
+   b:'Each shop’s UK delivery charge and whether we will quote for it automatically. A link from a shop that is not approved never self-prices, it goes to manual review instead.',
+   tip:'Changing a delivery charge changes every future quote, not the ones already sent.' },
+ { t:'The numbers behind every quote',
+   h:'#/admin/settings', a:'settings',
+   b:'The handling fee, the air rate per kilo, the sea box prices and the shipping dates. Every quote the system drafts comes from this page.',
+   tip:'This is the one page where a wrong number quietly costs money on every single order. Change it deliberately.' },
+ { t:'Everything is on the record',
+   h:'#/admin/audit', a:'audit',
+   b:'Every change, who made it and when. It is append only: nothing here can be edited or deleted, by anyone.',
+   tip:'This is why you and Gerald have separate logins instead of sharing one.' }
 ];
+
+/* The order step needs a real order to point at, and which one does not
+   matter. Prefer one still awaiting approval, because that is the only state
+   where the approve button exists to be highlighted. */
+function tourOrderHash(){
+ const un = S.orders.find(o => o.quote && !o.quote.sentAt && !payTotals(o).initialPaid);
+ const any = un || S.orders[0];
+ return any ? '#/admin/order/' + any.ref : '#/admin/orders?q=all';
+}
+const tourHash = st => st.h === 'ORDER' ? tourOrderHash() : st.h;
+
+function startTour(){ TOUR.on = true; TOUR.i = 0; goTourStep(); }
+function endTour(){ TOUR.on = false; paintTour(); }
+function goTourStep(){
+ const st = TOUR_STEPS[TOUR.i]; if (!st) return endTour();
+ const want = tourHash(st);
+ if (location.hash !== want) { location.hash = want; }   // fires render
+ else rerender(true);
+ // The step's element only exists after that render.
+ setTimeout(paintTour, 0);
+}
+function tourNext(){ if (TOUR.i < TOUR_STEPS.length - 1) { TOUR.i++; goTourStep() } else endTour() }
+function tourBack(){ if (TOUR.i > 0) { TOUR.i--; goTourStep() } }
+
+/* A step may name more than one anchor. The approve button only exists while
+   an order is awaiting approval, so that step falls back to the order header,
+   which is always there. First one found wins. */
+const tourAnchors = st => Array.isArray(st.a) ? st.a : [st.a];
+function tourEl(st){
+ for (const a of tourAnchors(st)) {
+   const el = document.querySelector('[data-tour="' + a + '"]');
+   if (el) return el;
+ }
+ return null;
+}
+
+/* Draw. Called after every render, on resize and on scroll, because the
+   element it points at moves and a coach mark that lags is worse than none. */
+function paintTour(){
+ const old = document.getElementById('tourLayer');
+ if (old) old.remove();
+ if (!TOUR.on) { document.body && document.body.classList && document.body.classList.remove('tour-on'); return }
+ const st = TOUR_STEPS[TOUR.i]; if (!st) return;
+ document.body.classList.add('tour-on');
+
+ const el = tourEl(st);
+ const layer = document.createElement('div');
+ layer.id = 'tourLayer';
+ const n = TOUR.i + 1, total = TOUR_STEPS.length;
+ const nav = `<div class="tour-nav">
+    <span class="tour-count">${n} of ${total}</span>
+    <div class="row" style="gap:6px">
+      <button class="btn btn-xs btn-ghost" data-act="tourEnd">Close</button>
+      ${TOUR.i ? '<button class="btn btn-xs" data-act="tourBack">Back</button>' : ''}
+      <button class="btn btn-xs btn-primary" data-act="tourNext">${n === total ? 'Finish' : 'Next'}</button>
+    </div>
+  </div>`;
+ const card = `<div class="tour-pop" id="tourPop">
+    <div class="tour-t">${esc(st.t)}</div>
+    <div class="tour-b">${esc(st.b)}</div>
+    <div class="tour-tip">${icon('alert',11)}<span>${esc(st.tip)}</span></div>
+    ${nav}
+  </div>`;
+
+ if (!el) {
+   // The page did not have the anchor. Say so rather than pointing at nothing.
+   layer.innerHTML = `<div class="tour-mask tour-nohole"></div><div class="tour-pop tour-mid" id="tourPop">
+     <div class="tour-t">${esc(st.t)}</div><div class="tour-b">${esc(st.b)}</div>
+     <div class="tour-tip">${icon('alert',11)}<span>${esc(st.tip)}</span></div>${nav}</div>`;
+   document.body.appendChild(layer);
+   return;
+ }
+
+ const r = el.getBoundingClientRect();
+ const pad = 6;
+ const top = Math.max(0, r.top - pad), left = Math.max(0, r.left - pad);
+ const w = r.width + pad * 2;
+ // A long table is taller than the screen, and a hole bigger than the window
+ // dims nothing at all. Highlight the part you can actually see.
+ const h = Math.min(r.height + pad * 2, window.innerHeight - top - 16);
+ layer.innerHTML = `<div class="tour-mask" style="top:${top}px;left:${left}px;width:${w}px;height:${h}px"></div>${card}`;
+ document.body.appendChild(layer);
+
+ // Place the card under the highlight, or above it when there is no room.
+ const pop = layer.querySelector('#tourPop');
+ const pw = Math.min(360, window.innerWidth - 24);
+ pop.style.width = pw + 'px';
+ const ph = pop.offsetHeight;
+ const below = top + h + 12;
+ const fitsBelow = below + ph < window.innerHeight - 8;
+ pop.style.top = (fitsBelow ? below : Math.max(8, top - ph - 12)) + 'px';
+ pop.style.left = Math.min(Math.max(8, left), window.innerWidth - pw - 8) + 'px';
+
+ if (r.top < 0 || r.bottom > window.innerHeight) {
+   el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+   setTimeout(paintTour, 320);
+ }
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => TOUR.on && paintTour());
+  window.addEventListener('scroll', () => TOUR.on && paintTour(), { passive: true });
+}
+
+/* The page behind the "Guided tour" rail link: a contents page that can also
+   start the walkthrough, so it is useful whether you want the tour or just
+   want to know what a page is called. */
 function adminGuide(){
  return `<div class="stack-l">
   <div class="stack-s"><div class="eyebrow">Getting started</div>
     <h2 style="font-size:24px">Guided tour</h2>
-    <p class="small muted" style="max-width:60ch">Every page in operations, what it is for, and the thing most likely to catch you out. Nothing here changes anything, so click around freely.</p>
+    <p class="small muted" style="max-width:60ch">Ten steps through the real pages. Each one takes you to the page it is describing and points at the thing that matters on it. Nothing you press during the tour changes anything.</p>
+    <div class="row" style="gap:8px;margin-top:4px">
+      <button class="btn btn-primary" data-act="tourStart">${icon('book',16)}Start the tour</button>
+    </div>
   </div>
   <div class="guide-grid">
-   ${GUIDE.map((g,n)=>`<a class="guide-card" href="${g.h}">
+   ${TOUR_STEPS.map((g,n)=>`<button class="guide-card" data-act="tourAt" data-i="${n}">
      <div class="guide-n">${n+1}</div>
      <div class="stack-s" style="gap:6px">
-       <div class="row" style="gap:8px;align-items:center">${icon(g.i,16)}<b>${esc(g.t)}</b></div>
-       <div class="small muted">${esc(g.w)}</div>
+       <b>${esc(g.t)}</b>
+       <div class="small muted">${esc(g.b)}</div>
        <div class="tiny" style="color:var(--ochre)">${icon('alert',11)} ${esc(g.tip)}</div>
      </div>
-   </a>`).join('')}
+   </button>`).join('')}
   </div>
   <div class="card card-p stack-s">
     <div class="eyebrow">The shape of a job</div>
-    <div class="small">A request arrives and lands in <b>Manual review</b> or already priced. You check the price, amend anything wrong, and press <b>approve</b>, which is what sends the quote. The customer pays through PayPal, and <b>PayPal tells us directly</b> that it cleared. The order joins a <b>cargo batch</b>, sails or flies, and when it lands the customer gets their collection code. They bring that code and photo ID to ${esc(collectLine())}.</div>
+    <div class="small">A request arrives and lands in <b>Manual review</b> or already priced. You check it, amend anything wrong, and press <b>approve</b>, which is what sends the quote. The customer pays through PayPal, and <b>PayPal tells us directly</b> that it cleared. The order joins a <b>cargo batch</b>, sails or flies, and when it lands the customer gets their collection code. They bring that code and photo ID to ${esc(collectLine())}.</div>
   </div>
  </div>`;
 }
@@ -4203,6 +4370,11 @@ document.addEventListener('click',e=>{
     if(API.on){ API.logout().catch(()=>{}); S.staff=null; } S.session=null; save(); location.hash='#/'; rerender(); toast('Signed out') },
   reset(){ if(confirm('Clear all demo data and start again with the seeded example orders?')){localStorage.removeItem(KEY);fresh();location.hash='#/';render();toast('Demo reset')} },
   tab(){ VIEW.adminTab=d.v; rerender(true); },
+  tourStart(){ startTour() },
+  tourAt(){ TOUR.on=true; TOUR.i=Number(d.i)||0; goTourStep() },
+  tourNext(){ tourNext() },
+  tourBack(){ tourBack() },
+  tourEnd(){ endTour() },
   inboxRefresh(){ INBOX.loaded=false; loadInbox(true); toast('Checking for new mail') },
   openThread(){ go('#/admin/inbox/'+encodeURIComponent(d.key)) },
   async sendReply(){

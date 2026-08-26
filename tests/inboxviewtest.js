@@ -22,12 +22,43 @@ const bad = h => {
 console.log('GUIDED TOUR');
 S.session='admin';
 const g = adminGuide();
-console.log('  pages listed        :', GUIDE.length);
-console.log('  every one has a link:', GUIDE.every(x=>/^#\\/admin/.test(x.h)));
-console.log('  every one has a tip :', GUIDE.every(x=>x.tip && x.tip.length>10));
-console.log('  every icon exists   :', GUIDE.every(x=>!!ICONS[x.i]) ? 'yes' : 'NO -> '+GUIDE.filter(x=>!ICONS[x.i]).map(x=>x.i).join(', '));
-console.log('  names the collection point:', g.includes('Mbare Grillz'));
-console.log('  renders clean       :', bad(g).length ? 'NO -> '+bad(g).join(', ') : 'yes');
+console.log('  steps                :', TOUR_STEPS.length);
+console.log('  every one has a tip  :', TOUR_STEPS.every(x=>x.tip && x.tip.length>10));
+console.log('  starts from the page :', g.includes('tourStart'));
+console.log('  names the collection :', g.includes('Mbare Grillz'));
+console.log('  renders clean        :', bad(g).length ? 'NO -> '+bad(g).join(', ') : 'yes');
+
+// The one that matters: a step pointing at an anchor nobody put in the markup
+// would silently fall back to a centred card, on every run, forever.
+const markup = [viewAdmin(['dash'],{}), viewAdmin(['orders'],{q:'all'}), viewAdmin(['inbox'],{}),
+                viewAdmin(['finance'],{}), viewAdmin(['batches'],{}), viewAdmin(['retailers'],{}),
+                viewAdmin(['settings'],{}), viewAdmin(['audit'],{})].join('');
+const orderRef = (S.orders.find(o=>o.quote&&!o.quote.sentAt&&!payTotals(o).initialPaid)||S.orders[0]).ref;
+const orderPage = viewAdmin(['order',orderRef],{});
+const all = markup + orderPage;
+const anch = st => Array.isArray(st.a) ? st.a : [st.a];
+const missing = TOUR_STEPS.filter(st => !anch(st).some(a => all.includes('data-tour="'+a+'"')));
+console.log('  every anchor exists  :', missing.length ? 'NO -> '+missing.map(x=>anch(x).join('/')).join(', ') : 'yes');
+
+// And each anchor must be on the page the step navigates to, not merely
+// somewhere in the app.
+const pageFor = { '#/admin':viewAdmin(['dash'],{}), '#/admin/orders?q=all':viewAdmin(['orders'],{q:'all'}),
+  '#/admin/inbox':viewAdmin(['inbox'],{}), '#/admin/finance':viewAdmin(['finance'],{}),
+  '#/admin/batches':viewAdmin(['batches'],{}), '#/admin/retailers':viewAdmin(['retailers'],{}),
+  '#/admin/settings':viewAdmin(['settings'],{}), '#/admin/audit':viewAdmin(['audit'],{}), 'ORDER':orderPage };
+const wrongPage = TOUR_STEPS.filter(st => {
+  const html = pageFor[st.h];
+  return html && !anch(st).some(a => html.includes('data-tour="'+a+'"'));
+});
+console.log('  anchor is on its page:', wrongPage.length ? 'NO -> '+wrongPage.map(x=>x.t+' wants '+anch(x).join('/')).join('; ') : 'yes');
+console.log('  the order step finds an order:', tourOrderHash().startsWith('#/admin/order/'), tourOrderHash());
+
+// Walking it without a browser: every step must resolve to a hash.
+TOUR.on=true; TOUR.i=0;
+const hashes = TOUR_STEPS.map((st,i)=>tourHash(st));
+console.log('  every step has a hash:', hashes.every(h=>h.indexOf('#/')===0) ? 'yes' : 'NO -> '+hashes.join(' '));
+console.log('  no step points nowhere:', hashes.filter(h=>!h).length===0);
+TOUR.on=false;
 
 console.log('');
 console.log('INBOX, EMPTY');

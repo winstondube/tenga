@@ -9,6 +9,7 @@ import { json, bad, now, toPence, fromPence, collectCode, token, verifyPw,
          looksLikeEmail, audit, mayReadOrder, publicView } from './lib.js';
 import { send } from './mail.js';
 import { createPayPalOrder, capturePayPalOrder, verifyWebhook, applyWebhook } from './paypal.js';
+import { verifyInbound, receiveEmail, replyToThread } from './inbox.js';
 
 const CORS = origin => ({
   'access-control-allow-origin': origin,
@@ -64,6 +65,15 @@ async function route(req, env, url, ctx) {
   const pay = p.match(/^\/orders\/([A-Za-z0-9-]+)\/paypal$/);
   if (pay && m === 'POST') return startPayPal(req, env, url, pay[1]);
   if (p === '/paypal/webhook' && m === 'POST') return paypalWebhook(req, env);
+
+  if (p === '/email/inbound' && m === 'POST') return inboundEmail(req, env);
+  if (p === '/inbox' && m === 'GET')          return listInbox(req, env, url);
+  const thread = p.match(/^\/inbox\/([^/]+)$/);
+  if (thread && m === 'GET')  return getThread(req, env, decodeURIComponent(thread[1]));
+  const rep = p.match(/^\/inbox\/([^/]+)\/reply$/);
+  if (rep && m === 'POST')    return replyThread(req, env, decodeURIComponent(rep[1]));
+  const rd = p.match(/^\/inbox\/([^/]+)\/read$/);
+  if (rd && m === 'POST')     return markRead(req, env, decodeURIComponent(rd[1]));
 
   if (p === '/staff/login'  && m === 'POST') return login(req, env);
   if (p === '/staff/logout' && m === 'POST') return logout(req, env);
@@ -333,4 +343,108 @@ async function paypalWebhook(req, env) {
       vars: { amount: '£' + Number(out.amount).toFixed(2), where: env.COLLECT_AT } });
   }
   return json({ ok: true, ...out });
+}
+
+
+/* ---------- inbox ---------- */
+
+/* Resend telling us mail arrived. Unverified deliveries are dropped, not
+   stored: a public URL anyone can POST to must not be able to put words in a
+   customer's mouth. 200 either way so Resend stops retrying what we refuse. */
+async function inboundEmail(req, env) {
+  const raw = await req.text();
+  const check = await verifyInbound(env, req, raw);
+  if (!check.verified) {
+    await audit(env, { action: 'Inbound email rejected', reason: String(check.reason).slice(0, 80),
+                       actor: 'resend', ip: req.headers.get('cf-connecting-ip') });
+    return json({ ok: false, reason: 'signature not verified' }, 200);
+  }
+  let event; try { event = JSON.parse(raw) } catch { return json({ ok: false }, 200) }
+  if (event.type !== 'email.received') return json({ ok: true, ignored: event.type }, 200);
+
+  const out = await receiveEmail(env, event);
+  if (out.stored) {
+    await audit(env, { ref: out.ref || null, action: 'Email received',
+                       reason: out.forwarded ? 'copy forwarded' : 'stored only', actor: 'customer' });
+  }
+  return json({ ok: true, ...out });
+}
+
+/* One row per conversation, newest first, with the unread count the nav uses. */
+async function listInbox(req, env, url) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+
+  const limit = Math.min(Number(url.searchParams.get('limit') || 100), 200);
+  const { results } = await env.DB.prepare(
+    `SELECT thread_key,
+            MAX(created_at)                                     AS last_at,
+            COUNT(*)                                            AS total,
+            SUM(CASE WHEN direction='in' AND read_at IS NULL THEN 1 ELSE 0 END) AS unread,
+            MAX(ref)                                            AS ref
+       FROM inbox
+      GROUP BY thread_key
+      ORDER BY last_at DESC
+      LIMIT ?`).bind(limit).all();
+
+  // The newest message of each thread, for the preview line.
+  const threads = [];
+  for (const t of (results || [])) {
+    const last = await env.DB.prepare(
+      `SELECT direction, from_addr, to_addr, subject, snippet, created_at
+         FROM inbox WHERE thread_key = ? ORDER BY created_at DESC LIMIT 1`).bind(t.thread_key).first();
+    threads.push({ threadKey: t.thread_key, ref: t.ref, total: t.total, unread: t.unread,
+                   lastAt: t.last_at, last: last || null });
+  }
+  const un = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM inbox WHERE direction='in' AND read_at IS NULL`).first();
+  return json({ threads, unread: (un && un.n) || 0 });
+}
+
+async function getThread(req, env, key) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+  const { results } = await env.DB.prepare(
+    `SELECT id,thread_key,ref,direction,from_addr,to_addr,subject,body_text,snippet,
+            message_id,attachments,read_at,created_at
+       FROM inbox WHERE thread_key = ? ORDER BY created_at`).bind(key).all();
+  if (!results || !results.length) return bad('not found', 404);
+  return json({ threadKey: key, messages: results });
+}
+
+async function markRead(req, env, key) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+  await env.DB.prepare(
+    `UPDATE inbox SET read_at = ? WHERE thread_key = ? AND direction='in' AND read_at IS NULL`
+  ).bind(now(), key).run();
+  return json({ ok: true });
+}
+
+/* Replying as the business. The address is taken from the thread, never from
+   the browser, so a reply cannot be aimed somewhere new. */
+async function replyThread(req, env, key) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+  const body = await req.json().catch(() => ({}));
+  const text = String(body.text || '').trim();
+  if (!text) return bad('write something first');
+
+  const last = await env.DB.prepare(
+    `SELECT * FROM inbox WHERE thread_key = ? AND direction='in' ORDER BY created_at DESC LIMIT 1`
+  ).bind(key).first();
+  if (!last) return bad('nothing to reply to', 404);
+
+  const subject = /^re:/i.test(last.subject) ? last.subject : `Re: ${last.subject}`;
+  const out = await replyToThread(env, {
+    threadKey: key, to: last.from_addr, subject, text,
+    ref: last.ref, inReplyTo: last.message_id, staff
+  });
+  await env.DB.prepare(
+    `UPDATE inbox SET read_at = ? WHERE thread_key = ? AND direction='in' AND read_at IS NULL`
+  ).bind(now(), key).run();
+  await audit(env, { ref: last.ref || null, action: 'Replied to email',
+                     after: last.from_addr, reason: out.sent ? 'sent' : (out.error || 'not sent'),
+                     actor: staff.name || staff.email });
+  return json(out);
 }

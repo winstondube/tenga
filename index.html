@@ -235,7 +235,7 @@ details:not([open]) > :not(summary){display:none !important}
 /* ---------- admin shell ---------- */
 .admin{display:grid;grid-template-columns:232px minmax(0,1fr);gap:22px;align-items:start}
 .admin > *{min-width:0}
-.rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px}
+.rail{position:sticky;top:60px;display:flex;flex-direction:column;gap:18px;min-height:calc(100vh - 84px)}
 .rail-grp{display:flex;flex-direction:column;gap:1px}
 .rail-grp > .eyebrow{padding:0 8px 6px}
 .rail a{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:3px;text-decoration:none;font-size:13.5px;color:var(--ink-2)}
@@ -244,6 +244,24 @@ details:not([open]) > :not(summary){display:none !important}
 .rail a .cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);background:var(--surface-2);padding:0 6px;border-radius:100px;min-width:20px;text-align:center}
 .rail a.on .cnt{background:var(--accent-soft);color:var(--accent-ink)}
 .rail a .cnt.hot{background:var(--danger-soft);color:var(--danger)}
+/* The tour sits at the bottom of the rail, pushed there rather than ordered
+   there, so it stays put however many queues appear above it. */
+.rail-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.rail a.rail-guide{align-items:flex-start;gap:9px;padding:9px 8px;line-height:1.35}
+.rail-guide span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.rail-guide em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.rail-guide svg{flex:none;margin-top:1px}
+.guide-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.guide-card{position:relative;display:block;text-decoration:none;color:inherit;background:var(--surface);
+ border:1px solid var(--line);border-radius:10px;padding:14px 14px 14px 44px}
+.guide-card:hover{border-color:var(--accent);box-shadow:0 1px 0 var(--line)}
+.guide-n{position:absolute;left:14px;top:14px;width:20px;height:20px;border-radius:100px;
+ background:var(--accent-soft);color:var(--accent-ink);font:600 11px/20px var(--mono);text-align:center}
+.mail-in{border-left:2px solid var(--line)}
+.mail-out{border-left:2px solid var(--accent);background:var(--surface-2)}
+.rowlink{cursor:pointer}
+.rowlink:hover{background:var(--surface-2)}
+tr.unread td{font-weight:600}
 
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;display:flex;flex-direction:column;gap:3px}
@@ -553,7 +571,11 @@ body:has(.floatcta.on){padding-bottom:56px}
 
 @media (min-width:601px) and (max-width:880px){
   .admin{grid-template-columns:1fr}
-  .rail{position:static;flex-direction:row;overflow-x:auto;gap:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .rail{position:static;flex-direction:row;overflow-x:auto;gap:14px;padding-bottom:8px;border-bottom:1px solid var(--line);min-height:0}
+  /* Sideways on a phone, so bottom-of-the-rail means end-of-the-row. */
+  .rail-foot{margin-top:0;margin-left:auto;padding-top:0;padding-left:14px;border-top:none;border-left:1px solid var(--line);flex:none}
+  .rail a.rail-guide{padding:5px 8px;white-space:nowrap}
+  .rail-guide em{display:none}
   .rail-grp{flex-direction:row;gap:2px;flex:none}
   .rail-grp > .eyebrow{display:none}
   .rail a{white-space:nowrap}
@@ -840,7 +862,10 @@ const ICONS={
  star:'M12 3.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z',
  lock:'M6.5 10.5V8a5.5 5.5 0 0 1 11 0v2.5M5.5 10.5h13v9h-13z',
  note:'M5 4.5h14v15H5zM8.5 9h7M8.5 12.5h7M8.5 16h4',
- menu:'M4 7h16M4 12h16M4 17h16'
+ menu:'M4 7h16M4 12h16M4 17h16',
+ book:'M12 6.5C10.5 5 8 4.5 4 4.5v13c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2v-13c-4 0-6.5.5-8 2zM12 6.5V19.5',
+ reply:'M9 8.5 4.5 13 9 17.5M4.5 13h8.5a6 6 0 0 1 6 6v1',
+ paperclip:'M16.5 8 9.7 14.8a2.4 2.4 0 0 0 3.4 3.4l6.8-6.8a4.2 4.2 0 0 0-6-6l-6.8 6.8a6 6 0 0 0 8.5 8.5l5.1-5.1'
 };
 function icon(n,s){s=s||16;const d=ICONS[n]||ICONS.box;
  return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`}
@@ -1493,8 +1518,43 @@ const API = {
   login(email, password){ return this.call('/staff/login', { method:'POST', body:{ email, password } }) },
   logout(){ return this.call('/staff/logout', { method:'POST' }) },
   me(){ return this.call('/staff/me') },
-  sendMessage(ref, type){ return this.call('/orders/' + encodeURIComponent(ref) + '/messages', { method:'POST', body:{ type } }) }
+  sendMessage(ref, type){ return this.call('/orders/' + encodeURIComponent(ref) + '/messages', { method:'POST', body:{ type } }) },
+  listInbox(){ return this.call('/inbox') },
+  getThread(key){ return this.call('/inbox/' + encodeURIComponent(key)) },
+  replyThread(key, text){ return this.call('/inbox/' + encodeURIComponent(key) + '/reply', { method:'POST', body:{ text } }) },
+  markRead(key){ return this.call('/inbox/' + encodeURIComponent(key) + '/read', { method:'POST' }) }
 };
+
+/* The inbox lives on the server, not in S, because it is not the customer's
+   data and there is nothing useful to show offline. Held here so a re-render
+   does not refetch on every keystroke. */
+const INBOX = { threads: [], unread: 0, loaded: false, loading: false, thread: null, sending: false };
+
+async function loadInbox(force){
+  if (!API.on || S.session !== 'admin') return;
+  if (INBOX.loading || (INBOX.loaded && !force)) return;
+  INBOX.loading = true;
+  try {
+    const r = await API.listInbox();
+    INBOX.threads = r.threads || []; INBOX.unread = r.unread || 0; INBOX.loaded = true;
+  } catch (e) { if (e.status !== 401) toast('Could not load the inbox: ' + e.message) }
+  finally { INBOX.loading = false; rerender(true) }
+}
+
+async function openThread(key){
+  INBOX.thread = { key, messages: null };
+  rerender(true);
+  try {
+    const r = await API.getThread(key);
+    INBOX.thread = { key, messages: r.messages || [] };
+    // Opening it is what marks it read, so the count means "not yet looked at".
+    await API.markRead(key).catch(()=>{});
+    INBOX.loaded = false; loadInbox(true);
+  } catch (e) {
+    INBOX.thread = { key, messages: [], error: e.message };
+  }
+  rerender(true);
+}
 
 /* Pushing a changed order back, coalesced. Editing a price fires an input
    event per keystroke, and each one re-renders; without this every keystroke
@@ -3100,6 +3160,8 @@ function viewAdmin(parts,q){
  else if(page==='finance')inner=adminFinance();
  else if(page==='reports')inner=adminReports();
  else if(page==='audit')inner=adminAudit();
+ else if(page==='inbox')inner=adminInbox(parts[1]);
+ else if(page==='guide')inner=adminGuide();
  else inner=`<div class="empty">Not found.</div>`;
  const cur=page==='orders'?(q.q||'all'):'';
  return `<div class="shell"><div class="admin">
@@ -3110,12 +3172,18 @@ function viewAdmin(parts,q){
    </div>`).join('')}
    <div class="rail-grp"><div class="eyebrow">Manage</div>
      <a href="#/admin" class="${page==='dash'?'on':''}">${icon('chart',15)}Dashboard</a>
+     <a href="#/admin/inbox" class="${page==='inbox'?'on':''}">${icon('inbox',15)}Inbox<span class="cnt ${INBOX.unread?'hot':''}">${INBOX.unread||0}</span></a>
      <a href="#/admin/finance" class="${page==='finance'?'on':''}">${icon('pound',15)}Finance</a>
      <a href="#/admin/reports" class="${page==='reports'?'on':''}">${icon('chart',15)}Reports</a>
      <a href="#/admin/batches" class="${page==='batches'?'on':''}">${icon('layers',15)}Cargo batches</a>
      <a href="#/admin/retailers" class="${page==='retailers'?'on':''}">${icon('shield',15)}Retailers</a>
      <a href="#/admin/settings" class="${page==='settings'?'on':''}">${icon('cog',15)}Settings</a>
      <a href="#/admin/audit" class="${page==='audit'?'on':''}">${icon('note',15)}Audit log</a>
+   </div>
+   <!-- Pinned to the bottom of the rail so it is always reachable without
+        scrolling, and out of the way of the work. -->
+   <div class="rail-foot">
+     <a href="#/admin/guide" class="rail-guide ${page==='guide'?'on':''}">${icon('book',15)}<span><b>Guided tour</b><em>Every page, what it does</em></span></a>
    </div>
   </nav>
   <main class="stack">${inner}</main>
@@ -3876,6 +3944,145 @@ function adminAudit(){
   </tbody></table></div></div>
  </div>`;
 }
+
+/* ---------------- inbox ----------------
+   Mail to help@ lands here. A copy still goes to Winston's own inbox as the
+   alert; this is where it gets answered, so the reply is on file next to the
+   order rather than in one person's sent items. */
+function adminInbox(key){
+ if(!API.on) return `<div class="stack">
+   <div class="stack-s"><div class="eyebrow">Conversations</div><h2 style="font-size:22px">Inbox</h2></div>
+   ${note('<b>The inbox needs the server.</b> This build is running on its own in your browser, so there is no mail to show.','info','shield')}
+  </div>`;
+
+ loadInbox();
+ if(key) return inboxThread(decodeURIComponent(key));
+
+ const rows=INBOX.threads;
+ return `<div class="stack">
+  <div class="spread wrap">
+    <div class="stack-s"><div class="eyebrow">Conversations</div><h2 style="font-size:22px">Inbox</h2></div>
+    <div class="row" style="gap:8px">
+      <button class="btn btn-s" data-act="inboxRefresh">${icon('arrow',14)}Refresh</button>
+    </div>
+  </div>
+  ${INBOX.unread?note('<b>'+INBOX.unread+' message'+(INBOX.unread>1?'s':'')+' you have not opened yet.</b> Opening a conversation marks it read.','ochre','chat'):''}
+  ${!INBOX.loaded&&INBOX.loading?`<div class="card card-p"><div class="tiny muted">Loading…</div></div>`:''}
+  ${INBOX.loaded&&!rows.length?`<div class="card card-p"><div class="empty">
+     Nothing yet. Mail sent to help@tengauk.com will appear here once the domain's MX record points at Resend.
+   </div></div>`:''}
+  ${rows.length?`<div class="card"><div class="scroll-x"><table class="t">
+   <thead><tr><th>From</th><th>Subject</th><th>Order</th><th>When</th></tr></thead>
+   <tbody>${rows.map(t=>{
+     const l=t.last||{};
+     const who=l.direction==='out'?('To '+ (l.to_addr||'')):(l.from_addr||t.threadKey);
+     return `<tr class="rowlink ${t.unread?'unread':''}" data-act="openThread" data-key="${esc(t.threadKey)}">
+      <td><div class="small"><b>${esc(who)}</b></div>
+          ${t.unread?`<span class="pill p-danger">${t.unread} new</span>`:`<span class="tiny muted">${t.total} message${t.total>1?'s':''}</span>`}</td>
+      <td><div class="small">${esc(l.subject||'(no subject)')}</div>
+          <div class="tiny muted">${l.direction==='out'?'You: ':''}${esc(l.snippet||'')}</div></td>
+      <td>${t.ref?`<a class="link mono tiny" href="#/admin/order/${esc(t.ref)}">${esc(t.ref)}</a>`:'<span class="tiny muted">—</span>'}</td>
+      <td class="tiny muted nowrap">${ago(t.lastAt)}</td>
+     </tr>`}).join('')}
+  </tbody></table></div></div>`:''}
+ </div>`;
+}
+
+function inboxThread(key){
+ const t=INBOX.thread;
+ if(!t||t.key!==key){ openThread(key); }
+ const msgs=(t&&t.key===key)?t.messages:null;
+ const ref=(msgs||[]).map(m=>m.ref).find(Boolean);
+ const last=(msgs||[]).filter(m=>m.direction==='in').slice(-1)[0];
+ return `<div class="stack">
+  <div class="row" style="gap:8px">
+    <a class="btn btn-xs btn-ghost" href="#/admin/inbox"><span style="display:inline-block;transform:rotate(180deg)">${icon('arrow',13)}</span>All conversations</a>
+    ${ref?`<a class="btn btn-xs" href="#/admin/order/${esc(ref)}">${icon('box',13)}Open ${esc(ref)}</a>`:''}
+  </div>
+  <div class="stack-s"><div class="eyebrow">Conversation</div>
+    <h2 style="font-size:20px">${esc((msgs&&msgs.length&&msgs[msgs.length-1].subject)||key)}</h2>
+    <div class="tiny muted">${esc(key)}</div></div>
+  ${msgs===null?`<div class="card card-p"><div class="tiny muted">Loading…</div></div>`:''}
+  ${t&&t.error?note('Could not load this conversation: '+esc(t.error),'danger','alert'):''}
+  ${(msgs||[]).map(m=>`
+    <div class="card card-p ${m.direction==='out'?'mail-out':'mail-in'}">
+      <div class="spread wrap" style="gap:8px">
+        <div class="small"><b>${m.direction==='out'?'You':esc(m.from_addr)}</b>
+          <span class="tiny muted">${m.direction==='out'?'to '+esc(m.to_addr):''}</span></div>
+        <div class="tiny muted nowrap">${fmtFull(m.created_at)}</div>
+      </div>
+      <div class="small" style="white-space:pre-wrap;margin-top:8px">${esc(m.body_text||'')}</div>
+      ${m.attachments?`<div class="tiny muted" style="margin-top:8px">${icon('paperclip',12)}${m.attachments} attachment${m.attachments>1?'s':''}, in the forwarded copy</div>`:''}
+    </div>`).join('')}
+  ${last?`<div class="card card-p stack-s">
+    <div class="eyebrow">Reply to ${esc(last.from_addr)}</div>
+    <textarea id="replyText" rows="5" placeholder="Type your reply. It sends from help@tengauk.com and stays on this order."></textarea>
+    <div class="row" style="gap:8px">
+      <button class="btn btn-primary" data-act="sendReply" data-key="${esc(key)}" ${INBOX.sending?'disabled':''}>
+        ${icon('reply',15)}${INBOX.sending?'Sending…':'Send reply'}</button>
+      <span class="tiny muted">Goes out as Tenga UK, and is recorded here.</span>
+    </div>
+  </div>`:''}
+ </div>`;
+}
+
+/* ---------------- guided tour ----------------
+   Written for someone opening this for the first time. Every page, what it is
+   for, and the one thing most likely to trip them up on it. */
+const GUIDE=[
+ {t:'Dashboard', h:'#/admin', i:'chart',
+  w:'What needs doing today, and nothing else. Orders waiting on a decision are counted at the top.',
+  tip:'The red counts in the left rail are the same numbers. If they are all zero there is genuinely nothing waiting.'},
+ {t:'Inbox', h:'#/admin/inbox', i:'inbox',
+  w:'Every email sent to help@tengauk.com, and every reply we send back. If the customer quoted an order number it is attached to that order automatically.',
+  tip:'A copy of each message also goes to Winston’s personal inbox as the alert. Answer it here, not there, so the reply is on file.'},
+ {t:'The order queues', h:'#/admin/orders?q=all', i:'box',
+  w:'The groups at the top of the rail are the same orders sliced by what they are waiting for: needing review, quoted, paid, to purchase, arrived.',
+  tip:'"Manual review" means the system would not price it on its own, usually a restricted item or a shop we do not know.'},
+ {t:'One order', h:'#/admin/orders?q=all', i:'note',
+  w:'Open any order to see what was asked for, what we quoted, what was paid and every message sent. Prices are amended here, and approving is what sends the quote.',
+  tip:'Nothing reaches the customer until you press approve. You can change a price as many times as you like first.'},
+ {t:'Finance', h:'#/admin/finance', i:'pound',
+  w:'What has come in, what is held, and anything disputed or reversed by PayPal.',
+  tip:'Money is only ever marked paid by PayPal telling us directly, never by someone pressing a button here.'},
+ {t:'Cargo batches', h:'#/admin/batches', i:'layers',
+  w:'Paid orders grouped into the shipment they travel in. Sea sails monthly; air goes as it comes.',
+  tip:'An order has to be paid before it can join a batch.'},
+ {t:'Retailers', h:'#/admin/retailers', i:'shield',
+  w:'The shops we buy from, their UK delivery charges, and what we will not carry.',
+  tip:'Changing a delivery charge here changes every future quote, not past ones.'},
+ {t:'Settings', h:'#/admin/settings', i:'cog',
+  w:'Prices: the air rate per kilo, the sea box prices, the handling fee and the shipping dates.',
+  tip:'This is the one page where a wrong number quietly costs money on every order. Change it deliberately.'},
+ {t:'Reports', h:'#/admin/reports', i:'chart',
+  w:'How the business is actually doing: orders, revenue and what each route earns.',
+  tip:'Air earns less than sea. That is the model, not a bug.'},
+ {t:'Audit log', h:'#/admin/audit', i:'note',
+  w:'Every change, who made it and when. Append only, nothing can be edited or deleted.',
+  tip:'This is why everyone has their own login rather than a shared one.'}
+];
+function adminGuide(){
+ return `<div class="stack-l">
+  <div class="stack-s"><div class="eyebrow">Getting started</div>
+    <h2 style="font-size:24px">Guided tour</h2>
+    <p class="small muted" style="max-width:60ch">Every page in operations, what it is for, and the thing most likely to catch you out. Nothing here changes anything, so click around freely.</p>
+  </div>
+  <div class="guide-grid">
+   ${GUIDE.map((g,n)=>`<a class="guide-card" href="${g.h}">
+     <div class="guide-n">${n+1}</div>
+     <div class="stack-s" style="gap:6px">
+       <div class="row" style="gap:8px;align-items:center">${icon(g.i,16)}<b>${esc(g.t)}</b></div>
+       <div class="small muted">${esc(g.w)}</div>
+       <div class="tiny" style="color:var(--ochre)">${icon('alert',11)} ${esc(g.tip)}</div>
+     </div>
+   </a>`).join('')}
+  </div>
+  <div class="card card-p stack-s">
+    <div class="eyebrow">The shape of a job</div>
+    <div class="small">A request arrives and lands in <b>Manual review</b> or already priced. You check the price, amend anything wrong, and press <b>approve</b>, which is what sends the quote. The customer pays through PayPal, and <b>PayPal tells us directly</b> that it cleared. The order joins a <b>cargo batch</b>, sails or flies, and when it lands the customer gets their collection code. They bring that code and photo ID to ${esc(collectLine())}.</div>
+  </div>
+ </div>`;
+}
 /* ================================================================
    EVENTS
    ================================================================ */
@@ -3996,6 +4203,22 @@ document.addEventListener('click',e=>{
     if(API.on){ API.logout().catch(()=>{}); S.staff=null; } S.session=null; save(); location.hash='#/'; rerender(); toast('Signed out') },
   reset(){ if(confirm('Clear all demo data and start again with the seeded example orders?')){localStorage.removeItem(KEY);fresh();location.hash='#/';render();toast('Demo reset')} },
   tab(){ VIEW.adminTab=d.v; rerender(true); },
+  inboxRefresh(){ INBOX.loaded=false; loadInbox(true); toast('Checking for new mail') },
+  openThread(){ go('#/admin/inbox/'+encodeURIComponent(d.key)) },
+  async sendReply(){
+    const text=val('replyText');
+    if(!text)return toast('Write something first');
+    if(INBOX.sending)return;
+    INBOX.sending=true; rerender(true);
+    try{
+      const r=await API.replyThread(d.key,text);
+      toast(r.sent?'Reply sent':'Saved, but the mail provider refused it');
+      const el=document.getElementById('replyText'); if(el)el.value='';
+      INBOX.thread=null; INBOX.loaded=false;
+      await openThread(d.key);
+    }catch(e){ toast('Could not send: '+e.message) }
+    finally{ INBOX.sending=false; rerender(true) }
+  },
   openOrder(){ VIEW.adminTab='review'; go('#/admin/order/'+d.ref); },
   search(){ VIEW.search=val('adminSearch'); rerender(true); },
 

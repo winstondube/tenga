@@ -95,3 +95,32 @@ CREATE TABLE IF NOT EXISTS settings (
   value      TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 );
+
+-- Mail sent TO us, which `messages` cannot hold because that table requires an
+-- order reference and most first contact does not have one yet.
+--
+-- Both directions live here so a conversation reads in order. `thread_key` is
+-- what groups them: an order reference when we can find one, otherwise the
+-- other party's address, which is crude but keeps a stranger's back-and-forth
+-- together without inventing a threading engine.
+CREATE TABLE IF NOT EXISTS inbox (
+  id           TEXT PRIMARY KEY,
+  thread_key   TEXT NOT NULL,
+  ref          TEXT,
+  direction    TEXT NOT NULL,          -- 'in' or 'out'
+  from_addr    TEXT NOT NULL,
+  to_addr      TEXT NOT NULL,
+  subject      TEXT NOT NULL DEFAULT '',
+  body_text    TEXT NOT NULL DEFAULT '',
+  snippet      TEXT NOT NULL DEFAULT '',
+  message_id   TEXT,                   -- RFC Message-ID, for replying in thread
+  provider_id  TEXT UNIQUE,            -- Resend's email id. UNIQUE makes a
+                                        -- redelivered webhook a no-op.
+  attachments  INTEGER NOT NULL DEFAULT 0,
+  read_at      INTEGER,
+  created_at   INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS inbox_thread  ON inbox(thread_key, created_at);
+CREATE INDEX IF NOT EXISTS inbox_recent  ON inbox(created_at DESC);
+CREATE INDEX IF NOT EXISTS inbox_unread  ON inbox(read_at) WHERE read_at IS NULL AND direction = 'in';
+CREATE INDEX IF NOT EXISTS inbox_ref     ON inbox(ref, created_at);

@@ -18,7 +18,7 @@ function wrap({ heading, lines, code, action }) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0F3F0;padding:24px 12px">
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border:1px solid #DDE4DF;border-radius:10px">
-  <tr><td style="padding:20px 24px;border-bottom:1px solid #EDF1EE;font-weight:700;letter-spacing:-.01em">tenga<span style="color:#0B5D4E">.uk</span></td></tr>
+  <tr><td style="padding:20px 24px;border-bottom:1px solid #EDF1EE;font-weight:700;letter-spacing:-.01em">tenga<span style="color:#B8862F">uk</span></td></tr>
   <tr><td style="padding:24px">
     <h1 style="margin:0 0 14px;font-size:20px;font-weight:650;letter-spacing:-.01em">${esc(heading)}</h1>
     ${p}

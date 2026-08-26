@@ -85,13 +85,32 @@ const addr = v => {
   return (m ? m[1] : s).trim().toLowerCase();
 };
 
-/* Fetch the body. The webhook deliberately does not carry it. */
-async function fetchBody(env, emailId) {
-  const r = await fetch(`${RESEND}/emails/receiving/${emailId}`, {
-    headers: { authorization: `Bearer ${env.RESEND_KEY}` }
-  });
-  if (!r.ok) return null;
-  return r.json().catch(() => null);
+/* Fetch the body. The webhook deliberately does not carry it.
+   Returns why it failed rather than just null: a message stored with no body
+   is a bug you cannot diagnose from the row it leaves behind. */
+export async function fetchBody(env, emailId) {
+  if (!env.RESEND_KEY) return { ok: false, error: 'no api key configured' };
+  let r;
+  try {
+    r = await fetch(`${RESEND}/emails/receiving/${emailId}`, {
+      headers: { authorization: `Bearer ${env.RESEND_KEY}` }
+    });
+  } catch (e) { return { ok: false, error: String(e).slice(0, 200) } }
+  const text = await r.text().catch(() => '');
+  if (!r.ok) return { ok: false, status: r.status, error: text.slice(0, 300) };
+  try { return { ok: true, data: JSON.parse(text) } }
+  catch { return { ok: false, status: r.status, error: 'response was not json' } }
+}
+
+/* Pull the body again for a message we already have. Used when the first
+   fetch failed, so a message is repairable instead of permanently blank. */
+export async function refetchBody(env, row) {
+  const got = await fetchBody(env, row.provider_id);
+  if (!got.ok) return got;
+  const text = got.data.text || stripHtml(got.data.html) || '';
+  await env.DB.prepare('UPDATE inbox SET body_text = ?, snippet = ? WHERE id = ?')
+    .bind(text.slice(0, 60000), toSnippet(text), row.id).run();
+  return { ok: true, length: text.length };
 }
 
 /* Store one received email. Returns what happened, so the route can say so. */
@@ -104,7 +123,8 @@ export async function receiveEmail(env, event) {
   const seen = await env.DB.prepare('SELECT id FROM inbox WHERE provider_id = ?').bind(d.email_id).first();
   if (seen) return { ignored: 'already stored', id: seen.id };
 
-  const full = env.RESEND_KEY ? await fetchBody(env, d.email_id) : null;
+  const got = await fetchBody(env, d.email_id);
+  const full = got.ok ? got.data : null;
   const text = (full && (full.text || stripHtml(full.html))) || '';
   const from = addr(d.from) || addr(full && full.from);
   const to = addr(d.received_for) || addr(d.to) || addr(full && full.to);
@@ -126,7 +146,8 @@ export async function receiveEmail(env, event) {
 
   // Best effort, and deliberately after the write.
   const forwarded = await forwardCopy(env, { from, to, subject, text, ref });
-  return { stored: id, ref, threadKey, forwarded };
+  return { stored: id, ref, threadKey, forwarded,
+           bodyOk: got.ok, bodyError: got.ok ? null : (got.status ? got.status + ' ' + got.error : got.error) };
 }
 
 /* The alert copy. Winston reads mail on his phone; he answers it in the panel. */

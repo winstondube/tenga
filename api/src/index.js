@@ -9,7 +9,7 @@ import { json, bad, now, toPence, fromPence, collectCode, token, verifyPw,
          looksLikeEmail, audit, mayReadOrder, publicView } from './lib.js';
 import { send } from './mail.js';
 import { createPayPalOrder, capturePayPalOrder, verifyWebhook, applyWebhook } from './paypal.js';
-import { verifyInbound, receiveEmail, replyToThread } from './inbox.js';
+import { verifyInbound, receiveEmail, replyToThread, refetchBody } from './inbox.js';
 
 const CORS = origin => ({
   'access-control-allow-origin': origin,
@@ -74,6 +74,8 @@ async function route(req, env, url, ctx) {
   if (rep && m === 'POST')    return replyThread(req, env, decodeURIComponent(rep[1]));
   const rd = p.match(/^\/inbox\/([^/]+)\/read$/);
   if (rd && m === 'POST')     return markRead(req, env, decodeURIComponent(rd[1]));
+  const rfz = p.match(/^\/inbox\/message\/([^/]+)\/refetch$/);
+  if (rfz && m === 'POST')    return refetchMessage(req, env, rfz[1]);
 
   if (p === '/staff/login'  && m === 'POST') return login(req, env);
   if (p === '/staff/logout' && m === 'POST') return logout(req, env);
@@ -456,6 +458,23 @@ async function replyThread(req, env, key) {
   ).bind(now(), key).run();
   await audit(env, { ref: last.ref || null, action: 'Replied to email',
                      after: last.from_addr, reason: out.sent ? 'sent' : (out.error || 'not sent'),
+                     actor: staff.name || staff.email });
+  return json(out);
+}
+
+
+/* Pull a body we failed to fetch the first time. Staff only. A message stored
+   with an empty body is repairable rather than lost, and the provider's own
+   error comes back rather than being swallowed. */
+async function refetchMessage(req, env, id) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+  const row = await env.DB.prepare('SELECT * FROM inbox WHERE id = ?').bind(id).first();
+  if (!row) return bad('not found', 404);
+  if (!row.provider_id) return bad('this message has no provider id to fetch');
+  const out = await refetchBody(env, row);
+  await audit(env, { ref: row.ref || null, action: 'Email body refetched',
+                     reason: out.ok ? out.length + ' characters' : String(out.status || '') + ' ' + String(out.error).slice(0, 60),
                      actor: staff.name || staff.email });
   return json(out);
 }

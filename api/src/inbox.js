@@ -191,9 +191,10 @@ export async function replyToThread(env, { threadKey, to, subject, text, ref, in
   // wa.me wants digits only. A button beats a printed number: nobody dials a
   // mobile from a laptop, and this market opens WhatsApp before anything else.
   const waDigits = String(wa).replace(/[^0-9]/g, '');
+  const motto = env.MOTTO || '';
   const html = `<div style="white-space:pre-wrap;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">${esc(text)}</div>
     <p style="margin:22px 0 0;font:13px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">
-      Thanks,<br><b>Tenga UK Team</b>
+      Thanks,<br><b>Tenga <span style="color:#B8862F">UK</span> Team</b>${motto ? `<br><span style="color:#6B7C75">${esc(motto)}</span>` : ''}
     </p>
     ${wa ? `<p style="margin:12px 0 0">
       <a href="https://wa.me/${waDigits}" style="display:inline-block;background:#1FA855;color:#ffffff;

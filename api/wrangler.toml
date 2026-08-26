@@ -18,6 +18,8 @@ COLLECT_AT = "Mbare Grillz, 9 Williams Avenue, Ardbennie, Harare"
 # Signed onto replies. Public, and kept here rather than in the code so it
 # changes without a code edit. Must match site.json contactWhatsapp.
 CONTACT_WHATSAPP = "+44 7337 524515"
+# The brand line, signed onto every email. Must match site.json motto.
+MOTTO = "Shop UK. Collect in Harare."
 # These are LIVE credentials: they authenticate against api-m.paypal.com and
 # the sandbox rejects them. Real money moves through this setting.
 PAYPAL_ENV = "live"

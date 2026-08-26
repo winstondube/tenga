@@ -188,6 +188,7 @@ ${inner}
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a><a href="mailto:${site.contactEmail}">${site.contactEmail}</a></div>
 </div>
 <div class="site-legal">
+  <b style="color:var(--ink)">${site.motto || ''}</b><br>
   ${site.name}, a buy-for-me and forwarding service. Cargo handled by third party carriers.
   Website designed &amp; built by <a href="https://welaunchsites.com/" style="display:inline;color:var(--ink-2)">LaunchSite</a>.
 </div></footer>`;
@@ -277,6 +278,7 @@ ${SRC.split('<div id="app"></div>')[1]}
   <div><h3>Start</h3><a href="${BASE}#/request">Send a link</a><a href="${BASE}#/lookup">Track an order</a></div>
 </div>
 <div class="site-legal">
+  <b style="color:var(--ink)">${site.motto || ''}</b><br>
   ${site.name}, a buy-for-me and forwarding service. Registered in England. Cargo handled by third party carriers.
   Website designed &amp; built by <a href="https://welaunchsites.com/" style="display:inline;color:var(--ink-2)">LaunchSite</a>.
 </div></footer>

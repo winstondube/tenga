@@ -162,7 +162,8 @@ console.log('\nthe reply signature');
 
   await replyToThread(env, { threadKey: 'TU-1041', to: 'buyer@example.com', subject: 'Re: hello',
     text: 'Yes, we can get that.', ref: 'TU-1041', staff: { name: 'Gerald', email: 'g@x.com' } });
-  ok('signed as the team', /Tenga UK Team/.test(sent.html), sent.html.slice(-300));
+  ok('signed as the team', /Tenga <span style="color:#B8862F">UK<\/span> Team/.test(sent.html), sent.html.slice(-300));
+  ok('the gold matches the wordmark in the email header', /#B8862F/.test(sent.html));
   ok('never names the individual', !/Gerald/.test(sent.html));
   ok('no strapline describing ourselves', !/buy-for-me and Zimbabwe forwarding/.test(sent.html));
   ok('WhatsApp is a button, not a printed number',
@@ -172,12 +173,12 @@ console.log('\nthe reply signature');
   ok('and says replying works too', /reply to this email/i.test(sent.html));
 
   await replyToThread(env, { threadKey: 'x2', to: 'b@e.com', subject: 's', text: 't', staff: null });
-  ok('no staff at all still signs correctly', /Tenga UK Team/.test(sent.html) && !/undefined/.test(sent.html));
+  ok('no staff at all still signs correctly', /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html) && !/undefined/.test(sent.html));
 
   const noWa = { ...env, CONTACT_WHATSAPP: '', DB: makeDB() };
   await replyToThread(noWa, { threadKey: 'x3', to: 'b@e.com', subject: 's', text: 't', staff: null });
   ok('with no number configured the button is omitted, not broken',
-     !/wa\.me/.test(sent.html) && /Tenga UK Team/.test(sent.html), sent.html.slice(-200));
+     !/wa\.me/.test(sent.html) && /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html), sent.html.slice(-200));
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);

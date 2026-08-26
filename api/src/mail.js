@@ -12,7 +12,7 @@ const esc = s => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 /* One template, so every email looks like the same company sent it. */
-function wrap({ heading, lines, code, action }) {
+function wrap({ heading, lines, code, action, motto }) {
   const p = lines.map(l => `<p style="margin:0 0 14px;line-height:1.6">${l}</p>`).join('');
   return `<!doctype html><html><body style="margin:0;background:#F0F3F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0F3F0;padding:24px 12px">
@@ -29,37 +29,38 @@ function wrap({ heading, lines, code, action }) {
     ${action ? `<a href="${esc(action.href)}" style="display:inline-block;background:#0B5D4E;color:#fff;text-decoration:none;padding:11px 18px;border-radius:7px;font-weight:600">${esc(action.label)}</a>` : ''}
   </td></tr>
   <tr><td style="padding:16px 24px;border-top:1px solid #EDF1EE;font-size:12px;color:#6B7C75">
+    ${motto ? `<b style="color:#101614">${esc(motto)}</b><br>` : ''}
     Tenga UK, a buy-for-me and forwarding service. Cargo handled by third party carriers.
   </td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 export const TEMPLATES = {
-  'Request received': (o, site) => ({
+  'Request received': (o, site, x, motto) => ({
     subject: `We have your request, ${firstName(o)} · ${o.ref}`,
-    html: wrap({ heading: 'We have your request',
+    html: wrap({ motto, heading: 'We have your request',
       lines: ['We are checking the current price, availability and UK delivery cost on every link you sent.',
               'You will get one quote with a single total, and nothing is bought until you approve it.'],
       action: { label: 'Track this order', href: `${site}/#/track/${o.ref}/${o.token}` } })
   }),
-  'Quote ready': (o, site, x) => ({
+  'Quote ready': (o, site, x, motto) => ({
     subject: `Your quote for ${o.ref} · ${x.total}`,
-    html: wrap({ heading: `Your quote is ready`,
+    html: wrap({ motto, heading: `Your quote is ready`,
       lines: [`Your total is <b>${esc(x.total)}</b>, shipping included, with nothing to pay on arrival.`,
               `Prices move, so it holds for ${esc(x.mins)} minutes. After that we recheck and resend.`],
       action: { label: 'See the quote and pay', href: `${site}/#/quote/${o.ref}/${o.token}` } })
   }),
-  'Payment received': (o, site, x) => ({
+  'Payment received': (o, site, x, motto) => ({
     subject: `Payment received for ${o.ref} · keep your collection code`,
-    html: wrap({ heading: 'Thank you, that is paid',
+    html: wrap({ motto, heading: 'Thank you, that is paid',
       lines: [`We have received ${esc(x.amount)} and we will now place the order with the shop.`,
               `Whoever collects brings this code <b>and photo ID in the name of ${esc(o.recipient && o.recipient.name)}</b> to <b>${esc(x.where || 'our Harare collection point')}</b>. We cannot hand the order over without both.`],
       code: o.collectCode,
       action: { label: 'Track this order', href: `${site}/#/track/${o.ref}/${o.token}` } })
   }),
-  'Ready for collection': (o, site, x) => ({
+  'Ready for collection': (o, site, x, motto) => ({
     subject: `${o.ref} has arrived in Harare`,
-    html: wrap({ heading: 'Ready to collect',
+    html: wrap({ motto, heading: 'Ready to collect',
       lines: [`Your order has landed and is ready at <b>${esc(x.where || 'our Harare collection point')}</b>.`,
               `Bring this code and photo ID in the name of ${esc(o.recipient && o.recipient.name)}. We cannot hand it over without both.`],
       code: o.collectCode,
@@ -72,7 +73,7 @@ export async function send(env, { ref, type, to, channel = 'Email', order, vars 
   const site = String(env.SITE_ORIGINS || '').split(',')[0] || '';
   const build = TEMPLATES[type];
   if (!build) throw new Error('no template for ' + type);
-  const { subject, html } = build({ ...order, ref }, site, vars);
+  const { subject, html } = build({ ...order, ref }, site, vars, env.MOTTO || '');
 
   const id = crypto.randomUUID();
   const row = (status, providerId, error) => env.DB.prepare(

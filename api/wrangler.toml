@@ -15,9 +15,6 @@ SITE_ORIGINS = "https://tengauk.com,https://www.tengauk.com,https://winstondube.
 MAIL_FROM = "Tenga UK <help@tengauk.com>"
 # Where orders are handed over. Named here so the emails and the site agree.
 COLLECT_AT = "Mbare Grillz, 9 Williams Avenue, Ardbennie, Harare"
-# Signed onto replies. Public, and kept here rather than in the code so it
-# changes without a code edit. Must match site.json contactWhatsapp.
-CONTACT_WHATSAPP = "+44 7337 524515"
 # The brand line, signed onto every email. Must match site.json motto.
 MOTTO = "Shop UK. Collect in Harare."
 # These are LIVE credentials: they authenticate against api-m.paypal.com and

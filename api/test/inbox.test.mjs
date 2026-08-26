@@ -154,7 +154,7 @@ console.log('\nreplying');
 console.log('\nthe reply signature');
 {
   const env = { DB: makeDB(), RESEND_KEY: null,
-                MAIL_FROM: 'Tenga UK <help@tengauk.com>', CONTACT_WHATSAPP: '+44 7337 524515' };
+                MAIL_FROM: 'Tenga UK <help@tengauk.com>', MOTTO: 'Shop UK. Collect in Harare.' };
   let sent = null;
   let n = 0;
   globalThis.fetch = async (u, o) => { sent = JSON.parse(o.body); return { ok: true, json: async () => ({ id: 'x' + (++n) }) } };
@@ -166,19 +166,19 @@ console.log('\nthe reply signature');
   ok('the gold matches the wordmark in the email header', /#B8862F/.test(sent.html));
   ok('never names the individual', !/Gerald/.test(sent.html));
   ok('no strapline describing ourselves', !/buy-for-me and Zimbabwe forwarding/.test(sent.html));
-  ok('WhatsApp is a button, not a printed number',
-     /wa\.me\/447337524515/.test(sent.html) && !/\+44 7337 524515/.test(sent.html), sent.html.slice(-300));
-  ok('the button carries inline styles, since email has no stylesheet',
-     /background:#1FA855/.test(sent.html));
-  ok('and says replying works too', /reply to this email/i.test(sent.html));
+  // Deliberately absent: a reply should keep the conversation on email, where
+  // it stays on file against the order.
+  ok('no WhatsApp button pulling them off email', !/wa\.me/.test(sent.html), sent.html.slice(-300));
+  ok('and no bare number either', !/7337 ?524515/.test(sent.html));
+  ok('carries the motto', /Shop UK\. Collect in Harare\./.test(sent.html));
 
   await replyToThread(env, { threadKey: 'x2', to: 'b@e.com', subject: 's', text: 't', staff: null });
   ok('no staff at all still signs correctly', /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html) && !/undefined/.test(sent.html));
 
-  const noWa = { ...env, CONTACT_WHATSAPP: '', DB: makeDB() };
-  await replyToThread(noWa, { threadKey: 'x3', to: 'b@e.com', subject: 's', text: 't', staff: null });
-  ok('with no number configured the button is omitted, not broken',
-     !/wa\.me/.test(sent.html) && /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html), sent.html.slice(-200));
+  const noMotto = { ...env, MOTTO: '', DB: makeDB() };
+  await replyToThread(noMotto, { threadKey: 'x3', to: 'b@e.com', subject: 's', text: 't', staff: null });
+  ok('with no motto configured the signature is still valid',
+     /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html) && !/undefined/.test(sent.html), sent.html.slice(-200));
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);

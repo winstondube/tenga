@@ -187,23 +187,16 @@ export async function replyToThread(env, { threadKey, to, subject, text, ref, in
   // Signed as the team rather than the individual, which is Winston's call.
   // The reply already comes from help@, so a name would add nothing the
   // customer can act on.
-  const wa = env.CONTACT_WHATSAPP || '';
-  // wa.me wants digits only. A button beats a printed number: nobody dials a
-  // mobile from a laptop, and this market opens WhatsApp before anything else.
-  const waDigits = String(wa).replace(/[^0-9]/g, '');
+  // Deliberately no WhatsApp button here. A reply is where the conversation is
+  // already happening and where it stays on file against the order; a big
+  // button inviting them elsewhere both loses the record and reads as the
+  // instruction. WhatsApp stays on the site, where it starts conversations.
   const motto = env.MOTTO || '';
   const html = `<div style="white-space:pre-wrap;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">${esc(text)}</div>
     <p style="margin:22px 0 0;font:13px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">
       Thanks,<br><b>Tenga <span style="color:#B8862F">UK</span> Team</b>${motto ? `<br><span style="color:#6B7C75">${esc(motto)}</span>` : ''}
     </p>
-    ${wa ? `<p style="margin:12px 0 0">
-      <a href="https://wa.me/${waDigits}" style="display:inline-block;background:#1FA855;color:#ffffff;
-         text-decoration:none;padding:10px 16px;border-radius:7px;font:600 13px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
-        Message us on WhatsApp</a>
-    </p>` : ''}
-    <p style="margin:10px 0 0;font:12px/1.6 -apple-system,sans-serif;color:#6B7C75">
-      Or just reply to this email. It reaches the same place.
-    </p>`;
+`;
 
   let providerId = null, ok = false, error = null;
   if (env.RESEND_KEY) {

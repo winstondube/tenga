@@ -360,12 +360,23 @@ async function inboundEmail(req, env) {
     return json({ ok: false, reason: 'signature not verified' }, 200);
   }
   let event; try { event = JSON.parse(raw) } catch { return json({ ok: false }, 200) }
-  if (event.type !== 'email.received') return json({ ok: true, ignored: event.type }, 200);
+  // Every outcome is recorded, including the ones we ignore. A delivery that
+  // arrives and is silently dropped is indistinguishable from one that never
+  // arrived at all, which makes the whole thing undiagnosable from here.
+  if (event.type !== 'email.received') {
+    await audit(env, { action: 'Inbound webhook ignored', reason: String(event.type).slice(0, 60),
+                       actor: 'resend' });
+    return json({ ok: true, ignored: event.type }, 200);
+  }
 
   const out = await receiveEmail(env, event);
   if (out.stored) {
     await audit(env, { ref: out.ref || null, action: 'Email received',
-                       reason: out.forwarded ? 'copy forwarded' : 'stored only', actor: 'customer' });
+                       reason: out.forwarded ? 'copy forwarded' : 'stored, copy NOT forwarded',
+                       after: out.threadKey, actor: 'customer' });
+  } else {
+    await audit(env, { action: 'Inbound email not stored', reason: String(out.ignored).slice(0, 80),
+                       actor: 'resend' });
   }
   return json({ ok: true, ...out });
 }

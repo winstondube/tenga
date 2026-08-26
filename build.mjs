@@ -139,6 +139,13 @@ function head({ title, description, canonical, jsonld }) {
 <meta name="description" content="${api.esc(description)}">
 <link rel="canonical" href="${canonical}">
 <meta name="robots" content="${site.indexable ? 'index, follow, max-image-preview:large' : 'noindex, nofollow'}">
+<!-- GitHub Pages will not set response headers, so the directives that CAN come
+     from a meta tag come from here. frame-ancestors, HSTS and nosniff cannot:
+     those need a real header, which means putting Cloudflare in front of Pages.
+     connect-src is the one that matters most, because it is what stops injected
+     script talking to anywhere except our own API. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' ${site.apiUrl || ''}; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#F0F3F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0C1211" media="(prefers-color-scheme: dark)">
 <meta property="og:site_name" content="${api.esc(site.name)}">

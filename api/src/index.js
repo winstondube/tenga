@@ -34,13 +34,26 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (origin && !allowed) return json({ error: 'origin not allowed' }, 403, cors);
 
+    /* The API can set real headers even though GitHub Pages cannot, and it is
+       the half that handles money and customer data. Cheap, and it means an
+       injected page cannot frame a JSON response or sniff it into script. */
+    const SEC = {
+      'strict-transport-security': 'max-age=31536000; includeSubDomains',
+      'x-content-type-options': 'nosniff',
+      'x-frame-options': 'DENY',
+      'referrer-policy': 'no-referrer',
+      'content-security-policy': "default-src 'none'; frame-ancestors 'none'",
+      'cross-origin-resource-policy': 'same-site'
+    };
+
     try {
       const r = await route(req, env, url, ctx);
       for (const [k, v] of Object.entries(cors)) r.headers.set(k, v);
+      for (const [k, v] of Object.entries(SEC)) r.headers.set(k, v);
       return r;
     } catch (e) {
       console.error(e && e.stack || e);
-      return json({ error: 'server error' }, 500, cors);
+      return json({ error: 'server error' }, 500, { ...cors, ...SEC });
     }
   }
 };

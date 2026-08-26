@@ -1555,7 +1555,8 @@ const API = {
   listInbox(){ return this.call('/inbox') },
   getThread(key){ return this.call('/inbox/' + encodeURIComponent(key)) },
   replyThread(key, text){ return this.call('/inbox/' + encodeURIComponent(key) + '/reply', { method:'POST', body:{ text } }) },
-  markRead(key){ return this.call('/inbox/' + encodeURIComponent(key) + '/read', { method:'POST' }) }
+  markRead(key){ return this.call('/inbox/' + encodeURIComponent(key) + '/read', { method:'POST' }) },
+  refetchBody(id){ return this.call('/inbox/message/' + encodeURIComponent(id) + '/refetch', { method:'POST' }) }
 };
 
 /* The inbox lives on the server, not in S, because it is not the customer's
@@ -4049,7 +4050,12 @@ function inboxThread(key){
           <span class="tiny muted">${m.direction==='out'?'to '+esc(m.to_addr):''}</span></div>
         <div class="tiny muted nowrap">${fmtFull(m.created_at)}</div>
       </div>
-      <div class="small" style="white-space:pre-wrap;margin-top:8px">${esc(m.body_text||'')}</div>
+      ${m.body_text
+        ? `<div class="small" style="white-space:pre-wrap;margin-top:8px">${esc(m.body_text)}</div>`
+        : `<div class="stack-s" style="margin-top:8px">
+             <div class="tiny muted">The body did not come through. It is still held by the mail provider.</div>
+             <div><button class="btn btn-xs" data-act="refetchBody" data-id="${esc(m.id)}">${icon('down',13)}Fetch it again</button></div>
+           </div>`}
       ${m.attachments?`<div class="tiny muted" style="margin-top:8px">${icon('paperclip',12)}${m.attachments} attachment${m.attachments>1?'s':''}, in the forwarded copy</div>`:''}
     </div>`).join('')}
   ${last?`<div class="card card-p stack-s">
@@ -4376,6 +4382,13 @@ document.addEventListener('click',e=>{
   tourBack(){ tourBack() },
   tourEnd(){ endTour() },
   inboxRefresh(){ INBOX.loaded=false; loadInbox(true); toast('Checking for new mail') },
+  async refetchBody(){
+    try{
+      const r=await API.refetchBody(d.id);
+      if(r.ok){ toast('Fetched'); const k=INBOX.thread&&INBOX.thread.key; INBOX.thread=null; if(k)await openThread(k); }
+      else toast('The provider refused: '+(r.error||r.status||'unknown'));
+    }catch(e){ toast('Could not fetch it: '+e.message) }
+  },
   openThread(){ go('#/admin/inbox/'+encodeURIComponent(d.key)) },
   async sendReply(){
     const text=val('replyText');

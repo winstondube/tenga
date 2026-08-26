@@ -1,8 +1,17 @@
-/* Creates the first staff account. Run once:
-     node seed.mjs ops@tenga.uk 'a long passphrase' > /tmp/seed.sql
-     npx wrangler d1 execute tenga --local --file=/tmp/seed.sql   */
-const [email, pw] = process.argv.slice(2);
-if (!email || !pw) { console.error('usage: node seed.mjs <email> <password>'); process.exit(1) }
+/* Creates a staff account, or resets the password on an existing one.
+   The name is what the audit log records against every action, so give people
+   their own account rather than sharing one: "Winston approved this quote" is
+   worth having and "Operations approved this quote" is not.
+
+     node seed.mjs winston@example.com 'a long generated password' Winston > /tmp/seed.sql
+     npx wrangler d1 execute tenga --remote --file=/tmp/seed.sql -y          */
+const [email, pw, ...rest] = process.argv.slice(2);
+const name = rest.join(' ') || 'Operations';
+if (!email || !pw) { console.error('usage: node seed.mjs <email> <password> [name]'); process.exit(1) }
+if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { console.error('that does not look like an email address'); process.exit(1) }
+// The values are interpolated into SQL below, so refuse anything that would
+// need escaping rather than trying to escape it.
+if (/'/.test(email + name)) { console.error('no apostrophes in the email or name'); process.exit(1) }
 // The KDF is tuned down to fit a Worker's CPU budget, so the password's own
 // length is doing the security. Generated, not chosen.
 if (pw.length < 16) { console.error('use at least 16 characters, and generate it rather than choose it'); process.exit(1) }
@@ -16,4 +25,4 @@ const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')
 const stored = hex(salt) + '$' + hex(bits);
 
 console.log(`INSERT OR REPLACE INTO staff (email,name,pw_hash,role,created_at)
-VALUES ('${email.toLowerCase()}','Operations','${stored}','ops',${Date.now()});`);
+VALUES ('${email.toLowerCase()}','${name}','${stored}','ops',${Date.now()});`);

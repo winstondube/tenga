@@ -6,7 +6,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 
 const BASE = process.env.API || 'http://127.0.0.1:8787';
 const ORIGIN = process.env.ORIGIN || 'https://tengauk.com';
-const STAFF = process.env.SEED_EMAIL || 'ops@tengauk.com';
+const STAFF = process.env.SEED_EMAIL || 'winstondube@gmail.com';
 let pass = 0, fail = 0;
 const ok = (label, cond, extra='') => { cond ? pass++ : fail++;
   console.log(`  ${cond ? 'ok  ' : 'FAIL'}  ${label}${extra && !cond ? '  -> ' + extra : ''}`); };

@@ -23,10 +23,10 @@ The paid tier, if it is ever needed, is $5/month.
 npm install
 npx wrangler d1 create tenga          # put the id into wrangler.toml
 npm run db:init:local                 # schema into the local database
-node seed.mjs ops@tenga.uk 'a long passphrase' > /tmp/seed.sql
+node seed.mjs you@example.com 'a long generated password' Name > /tmp/seed.sql
 npx wrangler d1 execute tenga --local --file=/tmp/seed.sql
 npm run dev                           # http://127.0.0.1:8787
-API=http://127.0.0.1:8787 SEED_PW='a long passphrase' npm test
+API=http://127.0.0.1:8787 SEED_EMAIL=you@example.com SEED_PW='a long generated password' npm test
 ```
 
 Going live:

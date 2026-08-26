@@ -1197,15 +1197,7 @@ function extract(url){
  return out;
 }
 /* ---------------- live product read ----------------
-   A browser cannot fetch a retailer page directly: the retailer sends no
-   CORS header, so the request is blocked. Until there is a server, we relay
-   through a public CORS proxy and parse the retailer's own structured data
-   (schema.org JSON-LD, then Open Graph, then microdata).
-
-   This is a testing stopgap, not production. Proxies are rate limited and
-   some retailers block them at the edge. Every failure path falls through to
-   manual entry, which is what the real service does anyway.                */
-/* There used to be three free CORS relays here (allorigins, codetabs,
+   There used to be three free CORS relays here (allorigins, codetabs,
    thingproxy) and every product link a customer pasted was sent through them.
    That handed a stranger's shopping list to three services nobody vetted, for
    a feature that mostly failed anyway: Boots, Superdrug, ASOS and Beauty Bay
@@ -1217,6 +1209,12 @@ function extract(url){
    anything. The customer types the price, which is what the interface has
    always asked them to do and what a person verifies before anyone pays. */
 async function fetchHTML(){ return null }
+/* The structured-data parser below is deliberately kept and is currently
+   UNREACHABLE: fetchHTML returns null, so enrich() gives up before reaching
+   it. It is the right implementation for reading a retailer page, and it will
+   work unchanged the day the Worker does the fetching server side, where
+   there is no CORS problem and nothing of the customer's leaks. Reading it as
+   live code is the mistake to avoid. */
 
 function toNum(v){
  if(v==null)return null;
@@ -1425,6 +1423,7 @@ function attrText(it){
 }
 
 async function enrich(p){
+ // Always null today. See the note above fetchHTML.
  const html=await fetchHTML(p.url);
  if(!html)return {...p,live:'failed'};
  const d=parseProduct(html);

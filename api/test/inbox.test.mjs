@@ -181,5 +181,40 @@ console.log('\nthe reply signature');
      /Tenga <span[^>]*>UK<\/span> Team/.test(sent.html) && !/undefined/.test(sent.html), sent.html.slice(-200));
 }
 
+console.log('\nwho gets told a customer wrote in');
+{
+  let sent = null;
+  const calls = [];
+  globalThis.fetch = async (u, o) => {
+    calls.push(String(u));
+    if (String(u).endsWith('/emails')) sent = JSON.parse(o.body);
+    // fetchBody reads .text(); the send path reads .json(). Both are stubbed,
+    // because a stub that only satisfies one of them fails inside the module
+    // rather than in the assertion, which tells you nothing.
+    return { ok: true,
+             text: async () => JSON.stringify({ text: 'hello', from: 'buyer@example.com' }),
+             json: async () => ({ id: 'f' + calls.length }) };
+  };
+  const sends = () => calls.filter(u => u.endsWith('/emails')).length;
+  const ev = id => ({ type: 'email.received', data: { email_id: id, from: 'buyer@example.com',
+                      received_for: ['help@tengauk.com'], subject: 'hello' } });
+
+  let env = { DB: makeDB(), RESEND_KEY: 're_x', MAIL_FROM: 'Tenga UK <help@tengauk.com>',
+              FORWARD_TO: 'winstondube@gmail.com' };
+  await receiveEmail(env, ev('f1'));
+  ok('one address still works', Array.isArray(sent.to) && sent.to.length === 1, JSON.stringify(sent.to));
+
+  env = { ...env, DB: makeDB(), FORWARD_TO: 'winstondube@gmail.com, gerald.dube23@gmail.com' };
+  await receiveEmail(env, ev('f2'));
+  ok('two addresses both get it', sent.to.length === 2 && sent.to.includes('gerald.dube23@gmail.com'), JSON.stringify(sent.to));
+  ok('as ONE send, not two', sends() === 2, 'outbound sends: ' + sends() + ' for 2 messages');
+  ok('whitespace around a comma is tolerated', sent.to.every(a => a === a.trim()), JSON.stringify(sent.to));
+
+  env = { ...env, DB: makeDB(), FORWARD_TO: '' };
+  const before = sends();
+  await receiveEmail(env, ev('f3'));
+  ok('with nobody configured it forwards nothing', sends() === before, 'extra sends: ' + (sends() - before));
+}
+
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

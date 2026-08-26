@@ -152,8 +152,12 @@ export async function receiveEmail(env, event) {
 
 /* The alert copy. Winston reads mail on his phone; he answers it in the panel. */
 async function forwardCopy(env, { from, to, subject, text, ref }) {
-  const onward = env.FORWARD_TO;
-  if (!onward || !env.RESEND_KEY) return false;
+  /* More than one person can be told. Gerald has the same admin access as
+     Winston, so a system where only one of them ever hears that a customer
+     wrote in means the other cannot cover. One send with several recipients,
+     not several sends, which matters on a plan capped at 100 a day. */
+  const onward = String(env.FORWARD_TO || '').split(',').map(x => x.trim()).filter(Boolean);
+  if (!onward.length || !env.RESEND_KEY) return false;
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const site = String(env.SITE_ORIGINS || '').split(',')[0] || '';
@@ -163,7 +167,7 @@ async function forwardCopy(env, { from, to, subject, text, ref }) {
       headers: { authorization: `Bearer ${env.RESEND_KEY}`, 'content-type': 'application/json' },
       body: JSON.stringify({
         from: env.MAIL_FROM,
-        to: [onward],
+        to: onward,
         // reply_to so hitting reply on the phone reaches the customer rather
         // than looping the forward back into our own inbox.
         reply_to: [from],

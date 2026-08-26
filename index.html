@@ -636,7 +636,7 @@ body > *{min-width:0}
 
 
 
-<script>window.TENGA_API="https://tenga-api.winstondube.workers.dev";window.TENGA_COLLECT={"name":"Mbare Grillz","street":"9 Williams Avenue","area":"Ardbennie","city":"Harare","hours":""}</script>
+<script>window.TENGA_API="https://tenga-api.winstondube.workers.dev";window.TENGA_COLLECT={"name":"Mbare Grillz","street":"9 Williams Avenue","area":"Ardbennie","city":"Harare","hours":""};window.TENGA_WA="+44 7337 524515"</script>
 <div id="app">
  <div class="topbar"><div class="topbar-in">
    <a class="brand" href="#/">
@@ -692,7 +692,7 @@ body > *{min-width:0}
  </section>
  <section class="ship-band"><div class="ship-in">
    <div class="ship-count">
-     <span class="ship-num">32</span>
+     <span class="ship-num">31</span>
      <span class="ship-unit">days<br>until the<br>next shipment</span>
    </div>
    <div class="ship-detail">
@@ -771,7 +771,7 @@ body > *{min-width:0}
      <p class="small muted" style="max-width:46ch;margin:0 auto">No account, no commitment. You will see the full price before anything is bought.</p>
      <div class="row wrap" style="justify-content:center;margin-top:6px">
        <a class="btn btn-primary btn-lg" href="#/request"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 14.5 14.5 9.5M10.8 6.7l1.6-1.6a3.7 3.7 0 0 1 5.2 5.2l-1.6 1.6M13.2 17.3l-1.6 1.6a3.7 3.7 0 0 1-5.2-5.2l1.6-1.6"/></svg>Start a request</a>
-       <a class="btn btn-lg" href="https://wa.me/447700900000" target="_blank" rel="noopener"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.3-5.4A7.5 7.5 0 1 1 20.5 12Z"/></svg>Ask on WhatsApp</a>
+       <a class="btn btn-lg" href="https://wa.me/447337524515" target="_blank" rel="noopener"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a7.5 7.5 0 0 1-10.9 6.7L4 20l1.3-5.4A7.5 7.5 0 1 1 20.5 12Z"/></svg>Ask on WhatsApp</a>
      </div>
    </section>
 
@@ -1443,6 +1443,13 @@ const collectLine = () => [COLLECT.name, COLLECT.street, COLLECT.area, COLLECT.c
    first-class button rather than a link somebody has to copy by hand.
    wa.me opens the app on a phone and Web WhatsApp on a desktop. */
 function waHref(text){ return 'https://wa.me/?text=' + encodeURIComponent(text) }
+/* Our own number, injected from site.json like the collection point. wa.me
+   wants digits only, so the spaces and the plus are stripped rather than
+   stored twice and allowed to disagree. */
+const WA_NUMBER = (typeof window!=='undefined' && window.TENGA_WA) || '+44 7337 524515';
+const waDigits = () => String(WA_NUMBER).replace(/[^0-9]/g,'');
+/* Opening a chat with us, as opposed to sharing something with anyone. */
+const waUs = text => 'https://wa.me/' + waDigits() + (text ? '?text=' + encodeURIComponent(text) : '');
 function siteRoot(){
   const base = String(location.pathname || '/').replace(/index\.html$/,'');
   return (location.origin || '') + (base.endsWith('/') ? base : base + '/');
@@ -2182,7 +2189,7 @@ function viewHome(){
      <p class="small muted" style="max-width:46ch;margin:0 auto">No account, no commitment. You will see the full price before anything is bought.</p>
      <div class="row wrap" style="justify-content:center;margin-top:6px">
        <a class="btn btn-primary btn-lg" href="#/request">${icon('link',17)}Start a request</a>
-       <a class="btn btn-lg" href="https://wa.me/447700900000" target="_blank" rel="noopener">${icon('chat',17)}Ask on WhatsApp</a>
+       <a class="btn btn-lg" href="${esc(waUs())}" target="_blank" rel="noopener">${icon('chat',17)}Ask on WhatsApp</a>
      </div>
    </section>
 

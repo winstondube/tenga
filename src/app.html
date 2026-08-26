@@ -1202,6 +1202,13 @@ const collectLine = () => [COLLECT.name, COLLECT.street, COLLECT.area, COLLECT.c
    first-class button rather than a link somebody has to copy by hand.
    wa.me opens the app on a phone and Web WhatsApp on a desktop. */
 function waHref(text){ return 'https://wa.me/?text=' + encodeURIComponent(text) }
+/* Our own number, injected from site.json like the collection point. wa.me
+   wants digits only, so the spaces and the plus are stripped rather than
+   stored twice and allowed to disagree. */
+const WA_NUMBER = (typeof window!=='undefined' && window.TENGA_WA) || '+44 7337 524515';
+const waDigits = () => String(WA_NUMBER).replace(/[^0-9]/g,'');
+/* Opening a chat with us, as opposed to sharing something with anyone. */
+const waUs = text => 'https://wa.me/' + waDigits() + (text ? '?text=' + encodeURIComponent(text) : '');
 function siteRoot(){
   const base = String(location.pathname || '/').replace(/index\.html$/,'');
   return (location.origin || '') + (base.endsWith('/') ? base : base + '/');
@@ -1941,7 +1948,7 @@ function viewHome(){
      <p class="small muted" style="max-width:46ch;margin:0 auto">No account, no commitment. You will see the full price before anything is bought.</p>
      <div class="row wrap" style="justify-content:center;margin-top:6px">
        <a class="btn btn-primary btn-lg" href="#/request">${icon('link',17)}Start a request</a>
-       <a class="btn btn-lg" href="https://wa.me/447700900000" target="_blank" rel="noopener">${icon('chat',17)}Ask on WhatsApp</a>
+       <a class="btn btn-lg" href="${esc(waUs())}" target="_blank" rel="noopener">${icon('chat',17)}Ask on WhatsApp</a>
      </div>
    </section>
 

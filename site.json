@@ -13,7 +13,8 @@
   "tagline": "Buy-for-me and Zimbabwe forwarding",
   "locale": "en_GB",
   "contactEmail": "help@tengauk.com",
-  "contactWhatsapp": "+44 7700 900000",
+  "contactWhatsapp": "+44 7337 524515",
+  "_contactWhatsapp": "The business mobile. Written once here and injected into the app, the contact page and every footer, so they can never drift apart.",
 
   "collection": {
     "name": "Mbare Grillz",

@@ -3029,6 +3029,18 @@ function viewAdmin(parts,q){
  </div></div>`;
 }
 
+/* Batches that have landed, and the orders in them nobody has emailed yet.
+   Being told is what "arrived" means to a customer, so the two are not the
+   same thing and the gap between them is worth showing. */
+function arrivedBatchesToTell(){
+ const ARRIVED=/Arrived in Zimbabwe|Customs clearance|Ready for collection/i;
+ return (S.batches||[]).filter(b=>ARRIVED.test(b.status||'')).map(b=>({
+   id:b.id, status:b.status,
+   waiting:(b.orders||[]).map(getOrder).filter(o=>
+     o && o.collectCode && !S.messages.some(m=>m.ref===o.ref&&m.type==='Ready for collection'))
+ })).filter(b=>b.waiting.length);
+}
+
 function adminDash(){
  const orders=S.orders;
  const open=orders.filter(o=>o.status!=='Delivered'&&o.status!=='Closed');
@@ -3039,11 +3051,19 @@ function adminDash(){
   ['review','Manual review','danger'],['qexpired','Expired quotes','warn'],['tobuy','Ready to purchase','accent'],
   ['receiving','To check in','info'],['weight','Awaiting weight','ochre'],['cargopay','Awaiting cargo payment','ochre']
  ].map(([k,l,t])=>({k,l,t,c:qCount(k)})).filter(x=>x.c>0);
+ // A batch that has landed but whose customers have not been told is the one
+ // state where somebody in Harare is waiting on us and does not know it.
+ const landed=arrivedBatchesToTell();
  return `<div class="stack-l">
   <div class="spread wrap">
     <div class="stack-s"><div class="eyebrow">Operations</div><h2 style="font-size:24px">Today</h2></div>
     <div class="row"><a class="btn btn-s" href="#/request">${icon('plus',15)}Log a request</a></div>
   </div>
+  ${landed.map(b=>note(
+    `<b>${b.id} has arrived in Harare and ${b.waiting.length} customer${b.waiting.length>1?'s have':' has'} not been told.</b>
+     They cannot collect until they have the code. `+
+     `<button class="btn btn-s" style="margin-top:8px" data-act="tellBatch" data-batch="${esc(b.id)}">`+
+     `${icon('mail',15)}Send the collection email to ${b.waiting.length}</button>`,'ochre','pin')).join('')}
   <div class="kpis" data-tour="kpis">
     <div class="kpi stripe-a"><span class="v num">${open.length}</span><span class="l">Open orders</span></div>
     <div class="kpi stripe-w"><span class="v num">${qCount('tobuy')}</span><span class="l">Paid, waiting to be bought</span></div>
@@ -4610,6 +4630,14 @@ document.addEventListener('click',e=>{
     if(b.shipDate&&typeof b.shipDate==='string')b.shipDate=new Date(b.shipDate).getTime();
     if(b.eta&&typeof b.eta==='string')b.eta=new Date(b.eta).getTime();
     logAudit('','Cargo batch saved','',b.id);save();rerender(true);toast('Batch saved') },
+  /* One press, the whole batch told. setStatus is what actually sends, and
+     it refuses to send twice, so pressing this again is safe. */
+  tellBatch(){ const b=S.batches.find(x=>x.id===d.batch); if(!b)return;
+    const waiting=(arrivedBatchesToTell().find(x=>x.id===b.id)||{waiting:[]}).waiting;
+    if(!waiting.length)return toast('Everyone in that batch has already been told');
+    waiting.forEach(o=>setStatus(o,'Ready for collection','Batch '+b.id+' arrived'));
+    logAudit('','Collection emails sent','',waiting.length+' orders in '+b.id);
+    save();rerender(true);toast('Told '+waiting.length+' customer'+(waiting.length>1?'s':'')) },
   pushBatchStatus(){ const b=S.batches.find(x=>x.id===d.batch);
     b.orders.forEach(r=>{const ord=getOrder(r);if(ord){setStatus(ord,b.status,'Batch '+b.id);
       logMsg(r,b.status,'WhatsApp',ord.customer.whatsapp,'Update on '+r+': '+b.status+'.')}});

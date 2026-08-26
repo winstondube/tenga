@@ -97,5 +97,35 @@ S.messages = S.messages.filter(m => !(m.ref === o.ref && m.type === 'Quote ready
 const failed = logMsg(o.ref, 'Quote ready', 'Email', 'a@b.com', 'x');
 await wait();
 console.log('  the failure is on the record, not hidden:', /not sent/i.test(failed.status), '->', failed.status);
+
+console.log('');
+console.log('THE ARRIVAL PROMPT');
+global.fetch = (url, opts = {}) => { CALLS.push({url:String(url),method:opts.method||'GET',
+  body:opts.body?JSON.parse(opts.body):null});
+  return Promise.resolve({ok:true,status:200,json:()=>Promise.resolve({id:'m',sent:true})}) };
+const paid = S.orders.filter(x => x.collectCode).slice(0, 2);
+S.messages = S.messages.filter(m => m.type !== 'Ready for collection');
+S.batches = [{ id:'B-TEST', status:'Arrived in Zimbabwe', orders: paid.map(x => x.ref) }];
+let landed = arrivedBatchesToTell();
+console.log('  a landed batch is flagged           :', landed.length === 1 && landed[0].waiting.length === paid.length,
+  landed.length ? landed[0].waiting.length + ' waiting' : 'not flagged');
+console.log('  and the dashboard says so           :', /has arrived in Harare/.test(adminDash()));
+
+CALLS.length = 0;
+click({ act:'tellBatch', batch:'B-TEST' });
+await wait();
+console.log('  one press emails all of them        :', posts('Ready for collection').length === paid.length,
+  posts('Ready for collection').length + ' of ' + paid.length);
+console.log('  the prompt then clears              :', arrivedBatchesToTell().length === 0);
+
+CALLS.length = 0;
+click({ act:'tellBatch', batch:'B-TEST' });
+await wait();
+console.log('  pressing it again sends nothing     :', posts('Ready for collection').length === 0);
+
+// A batch still at sea must not prompt anyone.
+S.messages = S.messages.filter(m => m.type !== 'Ready for collection');
+S.batches = [{ id:'B-SEA', status:'In transit to Zimbabwe', orders: paid.map(x => x.ref) }];
+console.log('  a batch still in transit does not   :', arrivedBatchesToTell().length === 0);
 })();
 `);

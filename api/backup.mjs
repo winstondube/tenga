@@ -34,6 +34,8 @@ const sql = readFileSync(out, 'utf8');
    names and batches its inserts, so counting INSERT statements undercounts and
    quietly reports a healthy backup as broken, which is the wrong way round for
    a check whose whole job is to be believed. */
+// Hardcoded, and the ONLY thing interpolated into SQL below. No request value
+// reaches a query in this file; there is no request in this file.
 const TABLES = ['orders', 'payments', 'messages', 'inbox', 'staff', 'audit'];
 const liveCount = t => {
   const r = wrangler('d1', 'execute', 'tenga', '--remote', '--json', '--command',

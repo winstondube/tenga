@@ -837,11 +837,23 @@ function logAudit(ref,action,before,after,reason){
  S.audit.unshift({id:uid('a'),ref:ref||'',action,before:before==null?'':String(before),after:after==null?'':String(after),actor:'Admin (demo)',at:Date.now(),reason:reason||''});
  if(S.audit.length>400)S.audit.length=400;
 }
-/* The four the server has a real template for. Two of those it sends itself:
-   'Request received' when the order is created, and 'Payment received' when
-   PayPal tells us the money cleared. Sending those from here too would send
-   them twice, so only these two are ours to trigger. */
-const MAILABLE=new Set(['Quote ready','Ready for collection']);
+/* Every type the server can build an email for, minus the two it sends
+   itself: 'Request received' when the order is created, and 'Payment
+   received' when PayPal tells us the money cleared. Triggering those from
+   here as well would send them twice.
+
+   This list and api/src/mail.js must agree. A type here with no template
+   there throws on the server; a template there missing here silently never
+   sends, which is the failure this whole area already had once. */
+const MAILABLE=new Set([
+ 'More information required','Quote ready','Quote expiring',
+ 'Retailer purchase completed','Product unavailable','Substitute approval required',
+ 'Retailer dispatched','Goods received in the UK','Goods issue identified',
+ 'Cargo payment required','Cargo payment reminder','Cargo payment received',
+ 'Additional payment required','Handed to cargo company','Packed for Zimbabwe',
+ 'In transit to Zimbabwe','Customs clearance','Arrived in Zimbabwe',
+ 'Ready for collection','Out for delivery','Item cancelled and refunded',
+ 'Refund issued','Delivered']);
 
 /* Recording that we told the customer, and actually telling them.
    These were two different things for the whole life of this app: every call
@@ -4142,7 +4154,7 @@ document.addEventListener('change',e=>{
    it.issues.push({type:el.value,at:Date.now(),notes:(it.recDraft&&it.recDraft.notes)||'',photos:[]});
    it.itemStatus='On hold';setStatus(o,'Receiving issue identified','Item: '+it.name+' — '+el.value);
    logAudit(o.ref,'Receiving issue logged','',el.value,it.name);
-   logMsg(o.ref,'Goods issue identified','Email',o.customer.email,'We found an issue with one of your items ('+el.value+'). We are resolving it with the retailer and will update you.');
+   logMsg(o.ref,'Goods issue identified','Email',o.customer.email,'We found an issue with one of your items ('+el.value+'). We are resolving it with the retailer and will update you.',null,{item:el.value});
    save();rerender(true)}
  else if(act==='pickSubs'){
    const dr=draft();
@@ -4397,7 +4409,7 @@ document.addEventListener('click',e=>{
     setStatus(o,'Awaiting price confirmation','Customer asked for an updated quote');
     o.quote.sentAt=null;o.quote.status='Recheck requested';
     logAudit(o.ref,'Updated quote requested','Quote expired','Awaiting price confirmation');
-    logMsg(o.ref,'More information required','Email',o.customer.email,'We are rechecking prices and will send you an updated quote shortly.');
+    logMsg(o.ref,'More information required','Email',o.customer.email,'We are rechecking prices and will send you an updated quote shortly.',null,{need:'We are rechecking prices and will send you an updated quote shortly.'});
     save();rerender();toast('We will recheck and resend');
   },
 
@@ -4411,7 +4423,7 @@ document.addEventListener('click',e=>{
     if(!o.items.some(i=>i.restricted.length&&!i.restrictedCleared))setStatus(o,'Awaiting price confirmation');save();rerender(true) },
   rejectItem(){ const it=o.items.find(i=>i.id===d.id);const why=prompt('Reason for rejecting this item?','Restricted by cargo rules');
     if(why===null)return;it.itemStatus='Removed';logAudit(o.ref,'Item rejected',it.name,'Removed',why);
-    logMsg(o.ref,'Product unavailable','Email',o.customer.email,'We cannot buy "'+it.name+'". Reason: '+why+'. It has been removed from your request.');
+    logMsg(o.ref,'Product unavailable','Email',o.customer.email,'We cannot buy "'+it.name+'". Reason: '+why+'. It has been removed from your request.',null,{item:it.name,reason:'cannot be bought: '+why,outcome:'It has been taken off your request. Anything you paid for it is refunded.'});
     save();rerender(true);toast('Item rejected and removed') },
   buildQuote(){
     const q=quoteCalc(o);
@@ -4463,7 +4475,7 @@ document.addEventListener('click',e=>{
     if(!amt){toast('Nothing to charge');return}
     o.payments.push({id:uid('p'),type:kind,provider:'PayPal',amount:amt,currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false});
     if(kind==='cargo'){setStatus(o,'Zimbabwe shipping payment required');
-      logMsg(o.ref,'Cargo payment required','WhatsApp',o.customer.whatsapp,'Your parcel weighs '+cargoCalc(o).chargeable+' kg. Zimbabwe shipping is '+money(amt)+'. Pay here to book it onto the next shipment.');}
+      logMsg(o.ref,'Cargo payment required','WhatsApp',o.customer.whatsapp,'Your parcel weighs '+cargoCalc(o).chargeable+' kg. Zimbabwe shipping is '+money(amt)+'. Pay here to book it onto the next shipment.',null,{kg:cargoCalc(o).chargeable+' kg',amount:money(amt)});}
     logAudit(o.ref,'Payment request created','',kind+' '+money(amt));
     save();rerender(true);toast('Payment request created')
   },
@@ -4477,7 +4489,7 @@ document.addEventListener('click',e=>{
     o.payments.push({id:uid('p'),type:'additional',provider:'PayPal',amount:round2(amt),currency:'GBP',status:'Payment link created',ref:'PL-'+hash(o.ref+Date.now())%99999,createdAt:Date.now(),paidAt:null,held:false,reason:why});
     setStatus(o,'Additional payment required',why);
     logAudit(o.ref,'Additional payment requested','',money(amt),why);
-    logMsg(o.ref,'Additional payment required','WhatsApp',o.customer.whatsapp,why+' We need a further '+money(amt)+' before we can complete the purchase.');
+    logMsg(o.ref,'Additional payment required','WhatsApp',o.customer.whatsapp,why+' We need a further '+money(amt)+' before we can complete the purchase.',null,{amount:money(amt),reason:why});
     save();rerender(true)
   },
   addRefund(){
@@ -4485,7 +4497,7 @@ document.addEventListener('click',e=>{
     o.refunds=o.refunds||[];
     o.refunds.push({amount:round2(amt),type:val('refType'),reason:val('refReason'),ref:'RF-'+hash(o.ref+Date.now()).toString(36).toUpperCase().slice(0,7),at:Date.now(),by:'Admin (demo)'});
     logAudit(o.ref,'Refund recorded','',money(amt),val('refReason'));
-    logMsg(o.ref,'Refund issued','Email',o.customer.email,'We have refunded '+money(amt)+'. '+val('refReason'));
+    logMsg(o.ref,'Refund issued','Email',o.customer.email,'We have refunded '+money(amt)+'. '+val('refReason'),null,{amount:money(amt),reason:val('refReason')});
     const t=payTotals(o);setStatus(o,t.refunded>=t.initialPaid+t.cargoPaid?'Fully refunded':'Partially refunded');
     save();rerender(true);toast('Refund recorded')
   },
@@ -4494,7 +4506,7 @@ document.addEventListener('click',e=>{
     o.refunds=o.refunds||[];
     o.refunds.push({amount:amt,type:'Cargo-payment refund',reason:'Parcel weighed lighter than quoted',ref:'RF-'+hash(o.ref+amt).toString(36).toUpperCase().slice(0,7),at:Date.now(),by:'Admin (demo)'});
     logAudit(o.ref,'Shipping difference refunded','',money(amt),'Actual cargo cost below the quoted estimate');
-    logMsg(o.ref,'Refund issued','Email',o.customer.email,'Good news: your parcel weighed less than we estimated, so we are refunding '+money(amt)+' of the shipping you paid.');
+    logMsg(o.ref,'Refund issued','Email',o.customer.email,'Good news: your parcel weighed less than we estimated, so we are refunding '+money(amt)+' of the shipping you paid.',null,{amount:money(amt),reason:'Your parcel weighed less than we estimated, so this is the shipping difference coming back.'});
     save();rerender(true);toast('Refunded '+money(amt))
   },
   releaseHold(){ const p=o.payments.find(x=>x.id===d.id);p.status='Payment available';p.held=false;
@@ -4512,7 +4524,7 @@ document.addEventListener('click',e=>{
     const diff=p.actualCost!=null?round2(Number(p.actualCost)-itemLine(it)):0;
     logAudit(o.ref,'Retailer purchase recorded','',it.retailerName+' '+p.orderNumber, diff?('Price difference '+money(diff)):'');
     if(activeItems(o).every(i=>i.purchase)){setStatus(o,'Purchased from retailer');
-      logMsg(o.ref,'Retailer purchase completed','Email',o.customer.email,'We have placed your order with the retailer. Order number '+p.orderNumber+'.');}
+      logMsg(o.ref,'Retailer purchase completed','Email',o.customer.email,'We have placed your order with the retailer. Order number '+p.orderNumber+'.',null,{orderNumber:p.orderNumber});}
     else setStatus(o,'Retailer order partially placed');
     if(diff>S.settings.absorbIncrease)setStatus(o,'Additional payment required','Retailer price rose by '+money(diff));
     save();rerender(true);toast('Purchase recorded')
@@ -4523,11 +4535,11 @@ document.addEventListener('click',e=>{
     if(kind===null)return;
     it.itemStatus='Out of stock';
     if(it.subsAllowed==='yes'||it.subsAllowed==='link'){setStatus(o,'Substitute approval required','Suggest an alternative for '+it.name);
-      logMsg(o.ref,'Substitute approval required','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. You said substitutes are acceptable ('+(it.subsUrl||it.subsNotes||'no detail given')+'). Please confirm the alternative we have suggested before we buy.');}
+      logMsg(o.ref,'Substitute approval required','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. You said substitutes are acceptable ('+(it.subsUrl||it.subsNotes||'no detail given')+'). Please confirm the alternative we have suggested before we buy.',null,{item:it.name,reason:'is '+kind,options:'You told us a substitute is acceptable. Reply to confirm, or tell us to cancel and refund it.'});}
     else if(it.subsAllowed==='cancel'){setStatus(o,'Product out of stock','Customer asked to cancel and refund');
-      logMsg(o.ref,'Product unavailable','Email',o.customer.email,it.name+' is '+kind+'. As instructed we will cancel this item and refund it.');}
+      logMsg(o.ref,'Product unavailable','Email',o.customer.email,it.name+' is '+kind+'. As instructed we will cancel this item and refund it.',null,{item:it.name,reason:'is '+kind,outcome:'As instructed we will cancel this item and refund it.'});}
     else {setStatus(o,'Customer decision required',it.name+' is '+kind);
-      logMsg(o.ref,'Product unavailable','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. Options: wait for restock, accept a substitute, choose something else, reduce the quantity, refund this item, or cancel the order.');}
+      logMsg(o.ref,'Product unavailable','WhatsApp',o.customer.whatsapp,it.name+' is '+kind+'. Options: wait for restock, accept a substitute, choose something else, reduce the quantity, refund this item, or cancel the order.',null,{item:it.name,reason:'is '+kind,outcome:'Options: wait for a restock, accept a substitute, choose something else, or cancel and be refunded. Tell us which.'});}
     logAudit(o.ref,'Item marked unavailable',it.name,kind);
     save();rerender(true)
   },
@@ -4597,7 +4609,7 @@ document.addEventListener('click',e=>{
   handOver(){
     setStatus(o,'Packed for Zimbabwe');setStatus(o,'Handed to cargo company');
     logAudit(o.ref,'Handed to cargo company','',o.cargo.company||'cargo partner');
-    logMsg(o.ref,'Handed to cargo company','WhatsApp',o.customer.whatsapp,'Your parcel has been handed to '+(o.cargo.company||'the cargo company')+'. Reference '+(o.cargo.shipRef||'to follow')+'.');
+    logMsg(o.ref,'Handed to cargo company','WhatsApp',o.customer.whatsapp,'Your parcel has been handed to '+(o.cargo.company||'the cargo company')+'. Reference '+(o.cargo.shipRef||'to follow')+'.',null,{company:o.cargo.company,reference:o.cargo.ref});
     save();rerender(true);toast('Handed over')
   },
 
@@ -4674,7 +4686,7 @@ function applyPaymentEffects(o,p){
      (o.recipient.name||o.customer.name)+'. We cannot hand the order over without both. The code is also on your tracking page.');
  } else if(p.type==='cargo'){
    setStatus(o,'Cargo payment received');setStatus(o,'Ready for cargo');
-   logMsg(o.ref,'Cargo payment received','Email',o.customer.email,'Thank you, your Zimbabwe shipping payment of '+money(p.amount)+' has been received. Your parcel will go on the next shipment.');
+   logMsg(o.ref,'Cargo payment received','Email',o.customer.email,'Thank you, your Zimbabwe shipping payment of '+money(p.amount)+' has been received. Your parcel will go on the next shipment.',null,{amount:money(p.amount)});
  } else {
    setStatus(o,'Purchase in progress','Additional payment received');
  }

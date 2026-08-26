@@ -5,3 +5,17 @@ _narrowtest.html
 _phone*.html
 _m*.html
 tests/check.js
+
+# Wrangler's local dev state. This is a real SQLite database: it held a staff
+# password hash and three orders, in a public repo, until 26 Aug 2026.
+.wrangler/
+**/.wrangler/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# Secrets never belong here. Worker secrets are set with `wrangler secret put`.
+.env
+.env.*
+!.env.example

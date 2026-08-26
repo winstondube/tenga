@@ -1078,9 +1078,39 @@ function logAudit(ref,action,before,after,reason){
  S.audit.unshift({id:uid('a'),ref:ref||'',action,before:before==null?'':String(before),after:after==null?'':String(after),actor:'Admin (demo)',at:Date.now(),reason:reason||''});
  if(S.audit.length>400)S.audit.length=400;
 }
-function logMsg(ref,type,channel,to,body,status){
- S.messages.unshift({id:uid('m'),ref,type,channel:channel||'Email',to:to||'',body:body||'',status:status||'Delivered',at:Date.now()});
+/* The four the server has a real template for. Two of those it sends itself:
+   'Request received' when the order is created, and 'Payment received' when
+   PayPal tells us the money cleared. Sending those from here too would send
+   them twice, so only these two are ours to trigger. */
+const MAILABLE=new Set(['Quote ready','Ready for collection']);
+
+/* Recording that we told the customer, and actually telling them.
+   These were two different things for the whole life of this app: every call
+   here wrote a row saying "Delivered" and sent nothing, because API.sendMessage
+   existed and was never once called. A quote could be approved, logged as
+   emailed, and the customer would sit waiting for an email that was never
+   sent. */
+function logMsg(ref,type,channel,to,body,status,vars){
+ const live=API.on&&S.session==='admin'&&MAILABLE.has(type);
+ const m={id:uid('m'),ref,type,channel:channel||'Email',to:to||'',body:body||'',
+   // Never claim delivery we cannot back up. Offline, this is the demo and
+   // "Delivered" is the honest answer; with a server, the other types have no
+   // template behind them and saying so is better than pretending.
+   status:status||(live?'Sending':(API.on?'Recorded, not emailed':'Delivered')),at:Date.now()};
+ S.messages.unshift(m);
  if(S.messages.length>400)S.messages.length=400;
+ if(live)(async()=>{
+   try{
+     // The server builds the email from the order it holds, and saving is
+     // debounced, so sending first would quote whatever the total was 700ms
+     // ago. Push the order before asking for the email about it.
+     await flushSave(ref);
+     const r=await API.sendMessage(ref,type,vars);
+     m.status=r&&r.sent?'Delivered':'Queued at the provider';
+   }catch(e){ m.status='Not sent: '+e.message; toast('That email did not go out: '+e.message) }
+   save();rerender(true);
+ })();
+ return m;
 }
 function nextRef(){S.counter++;return 'TU-'+S.counter}
 function getOrder(ref){return S.orders.find(o=>o.ref===ref)}
@@ -1554,7 +1584,7 @@ const API = {
   login(email, password){ return this.call('/staff/login', { method:'POST', body:{ email, password } }) },
   logout(){ return this.call('/staff/logout', { method:'POST' }) },
   me(){ return this.call('/staff/me') },
-  sendMessage(ref, type){ return this.call('/orders/' + encodeURIComponent(ref) + '/messages', { method:'POST', body:{ type } }) },
+  sendMessage(ref, type, vars){ return this.call('/orders/' + encodeURIComponent(ref) + '/messages', { method:'POST', body:{ type, vars } }) },
   listInbox(){ return this.call('/inbox') },
   getThread(key){ return this.call('/inbox/' + encodeURIComponent(key)) },
   replyThread(key, text){ return this.call('/inbox/' + encodeURIComponent(key) + '/reply', { method:'POST', body:{ text } }) },
@@ -1597,6 +1627,16 @@ async function openThread(key){
    event per keystroke, and each one re-renders; without this every keystroke
    would be a request. */
 const PENDING_SAVES = new Map();
+/* Send the pending save for one order now instead of in 700ms, and wait for
+   it. Anything that asks the server to act on an order has to do this first,
+   or the server acts on the version before the edit. */
+async function flushSave(ref){
+  const t = PENDING_SAVES.get(ref);
+  if (t) { clearTimeout(t); PENDING_SAVES.delete(ref); }
+  const o = getOrder(ref);
+  if (!o || !API.on || S.session !== 'admin') return;
+  try { await API.saveOrder(o) } catch (e) { /* the send below will report it */ }
+}
 function syncOrder(o){
   if (!API.on || !o || !o.ref || S.session !== 'admin') return;
   clearTimeout(PENDING_SAVES.get(o.ref));
@@ -4633,7 +4673,7 @@ document.addEventListener('click',e=>{
     else if(!/completed|available|held/i.test(p.status))p.amount=q.total;
     setStatus(o,'Quote sent');setStatus(o,'Awaiting initial payment');
     logAudit(o.ref,'Quote sent','',money(q.total),'Expires in '+mins+' minutes');
-    logMsg(o.ref,'Quote ready','Email',o.customer.email,'Your quote for '+o.ref+' is '+money(q.total)+'. It expires in '+mins+' minutes.');
+    logMsg(o.ref,'Quote ready','Email',o.customer.email,'Your quote for '+o.ref+' is '+money(q.total)+'. It expires in '+mins+' minutes.',null,{mins});
     save();rerender(true);toast('Quote sent to '+o.customer.email)
   },
 

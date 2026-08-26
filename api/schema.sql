@@ -124,3 +124,13 @@ CREATE INDEX IF NOT EXISTS inbox_thread  ON inbox(thread_key, created_at);
 CREATE INDEX IF NOT EXISTS inbox_recent  ON inbox(created_at DESC);
 CREATE INDEX IF NOT EXISTS inbox_unread  ON inbox(read_at) WHERE read_at IS NULL AND direction = 'in';
 CREATE INDEX IF NOT EXISTS inbox_ref     ON inbox(ref, created_at);
+
+-- Failed attempts, so a password can be guessed at human speed and not at
+-- network speed. Rows are per identity+ip and expire on their own.
+CREATE TABLE IF NOT EXISTS attempts (
+  k          TEXT PRIMARY KEY,
+  n          INTEGER NOT NULL DEFAULT 0,
+  first_at   INTEGER NOT NULL,
+  until      INTEGER
+);
+CREATE INDEX IF NOT EXISTS attempts_until ON attempts(until);

@@ -104,3 +104,54 @@ export function publicView(row) {
     timeline: doc.timeline, cargo: doc.cargo, refunds: doc.refunds
   };
 }
+
+
+/* Rate limiting.
+ *
+ * There was none. Eight wrong passwords went through in two seconds with no
+ * 429, which turns a password into an offline-speed guessing problem played
+ * at network speed. Winston's passwords are generated and 24 characters, so
+ * this is defence in depth rather than the only thing standing there, but the
+ * customer lookup has no such protection behind it at all.
+ *
+ * Kept in D1 rather than in memory because a Worker isolate is not a place
+ * state survives, and a counter that resets whenever Cloudflare feels like it
+ * is not a rate limit.
+ */
+export async function rateLimit(env, key, { max = 8, windowMs = 900000, blockMs = 900000 } = {}) {
+  const t = now();
+  const row = await env.DB.prepare('SELECT n, first_at, until FROM attempts WHERE k = ?').bind(key).first();
+
+  if (row && row.until && row.until > t) {
+    return { ok: false, retryAfter: Math.ceil((row.until - t) / 1000) };
+  }
+  // A window that has passed, or a block that has expired, starts again.
+  if (!row || (t - row.first_at) > windowMs || (row.until && row.until <= t)) {
+    await env.DB.prepare(
+      `INSERT INTO attempts (k,n,first_at,until) VALUES (?,0,?,NULL)
+       ON CONFLICT(k) DO UPDATE SET n=0, first_at=excluded.first_at, until=NULL`
+    ).bind(key, t).run();
+    return { ok: true, remaining: max };
+  }
+  return { ok: true, remaining: Math.max(0, max - row.n) };
+}
+
+/* Called only when an attempt actually failed. A correct password costs
+   nothing, so normal use never walks toward a block. */
+export async function rateFail(env, key, { max = 8, windowMs = 900000, blockMs = 900000 } = {}) {
+  const t = now();
+  await env.DB.prepare(
+    `INSERT INTO attempts (k,n,first_at,until) VALUES (?,1,?,NULL)
+     ON CONFLICT(k) DO UPDATE SET n = attempts.n + 1`
+  ).bind(key, t).run();
+  const row = await env.DB.prepare('SELECT n FROM attempts WHERE k = ?').bind(key).first();
+  if (row && row.n >= max) {
+    await env.DB.prepare('UPDATE attempts SET until = ? WHERE k = ?').bind(t + blockMs, key).run();
+    return { blocked: true, seconds: Math.ceil(blockMs / 1000) };
+  }
+  return { blocked: false };
+}
+
+export async function rateClear(env, key) {
+  await env.DB.prepare('DELETE FROM attempts WHERE k = ?').bind(key).run();
+}

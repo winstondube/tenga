@@ -6,7 +6,8 @@
  * directly that money arrived rather than taking the buyer's word for it.
  */
 import { json, bad, now, toPence, fromPence, collectCode, token, verifyPw,
-         looksLikeEmail, audit, mayReadOrder, publicView } from './lib.js';
+         looksLikeEmail, audit, mayReadOrder, publicView,
+         rateLimit, rateFail, rateClear } from './lib.js';
 import { send } from './mail.js';
 import { createPayPalOrder, capturePayPalOrder, verifyWebhook, applyWebhook } from './paypal.js';
 import { verifyInbound, receiveEmail, replyToThread, refetchBody } from './inbox.js';
@@ -62,6 +63,9 @@ async function route(req, env, url, ctx) {
   if (msgs && m === 'GET')  return listMessages(req, env, msgs[1]);
   if (msgs && m === 'POST') return sendMessage(req, env, msgs[1]);
 
+  const recp = p.match(/^\/orders\/([A-Za-z0-9-]+)\/payments$/);
+  if (recp && m === 'POST') return recordPayment(req, env, recp[1]);
+
   const pay = p.match(/^\/orders\/([A-Za-z0-9-]+)\/paypal$/);
   if (pay && m === 'POST') return startPayPal(req, env, url, pay[1]);
   if (p === '/paypal/webhook' && m === 'POST') return paypalWebhook(req, env);
@@ -100,16 +104,33 @@ async function currentStaff(req, env) {
 async function login(req, env) {
   const { email, password } = await req.json().catch(() => ({}));
   if (!email || !password) return bad('email and password required');
+  const id = String(email).toLowerCase().trim();
+  const ip = req.headers.get('cf-connecting-ip') || 'noip';
+  // Keyed on both, so one attacker cannot lock a real person out by guessing
+  // at their address from somewhere else.
+  const key = 'login:' + id + ':' + ip;
+
+  const gate = await rateLimit(env, key);
+  if (!gate.ok) {
+    await audit(env, { action: 'Staff sign in blocked', after: id.slice(0, 60),
+                       reason: 'too many attempts', actor: 'anonymous', ip });
+    return json({ error: 'too many attempts, try again shortly' }, 429,
+                { 'retry-after': String(gate.retryAfter) });
+  }
+
   const row = await env.DB.prepare('SELECT * FROM staff WHERE email = ?')
-    .bind(String(email).toLowerCase().trim()).first();
+    .bind(id).first();
   // Same work whether or not the account exists, so timing says nothing.
   const ok = row ? await verifyPw(password, row.pw_hash)
                  : await verifyPw(password, '00'.repeat(16) + '$' + '00'.repeat(32));
   if (!row || !ok) {
-    await audit(env, { action: 'Staff sign in failed', after: String(email).slice(0, 60),
-                       actor: 'anonymous', ip: req.headers.get('cf-connecting-ip') });
+    const hit = await rateFail(env, key);
+    await audit(env, { action: 'Staff sign in failed', after: id.slice(0, 60),
+                       reason: hit.blocked ? 'blocked for ' + hit.seconds + 's' : '',
+                       actor: 'anonymous', ip });
     return bad('those details do not match', 401);
   }
+  await rateClear(env, key);   // a correct password costs nothing
   const sid = token() + token();
   const expires = now() + 12 * 60 * 60 * 1000;
   await env.DB.prepare('INSERT INTO sessions (id,email,created_at,expires_at) VALUES (?,?,?,?)')
@@ -224,16 +245,22 @@ async function getOrder(req, env, url, ref) {
 
 /* Reference alone is guessable, so this needs a contact on the order too. */
 async function lookupOrder(req, env) {
+  const ip = req.headers.get('cf-connecting-ip') || 'noip';
+  const lkey = 'lookup:' + ip;
+  const lgate = await rateLimit(env, lkey, { max: 20 });
+  if (!lgate.ok) return json({ error: 'too many attempts, try again shortly' }, 429,
+                             { 'retry-after': String(lgate.retryAfter) });
   const { ref, who } = await req.json().catch(() => ({}));
   if (!ref || !who) return bad('reference and contact required');
   const row = await env.DB.prepare('SELECT * FROM orders WHERE UPPER(ref) = ?')
     .bind(String(ref).trim().toUpperCase()).first();
-  const ip = req.headers.get('cf-connecting-ip');
   if (!row || !mayReadOrder({ ...row, recipient_phone: row.recipient }, { who })) {
+    await rateFail(env, lkey, { max: 20 });
     await audit(env, { ref: row ? row.ref : String(ref).slice(0, 20), action: 'Lookup failed',
                        actor: 'anonymous', ip });
     return bad('we cannot match that', 404);
   }
+  await rateClear(env, lkey);
   await audit(env, { ref: row.ref, action: 'Order opened by lookup', actor: 'customer', ip });
   return json({ ref: row.ref, token: row.token });
 }
@@ -249,8 +276,14 @@ async function patchOrder(req, env, ref) {
   const doc = body.doc;
   // The server owns money and identity; the client may not rewrite them.
   doc.ref = row.ref;
-  const paid = (doc.payments || []).filter(p => /completed|held/i.test(p.status || ''))
-    .reduce((a, p) => a + toPence(p.amount), 0);
+  /* Paid state is NOT taken from the document the browser sent.
+     It used to be, and a staff PATCH could therefore invent a payment: a
+     forged £9,999 went straight into paid_pence with no money behind it. It
+     is derived from the payments table now, which only the PayPal webhook and
+     the audited manual route below can write. That is the whole point of the
+     rule: money moves through a webhook or an admin route, never through a
+     field a client is free to set. */
+  const paid = await paidPence(env, ref);
 
   await env.DB.prepare(
     `UPDATE orders SET status=?, ship_mode=?, total_pence=?, paid_pence=?, doc=?, updated_at=? WHERE ref=?`
@@ -292,6 +325,48 @@ async function sendMessage(req, env, ref) {
   return json(out);
 }
 
+
+/* The only source of truth for what an order has been paid. */
+async function paidPence(env, ref) {
+  const row = await env.DB.prepare(
+    `SELECT COALESCE(SUM(amount_pence),0) AS p FROM payments
+      WHERE ref = ? AND status IN ('Payment completed','Payment held','Payment refunded')`
+  ).bind(ref).first();
+  return (row && row.p) || 0;
+}
+
+/* Money that arrived outside PayPal: cash on collection, a bank transfer.
+   Staff only, written to the payments table rather than to the order
+   document, and audited with a name against it, so "who decided this was
+   paid" always has an answer. */
+async function recordPayment(req, env, ref) {
+  const staff = await currentStaff(req, env);
+  if (!staff) return bad('staff only', 401);
+  const row = await env.DB.prepare('SELECT ref FROM orders WHERE ref = ?').bind(ref).first();
+  if (!row) return bad('not found', 404);
+  const b = await req.json().catch(() => ({}));
+  const amountPence = toPence(b.amount || 0);
+  if (!amountPence) return bad('an amount is required');
+  const reason = String(b.reason || '').slice(0, 200);
+  if (!reason) return bad('say what this payment was, for the audit trail');
+
+  await env.DB.prepare(
+    `INSERT INTO payments (id,ref,kind,provider,provider_ref,amount_pence,currency,status,raw,created_at,paid_at)
+     VALUES (?,?,?,?,?,?,'GBP',?,?,?,?)`
+  ).bind(crypto.randomUUID(), ref, String(b.kind || 'initial'),
+         String(b.method || 'Manual').slice(0, 40),
+         'manual:' + crypto.randomUUID(), amountPence,
+         amountPence < 0 ? 'Payment refunded' : 'Payment completed',
+         JSON.stringify({ by: staff.email, reason }).slice(0, 2000), now(), now()).run();
+
+  const paid = await paidPence(env, ref);
+  await env.DB.prepare('UPDATE orders SET paid_pence = ?, updated_at = ? WHERE ref = ?')
+    .bind(paid, now(), ref).run();
+  await audit(env, { ref, action: 'Payment recorded by hand',
+                     after: '£' + fromPence(amountPence).toFixed(2), reason,
+                     actor: staff.name || staff.email, ip: req.headers.get('cf-connecting-ip') });
+  return json({ ok: true, paid: fromPence(paid) });
+}
 
 /* ---------- paypal ---------- */
 

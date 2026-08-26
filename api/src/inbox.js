@@ -184,8 +184,18 @@ export async function replyToThread(env, { threadKey, to, subject, text, ref, in
   const id = crypto.randomUUID();
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Sign it with the person who wrote it. A reply from a named human reads
+  // like a reply; a strapline describing our own business model does not.
+  const who = (staff && staff.name && staff.name !== 'Operations') ? staff.name : '';
+  // MAIL_FROM is "Tenga UK <help@tengauk.com>"; the signature wants the address.
+  const from = (String(env.MAIL_FROM || '').match(/<([^>]+)>/) || [])[1]
+             || String(env.MAIL_FROM || 'help@tengauk.com');
+  const wa = env.CONTACT_WHATSAPP || '';
   const html = `<div style="white-space:pre-wrap;font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">${esc(text)}</div>
-    <p style="margin:20px 0 0;font:12px -apple-system,sans-serif;color:#6B7C75">Tenga UK · buy-for-me and Zimbabwe forwarding</p>`;
+    <p style="margin:22px 0 0;font:13px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#101614">
+      ${who ? esc(who) + '<br>' : ''}<span style="color:#6B7C75">Tenga UK</span><br>
+      <a href="mailto:${esc(from)}" style="color:#0B5D4E;text-decoration:none">${esc(from)}</a>${wa ? `<span style="color:#6B7C75"> · ${esc(wa)}</span>` : ''}
+    </p>`;
 
   let providerId = null, ok = false, error = null;
   if (env.RESEND_KEY) {
